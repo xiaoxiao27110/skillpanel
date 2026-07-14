@@ -1,0 +1,40 @@
+services:
+  skillpanel:
+    build:
+      context: .
+      args:
+        OPENCODE_VERSION: ${OPENCODE_VERSION:-1.17.12}
+        HERMES_VERSION: ${HERMES_VERSION:-0.18.2}
+    image: skillpanel-poc:${OPENCODE_VERSION:-1.17.12}
+    container_name: skillpanel-poc
+    restart: unless-stopped
+    environment:
+      HERMES_DASHBOARD_BASIC_AUTH_USERNAME: ${HERMES_DASHBOARD_USER:-skillpanel}
+      HERMES_DASHBOARD_BASIC_AUTH_PASSWORD: ${HERMES_DASHBOARD_PASSWORD:-skillpanel-dev}
+      CODE_SERVER_PASSWORD: ${CODE_SERVER_PASSWORD:-skillpanel-dev}
+      SKILLPANEL_MODEL: ${SKILLPANEL_MODEL:-MiniMax-M2.7}
+      SKILLPANEL_OPENCODE_PROVIDER: ${SKILLPANEL_OPENCODE_PROVIDER:-minimax-cn-coding-plan}
+      SKILLPANEL_HERMES_PROVIDER: ${SKILLPANEL_HERMES_PROVIDER:-minimax-cn}
+    ports:
+      - "127.0.0.1:4096:4096"
+      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:9119:9119"
+      - "127.0.0.1:8787:8787"
+    tmpfs:
+      - /run/skillpanel:rw,noexec,nosuid,nodev,mode=0700
+      - /run/skillpanel-opencode-tuis:rw,noexec,nosuid,nodev,mode=0750
+    volumes:
+      - ${OPENCODE_AUTH_FILE:-${HOME}/.local/share/opencode/auth.json}:/run/secrets/opencode-auth.json:ro
+      - .:/workspace
+      - opencode-config:/root/.config/opencode
+      - opencode-state:/root/.local/share/opencode
+      - hermes-home:/root/.hermes
+      - code-server-data:/home/coder/.local/share/code-server
+      - skillpanel-state:/data
+
+volumes:
+  opencode-config:
+  opencode-state:
+  hermes-home:
+  code-server-data:
+  skillpanel-state:

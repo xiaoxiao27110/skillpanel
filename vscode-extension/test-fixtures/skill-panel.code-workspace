@@ -1,0 +1,13 @@
+{
+  "folders": [
+    {
+      "path": "workspace/nested"
+    },
+    {
+      "path": "workspace-two"
+    }
+  ],
+  "settings": {
+    "workbench.startupEditor": "none"
+  }
+}

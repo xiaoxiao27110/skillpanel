@@ -1,0 +1,15 @@
+.git
+.DS_Store
+._*
+**/._*
+.___*
+**/.___*
+__pycache__
+*.pyc
+runtime
+REPORT.runtime.md
+**/node_modules
+vscode-extension/dist
+vscode-extension/out
+vscode-extension/.vscode-test
+vscode-extension/*.vsix

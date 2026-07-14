@@ -1,0 +1,15 @@
+diff --git a/agent/turn_context.py b/agent/turn_context.py
+--- a/agent/turn_context.py
++++ b/agent/turn_context.py
+@@ -329,6 +329,10 @@ def build_turn_context(
+     if agent._cached_system_prompt is None:
+         restore_or_build_system_prompt(agent, system_message, conversation_history)
+ 
++    from skillpanel_hot_reload import refresh_after_prompt_restore
++
++    refresh_after_prompt_restore(agent, system_message)
++
+     active_system_prompt = agent._cached_system_prompt
+ 
+     # Create the DB session row now that _cached_system_prompt is populated, so
+

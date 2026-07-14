@@ -1,0 +1,93 @@
+{
+  "name": "skill-panel",
+  "displayName": "SkillPanel",
+  "description": "Manage shared OpenCode and Hermes skills through the SkillPanel controller.",
+  "version": "0.1.0",
+  "publisher": "skillpanel",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.121.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onView:skillPanel.skills"
+  ],
+  "files": [
+    "dist/extension.js",
+    "dist/extension.js.map",
+    "media/skill-panel.svg",
+    "README.md"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "skillPanel.refresh",
+        "title": "刷新 Skills",
+        "category": "SkillPanel",
+        "icon": "$(refresh)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "skillPanel",
+          "title": "SkillPanel",
+          "icon": "media/skill-panel.svg"
+        }
+      ]
+    },
+    "views": {
+      "skillPanel": [
+        {
+          "id": "skillPanel.skills",
+          "name": "Skills"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "skillPanel.refresh",
+          "when": "view == skillPanel.skills",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "build": "node esbuild.mjs",
+    "build:production": "node esbuild.mjs --production",
+    "compile:test": "tsc -p tsconfig.test.json",
+    "test:unit": "npm run compile:test && mocha --ui tdd \"out-test/test/unit/**/*.test.js\"",
+    "test:extension": "npm run build && npm run compile:test && vscode-test",
+    "test": "npm run check && npm run test:unit && npm run test:extension",
+    "package": "npm run check && npm run build:production && vsce package --allow-missing-repository --skip-license --out skill-panel.vsix",
+    "vscode:prepublish": "npm run check && npm run build:production"
+  },
+  "dependencies": {
+    "yaml": "2.9.0"
+  },
+  "overrides": {
+    "diff": "8.0.3",
+    "serialize-javascript": "7.0.7"
+  },
+  "devDependencies": {
+    "@types/mocha": "10.0.10",
+    "@types/node": "24.13.3",
+    "@types/vscode": "1.120.0",
+    "@vscode/test-cli": "0.0.15",
+    "@vscode/test-electron": "3.0.0",
+    "@vscode/vsce": "3.9.2",
+    "esbuild": "0.28.1",
+    "mocha": "11.7.6",
+    "typescript": "7.0.2"
+  }
+}
