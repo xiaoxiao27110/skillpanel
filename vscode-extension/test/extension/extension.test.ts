@@ -11,7 +11,20 @@ import { panelMessage } from "../../src/treeProvider";
 let server: http.Server;
 let api: SkillPanelExtensionApi;
 let revision = 40;
+let sceneRevision = 2;
 let enabled = true;
+
+function sceneCatalog() {
+  return {
+    revision: sceneRevision,
+    active: "默认",
+    scenes: [
+      { name: "默认", disabled: [], active: true },
+      { name: "写作", disabled: ["global-only"], active: false }
+    ],
+    pids: { opencode: 10, hermes: 11, controller: 12 }
+  };
+}
 
 function catalog() {
   return {
@@ -54,6 +67,10 @@ suite("SkillPanel extension", () => {
         send(200, catalog());
         return;
       }
+      if (request.method === "GET" && request.url === "/scenes") {
+        send(200, sceneCatalog());
+        return;
+      }
       if (request.method === "PUT" && request.url === "/skills/canary-alpha") {
         let raw = "";
         request.setEncoding("utf8");
@@ -78,7 +95,9 @@ suite("SkillPanel extension", () => {
             hermes_refresh: "next-turn",
             opencode_skills: enabled ? ["canary-alpha"] : [],
             pids: catalog().pids,
-            latency_ms: 1
+            latency_ms: 1,
+            active_scene: "默认",
+            scenes_revision: sceneRevision
           });
         });
         return;
@@ -109,7 +128,7 @@ suite("SkillPanel extension", () => {
     assert.deepEqual(extension?.packageJSON.activationEvents, ["onView:skillPanel.skills"]);
     assert.deepEqual(
       extension?.packageJSON.contributes.commands.map((entry: { command: string }) => entry.command),
-      ["skillPanel.refresh"]
+      ["skillPanel.refresh", "skillPanel.createScene", "skillPanel.renameScene", "skillPanel.deleteScene"]
     );
     assert.deepEqual(
       extension?.packageJSON.contributes.viewsContainers.activitybar.map(
@@ -125,7 +144,14 @@ suite("SkillPanel extension", () => {
     const commands = await vscode.commands.getCommands(true);
     assert.deepEqual(
       commands.filter((command) => /^skillPanel\.(?!skills\.)/.test(command)).sort(),
-      ["skillPanel.refresh", "skillPanel.toggleSkill"]
+      [
+        "skillPanel.activateScene",
+        "skillPanel.createScene",
+        "skillPanel.deleteScene",
+        "skillPanel.refresh",
+        "skillPanel.renameScene",
+        "skillPanel.toggleSkill"
+      ]
     );
   });
 

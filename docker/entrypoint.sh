@@ -51,6 +51,12 @@ for fixture in /opt/skillpanel/fixtures/skills/*; do
   fi
 done
 
+scenes_file="${SKILLPANEL_SCENES_FILE:-/data/scenes.json}"
+scenes_seed="${SKILLPANEL_SCENES_SEED:-/opt/skillpanel/docker/scenes.seed.json}"
+if [[ ! -e "${scenes_file}" && -r "${scenes_seed}" ]]; then
+  cp "${scenes_seed}" "${scenes_file}"
+fi
+
 /opt/hermes/bin/python -m bootstrap_config
 
 chown -R skillpanel:skillpanel "${enabled}" "${disabled}" /data

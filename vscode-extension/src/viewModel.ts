@@ -1,4 +1,22 @@
-import type { ConflictItem, ProjectSkill, SkillCatalog } from "./types";
+import type { ConflictItem, ProjectSkill, Scene, SkillCatalog } from "./types";
+
+export function sceneItemDescription(scene: Scene): string | undefined {
+  if (scene.active) {
+    return "当前";
+  }
+  return scene.disabled.length > 0 ? `关闭 ${scene.disabled.length} 项` : undefined;
+}
+
+export function sceneTooltipLines(scene: Scene): string[] {
+  const lines = [scene.name, scene.active ? "状态：当前场景" : "状态：未激活"];
+  if (scene.disabled.length === 0) {
+    lines.push("关闭名单：空（全部启用）");
+  } else {
+    lines.push(`关闭名单（${scene.disabled.length} 项）：`);
+    lines.push(...scene.disabled.map((name) => `· ${name}`));
+  }
+  return lines;
+}
 
 export function buildConflicts(
   catalog: SkillCatalog | undefined,

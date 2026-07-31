@@ -49,12 +49,16 @@ suite("ControllerClient", () => {
         hermes_refresh: "next-turn",
         opencode_skills: [],
         pids: { opencode: 10, hermes: 11, controller: 12 },
-        latency_ms: 12.5
+        latency_ms: 12.5,
+        active_scene: "默认",
+        scenes_revision: 3
       });
     });
     const result = await client.setSkill("name with space", false, 7);
     assert.deepEqual(JSON.parse(body), { enabled: false, expected_revision: 7 });
     assert.equal(result.revision, 8);
+    assert.equal(result.active_scene, "默认");
+    assert.equal(result.scenes_revision, 3);
   });
 
   test("preserves 409 current_revision", async () => {
@@ -133,5 +137,130 @@ suite("ControllerClient", () => {
       return new Response(body, { status: 200 });
     });
     await assert.rejects(client.getSkills(), /request failed: aborted body/);
+  });
+});
+
+function sceneCatalog() {
+  return {
+    revision: 3,
+    active: "默认",
+    scenes: [
+      { name: "默认", disabled: [], active: true },
+      { name: "写作", disabled: ["pdf", "docx"], active: false }
+    ],
+    pids: { opencode: 10, hermes: 11, controller: 12 }
+  };
+}
+
+function sceneMutation() {
+  return { ...sceneCatalog(), ok: true, skill_revision: 8, latency_ms: 4.5 };
+}
+
+suite("ControllerClient scenes", () => {
+  test("parses GET /scenes", async () => {
+    const client = new ControllerClient("http://controller", 100, async (input, init) => {
+      assert.equal(String(input), "http://controller/scenes");
+      assert.equal(init?.method, "GET");
+      return response(sceneCatalog());
+    });
+    assert.deepEqual(await client.getScenes(), sceneCatalog());
+  });
+
+  test("creates a scene with POST /scenes", async () => {
+    let body = "";
+    const client = new ControllerClient("http://controller", 100, async (input, init) => {
+      assert.equal(String(input), "http://controller/scenes");
+      assert.equal(init?.method, "POST");
+      body = String(init?.body);
+      return response(sceneMutation());
+    });
+    const result = await client.createScene("写作");
+    assert.deepEqual(JSON.parse(body), { name: "写作" });
+    assert.equal(result.ok, true);
+    assert.equal(result.skill_revision, 8);
+    assert.equal(result.latency_ms, 4.5);
+    assert.equal(result.revision, 3);
+  });
+
+  test("activates a scene with URL-encoded name and scenes revision", async () => {
+    let body = "";
+    const client = new ControllerClient("http://controller", 100, async (input, init) => {
+      assert.equal(String(input), `http://controller/scenes/${encodeURIComponent("写作")}/activate`);
+      assert.equal(init?.method, "PUT");
+      body = String(init?.body);
+      return response({ ...sceneMutation(), changed: true });
+    });
+    const result = await client.activateScene("写作", 3);
+    assert.deepEqual(JSON.parse(body), { expected_revision: 3 });
+    assert.equal(result.changed, true);
+    assert.equal(result.active, "默认");
+  });
+
+  test("renames a scene with new_name and expected_revision", async () => {
+    let body = "";
+    const client = new ControllerClient("http://controller", 100, async (input, init) => {
+      assert.equal(String(input), `http://controller/scenes/${encodeURIComponent("写作")}`);
+      assert.equal(init?.method, "PUT");
+      body = String(init?.body);
+      return response(sceneMutation());
+    });
+    const result = await client.renameScene("写作", "阅读", 3);
+    assert.deepEqual(JSON.parse(body), { new_name: "阅读", expected_revision: 3 });
+    assert.equal(result.ok, true);
+  });
+
+  test("deletes a scene with expected_revision in the DELETE body", async () => {
+    let body = "";
+    const client = new ControllerClient("http://controller", 100, async (input, init) => {
+      assert.equal(String(input), `http://controller/scenes/${encodeURIComponent("写作")}`);
+      assert.equal(init?.method, "DELETE");
+      body = String(init?.body);
+      return response({ ...sceneCatalog(), ok: true });
+    });
+    const result = await client.deleteScene("写作", 3);
+    assert.deepEqual(JSON.parse(body), { expected_revision: 3 });
+    assert.equal(result.ok, true);
+    assert.deepEqual(
+      result.scenes.map((scene) => scene.name),
+      ["默认", "写作"]
+    );
+  });
+
+  test("preserves 409 current_revision on activate", async () => {
+    const client = new ControllerClient("http://controller", 100, async () =>
+      response({ detail: { message: "Revision conflict", current_revision: 4 } }, 409)
+    );
+    await assert.rejects(
+      client.activateScene("写作", 3),
+      (error: unknown) =>
+        error instanceof ControllerError && error.status === 409 && error.currentRevision === 4
+    );
+  });
+
+  test("preserves 409 on create without a current_revision", async () => {
+    const client = new ControllerClient("http://controller", 100, async () =>
+      response({ detail: "scene already exists" }, 409)
+    );
+    await assert.rejects(
+      client.createScene("写作"),
+      (error: unknown) =>
+        error instanceof ControllerError &&
+        error.status === 409 &&
+        error.currentRevision === undefined
+    );
+  });
+
+  test("rejects malformed scene catalogs", async () => {
+    const client = new ControllerClient("http://controller", 100, async () =>
+      response({ ...sceneCatalog(), scenes: [{ name: "默认", disabled: "pdf", active: true }] })
+    );
+    await assert.rejects(client.getScenes(), /invalid scene\.disabled/);
+  });
+
+  test("rejects an activate result without changed", async () => {
+    const client = new ControllerClient("http://controller", 100, async () =>
+      response(sceneMutation())
+    );
+    await assert.rejects(client.activateScene("写作", 3), /invalid scenes\.changed/);
   });
 });

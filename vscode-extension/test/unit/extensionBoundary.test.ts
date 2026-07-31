@@ -19,7 +19,7 @@ suite("extension contribution boundary", () => {
     fs.readFileSync(path.join(extensionRoot, "package.json"), "utf8")
   ) as ExtensionManifest;
 
-  test("contributes only the agreed view and refresh command", () => {
+  test("contributes only the agreed view and commands", () => {
     assert.deepEqual(Object.keys(manifest.contributes), [
       "commands",
       "viewsContainers",
@@ -30,7 +30,7 @@ suite("extension contribution boundary", () => {
     assert.deepEqual(manifest.activationEvents, ["onView:skillPanel.skills"]);
     assert.deepEqual(
       manifest.contributes.commands.map(({ command }) => command),
-      ["skillPanel.refresh"]
+      ["skillPanel.refresh", "skillPanel.createScene", "skillPanel.renameScene", "skillPanel.deleteScene"]
     );
     assert.deepEqual(Object.keys(manifest.contributes.viewsContainers), ["activitybar"]);
     assert.deepEqual(
@@ -48,6 +48,23 @@ suite("extension contribution boundary", () => {
         command: "skillPanel.refresh",
         when: "view == skillPanel.skills",
         group: "navigation"
+      },
+      {
+        command: "skillPanel.createScene",
+        when: "view == skillPanel.skills",
+        group: "navigation"
+      }
+    ]);
+    assert.deepEqual(manifest.contributes.menus["view/item/context"], [
+      {
+        command: "skillPanel.renameScene",
+        when: "view == skillPanel.skills && (viewItem == skillPanel.scene || viewItem == skillPanel.scene.active)",
+        group: "1_scene"
+      },
+      {
+        command: "skillPanel.deleteScene",
+        when: "view == skillPanel.skills && (viewItem == skillPanel.scene || viewItem == skillPanel.scene.active)",
+        group: "1_scene"
       }
     ]);
   });

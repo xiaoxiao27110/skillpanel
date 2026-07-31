@@ -80,13 +80,13 @@ Hermes 0.18.2 在构建镜像时应用 `patches/hermes-turn-revision.patch`。�
 
 主要持久路径：
 
-| Named volume | 容器路径 | 内容 |
-|---|---|---|
-| `opencode-config` | `/root/.config/opencode` | OpenCode 配置、启用和禁用 skill |
-| `opencode-state` | `/root/.local/share/opencode` | OpenCode 持久状态；auth 路径指向 tmpfs 中的最小凭据文件 |
-| `hermes-home` | `/root/.hermes` | Hermes 配置和 session 数据 |
-| `code-server-data` | `/home/coder/.local/share/code-server` | code-server 用户状态和已安装 VSIX |
-| `skillpanel-state` | `/data` | revision 状态和控制锁 |
+| Named volume         | 容器路径                                 | 内容                                                    |
+| -------------------- | ---------------------------------------- | ------------------------------------------------------- |
+| `opencode-config`  | `/root/.config/opencode`               | OpenCode 配置、启用和禁用 skill                         |
+| `opencode-state`   | `/root/.local/share/opencode`          | OpenCode 持久状态；auth 路径指向 tmpfs 中的最小凭据文件 |
+| `hermes-home`      | `/root/.hermes`                        | Hermes 配置和 session 数据                              |
+| `code-server-data` | `/home/coder/.local/share/code-server` | code-server 用户状态和已安装 VSIX                       |
+| `skillpanel-state` | `/data`                                | revision 状态和控制锁                                   |
 
 TUI registry 位于容器 tmpfs 的 `/run/skillpanel-opencode-tuis`，与存放最小鉴权文件的 `0700` 目录分离，也不是持久状态。登记文件由 root 创建、controller 组只读，并以 PID start time 防止 PID 复用；控制器只接受绝对工作目录和 `http://127.0.0.1:<port>`。
 
@@ -257,15 +257,29 @@ curl -fsS -X PUT \
 
 错误状态：
 
-| HTTP | 含义 |
-|---|---|
-| `400` | skill 名格式非法或请求体无效 |
-| `404` | 未扫描到该 skill |
+| HTTP    | 含义                                                        |
+| ------- | ----------------------------------------------------------- |
+| `400` | skill 名格式非法或请求体无效                                |
+| `404` | 未扫描到该 skill                                            |
 | `409` | `expected_revision` 已过期；响应给出 `current_revision` |
-| `503` | OpenCode dispose/校验失败；发生移动时控制器会尝试回滚 |
+| `503` | OpenCode dispose/校验失败；发生移动时控制器会尝试回滚       |
 | `507` | revision 状态提交失败；控制器会尝试回滚目录和 OpenCode 视图 |
 
 VS Code 客户端遇到 `409` 时应重新 `GET /skills`，向用户展示最新状态，再基于用户原始意图决定是否重试；不能用旧 revision 盲目循环。
+
+### 场景 API
+
+场景是一份「关名单」（`disabled` 为 skill 精确名字数组），把一组开关状态命名保存下来。任何时刻恰有一个激活场景；激活某个场景会把名单内的 skill 关掉、其余（包括名单未记录的新装 skill）一律打开，名单里已不存在的 skill 静默跳过。场景状态保存在 `/data/scenes.json`（`SKILLPANEL_SCENES_FILE`），带独立 revision 乐观锁，与 skill 操作共用同一把文件锁；文件缺失或损坏时惰性创建「默认」场景接管当前状态。
+
+- `GET /scenes`：返回 `revision`、`active`、按名字排序的 `scenes`（每项含 `name`、`disabled`、`active`）和 `pids`。
+- `POST /scenes`（`{"name": "编码"}`）：创建并切入新场景，全部 skill 打开起步。场景名 strip 后非空、不超过 64 字符，允许中文等任意 unicode；`400` 非法名，`409` 重名。
+- `PUT /scenes/{name}/activate`（`{"expected_revision": n}`）：原子切换。任一目录搬动失败会把已搬的全部搬回，scenes.json 与 skill revision 均不变，返回 `503`；成功时 skill-state 与 scenes.json 各递增一次 revision。`404` 未知场景，`409` revision 冲突（响应带 `current_revision`）。
+- `PUT /scenes/{name}`（`{"new_name": "绘图", "expected_revision": n}`）：重命名，激活场景同步更新 `active`，不做 apply。
+- `DELETE /scenes/{name}`（`{"expected_revision": n}`）：删除激活场景会自动切到剩余场景中名字排序第一个并 apply；删除最后一个场景会重新生成全开的「默认」场景并 apply。
+
+`PUT /skills/{name}` 开关成功后会把结果实时写回激活场景的关名单（关→加入、开→移出），与状态提交在同一事务内，写回失败则整体回滚；响应新增 `active_scene` 和 `scenes_revision` 两个字段。
+
+容器首次启动时可用 seed 预置场景：entrypoint 在 scenes 文件不存在且 seed 文件（`SKILLPANEL_SCENES_SEED`，默认 `/opt/skillpanel/docker/scenes.seed.json`）可读时把 seed 复制过去；重启或升级绝不覆盖已有文件。
 
 ## 导入已有 skill
 

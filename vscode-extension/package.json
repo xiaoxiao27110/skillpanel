@@ -32,6 +32,22 @@
         "title": "刷新 Skills",
         "category": "SkillPanel",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "skillPanel.createScene",
+        "title": "新建场景",
+        "category": "SkillPanel",
+        "icon": "$(add)"
+      },
+      {
+        "command": "skillPanel.renameScene",
+        "title": "重命名场景",
+        "category": "SkillPanel"
+      },
+      {
+        "command": "skillPanel.deleteScene",
+        "title": "删除场景",
+        "category": "SkillPanel"
       }
     ],
     "viewsContainers": {
@@ -57,6 +73,23 @@
           "command": "skillPanel.refresh",
           "when": "view == skillPanel.skills",
           "group": "navigation"
+        },
+        {
+          "command": "skillPanel.createScene",
+          "when": "view == skillPanel.skills",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "skillPanel.renameScene",
+          "when": "view == skillPanel.skills && (viewItem == skillPanel.scene || viewItem == skillPanel.scene.active)",
+          "group": "1_scene"
+        },
+        {
+          "command": "skillPanel.deleteScene",
+          "when": "view == skillPanel.skills && (viewItem == skillPanel.scene || viewItem == skillPanel.scene.active)",
+          "group": "1_scene"
         }
       ]
     }
@@ -84,7 +117,7 @@
     "@types/node": "24.13.3",
     "@types/vscode": "1.120.0",
     "@vscode/test-cli": "0.0.15",
-    "@vscode/test-electron": "3.0.0",
+    "@vscode/test-electron": "3.1.0",
     "@vscode/vsce": "3.9.2",
     "esbuild": "0.28.1",
     "mocha": "11.7.6",

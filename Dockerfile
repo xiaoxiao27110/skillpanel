@@ -24,6 +24,7 @@ ENV PATH="/usr/local/bin:/root/.opencode/bin:/opt/hermes/bin:${PATH}" \
     SKILLPANEL_ENABLED_DIR="/root/.config/opencode/skills" \
     SKILLPANEL_DISABLED_DIR="/root/.config/opencode/skills-disabled" \
     SKILLPANEL_STATE_FILE="/data/skill-state.json" \
+    SKILLPANEL_SCENES_FILE="/data/scenes.json" \
     SKILLPANEL_OPENCODE_URL="http://127.0.0.1:4096"
 
 RUN apt-get update \

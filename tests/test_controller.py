@@ -64,6 +64,7 @@ class ControllerTests(unittest.TestCase):
             "SKILLPANEL_ENABLED_DIR": str(self.enabled),
             "SKILLPANEL_DISABLED_DIR": str(self.disabled),
             "SKILLPANEL_STATE_FILE": str(root / "state.json"),
+            "SKILLPANEL_SCENES_FILE": str(root / "scenes.json"),
             "SKILLPANEL_OPENCODE_TUI_DIR": str(self.tui_registry),
         }
         self.env = patch.dict(os.environ, env)
@@ -829,6 +830,429 @@ class ControllerTests(unittest.TestCase):
         self.assertTrue((self.enabled / "canary-alpha").is_dir())
         self.assertTrue(invalid.is_dir())
         self.assertEqual(catalog["reconciliations"], [])
+
+
+GAMMA_SKILL = """---
+name: canary-gamma
+description: third test canary
+---
+Return the gamma canary.
+"""
+
+
+class SceneTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        root = Path(self.tmp.name)
+        self.enabled = root / "skills"
+        self.disabled = root / "skills-disabled"
+        self.tui_registry = root / "opencode-tuis"
+        self.scenes_file = root / "scenes.json"
+        for name, content in (("canary-alpha", SKILL), ("canary-beta", BETA_SKILL)):
+            skill = self.enabled / name
+            skill.mkdir(parents=True)
+            (skill / "SKILL.md").write_text(content, encoding="utf-8")
+        env = {
+            "SKILLPANEL_ENABLED_DIR": str(self.enabled),
+            "SKILLPANEL_DISABLED_DIR": str(self.disabled),
+            "SKILLPANEL_STATE_FILE": str(root / "state.json"),
+            "SKILLPANEL_SCENES_FILE": str(self.scenes_file),
+            "SKILLPANEL_OPENCODE_TUI_DIR": str(self.tui_registry),
+        }
+        self.env = patch.dict(os.environ, env)
+        self.env.start()
+        sys.modules.pop("controller", None)
+        self.controller = importlib.import_module("controller")
+
+        def fake_dispose(expected):
+            names = sorted(p.name for p in self.enabled.iterdir() if p.is_dir())
+            mismatches = [
+                name for name, enabled in expected.items() if ((name in names) != enabled)
+            ]
+            if mismatches:
+                raise RuntimeError(f"did not converge: {mismatches}")
+            return names
+
+        self.fake_dispose = fake_dispose
+        self.dispose_patcher = patch.object(self.controller, "_dispose_and_verify", side_effect=fake_dispose)
+        self.dispose = self.dispose_patcher.start()
+
+    def tearDown(self):
+        self.dispose_patcher.stop()
+        self.env.stop()
+        sys.modules.pop("controller", None)
+        self.tmp.cleanup()
+
+    def _scenes_on_disk(self):
+        return json.loads(self.scenes_file.read_text(encoding="utf-8"))
+
+    def _write_scenes(self, payload):
+        self.scenes_file.write_text(json.dumps(payload), encoding="utf-8")
+
+    def _move_to_disabled(self, name):
+        self.disabled.mkdir(parents=True, exist_ok=True)
+        os.rename(self.enabled / name, self.disabled / name)
+
+    def test_lazy_init_captures_current_disabled(self):
+        self._move_to_disabled("canary-alpha")
+
+        result = self.controller.list_scenes()
+
+        self.assertEqual(result["revision"], 0)
+        self.assertEqual(result["active"], "默认")
+        self.assertEqual(
+            result["scenes"],
+            [{"name": "默认", "disabled": ["canary-alpha"], "active": True}],
+        )
+        self.assertIn("pids", result)
+        self.assertEqual(self._scenes_on_disk()["revision"], 0)
+
+    def test_create_scene_activates_and_enables_all(self):
+        self.controller.list_skills()
+        self.controller.toggle_skill(
+            "canary-alpha",
+            self.controller.ToggleRequest(enabled=False, expected_revision=0),
+        )
+
+        result = self.controller.create_scene(
+            self.controller.SceneCreateRequest(name="编码")
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["active"], "编码")
+        self.assertEqual(result["revision"], 1)
+        self.assertEqual(result["skill_revision"], 2)
+        self.assertTrue((self.enabled / "canary-alpha").is_dir())
+        self.assertTrue((self.enabled / "canary-beta").is_dir())
+        self.assertEqual(
+            [(item["name"], item["active"]) for item in result["scenes"]],
+            [("编码", True), ("默认", False)],
+        )
+        self.assertEqual(result["scenes"][0]["disabled"], [])
+        self.assertEqual(result["scenes"][1]["disabled"], ["canary-alpha"])
+
+    def test_activate_converges_listed_unlisted_and_new_skills(self):
+        self.controller.list_skills()
+        gamma = self.disabled / "canary-gamma"
+        gamma.mkdir(parents=True)
+        (gamma / "SKILL.md").write_text(GAMMA_SKILL, encoding="utf-8")
+        self._write_scenes(
+            {
+                "revision": 5,
+                "active": "默认",
+                "scenes": {
+                    "默认": {"disabled": []},
+                    "编码": {"disabled": ["canary-alpha", "ghost-skill"]},
+                },
+            }
+        )
+
+        result = self.controller.activate_scene(
+            "编码", self.controller.SceneActivateRequest(expected_revision=5)
+        )
+
+        self.assertTrue(result["changed"])
+        self.assertEqual(result["active"], "编码")
+        self.assertEqual(result["revision"], 6)
+        self.assertTrue((self.disabled / "canary-alpha").is_dir())
+        self.assertTrue((self.enabled / "canary-beta").is_dir())
+        # Newly installed skills missing from the list are enabled.
+        self.assertTrue((self.enabled / "canary-gamma").is_dir())
+
+        again = self.controller.activate_scene(
+            "编码", self.controller.SceneActivateRequest(expected_revision=6)
+        )
+        self.assertFalse(again["changed"])
+        self.assertEqual(again["revision"], 7)
+
+    def test_activate_rolls_back_directories_and_revisions_on_failure(self):
+        self.controller.list_skills()
+        self._write_scenes(
+            {
+                "revision": 5,
+                "active": "默认",
+                "scenes": {
+                    "默认": {"disabled": []},
+                    "编码": {"disabled": ["canary-alpha"]},
+                },
+            }
+        )
+        calls = 0
+
+        def fail_once(expected):
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise RuntimeError("offline")
+            return self.fake_dispose(expected)
+
+        self.dispose.side_effect = fail_once
+        with self.assertRaises(HTTPException) as raised:
+            self.controller.activate_scene(
+                "编码", self.controller.SceneActivateRequest(expected_revision=5)
+            )
+
+        self.assertEqual(raised.exception.status_code, 503)
+        self.assertIn("rollback was complete", str(raised.exception.detail))
+        self.assertTrue((self.enabled / "canary-alpha").is_dir())
+        self.assertFalse((self.disabled / "canary-alpha").exists())
+        self.assertEqual(self.controller._load_state()["revision"], 0)
+        self.assertEqual(self._scenes_on_disk()["revision"], 5)
+        self.assertEqual(self._scenes_on_disk()["active"], "默认")
+
+    def test_rename_scene_syncs_active_without_apply(self):
+        self.controller.list_skills()
+        self._write_scenes(
+            {
+                "revision": 2,
+                "active": "默认",
+                "scenes": {
+                    "默认": {"disabled": []},
+                    "编码": {"disabled": ["canary-alpha"]},
+                },
+            }
+        )
+
+        renamed = self.controller.rename_scene(
+            "编码",
+            self.controller.SceneRenameRequest(new_name="绘图", expected_revision=2),
+        )
+        self.assertTrue(renamed["ok"])
+        self.assertEqual(renamed["revision"], 3)
+        self.assertEqual(renamed["active"], "默认")
+        self.assertEqual(
+            [item["name"] for item in renamed["scenes"]], ["绘图", "默认"]
+        )
+
+        renamed_active = self.controller.rename_scene(
+            "默认",
+            self.controller.SceneRenameRequest(new_name="基准", expected_revision=3),
+        )
+        self.assertEqual(renamed_active["active"], "基准")
+        self.assertEqual(
+            [item["name"] for item in renamed_active["scenes"]], ["基准", "绘图"]
+        )
+        # Rename never applies: directories and skill revision stay untouched.
+        self.assertTrue((self.enabled / "canary-alpha").is_dir())
+        self.assertEqual(self.controller._load_state()["revision"], 0)
+
+    def test_delete_non_active_scene_only_bumps_revision(self):
+        self.controller.list_skills()
+        self._write_scenes(
+            {
+                "revision": 4,
+                "active": "默认",
+                "scenes": {
+                    "默认": {"disabled": ["canary-alpha"]},
+                    "编码": {"disabled": []},
+                },
+            }
+        )
+
+        result = self.controller.delete_scene(
+            "编码", self.controller.SceneDeleteRequest(expected_revision=4)
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["revision"], 5)
+        self.assertEqual(result["active"], "默认")
+        self.assertEqual([item["name"] for item in result["scenes"]], ["默认"])
+        self.assertTrue((self.enabled / "canary-alpha").is_dir())
+        self.assertEqual(self.controller._load_state()["revision"], 0)
+
+    def test_delete_active_scene_switches_to_sorted_first_and_applies(self):
+        self.controller.list_skills()
+        self.controller.toggle_skill(
+            "canary-alpha",
+            self.controller.ToggleRequest(enabled=False, expected_revision=0),
+        )
+        self._write_scenes(
+            {
+                "revision": 1,
+                "active": "默认",
+                "scenes": {
+                    "默认": {"disabled": ["canary-alpha"]},
+                    "b-scene": {"disabled": ["canary-beta"]},
+                    "a-scene": {"disabled": []},
+                },
+            }
+        )
+
+        result = self.controller.delete_scene(
+            "默认", self.controller.SceneDeleteRequest(expected_revision=1)
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["active"], "a-scene")
+        self.assertEqual(result["revision"], 2)
+        self.assertEqual(
+            [item["name"] for item in result["scenes"]], ["a-scene", "b-scene"]
+        )
+        # The successor scene was applied: alpha enabled, beta untouched.
+        self.assertTrue((self.enabled / "canary-alpha").is_dir())
+        self.assertTrue((self.enabled / "canary-beta").is_dir())
+
+    def test_delete_last_scene_regenerates_default_all_enabled(self):
+        self.controller.list_skills()
+        self.controller.toggle_skill(
+            "canary-alpha",
+            self.controller.ToggleRequest(enabled=False, expected_revision=0),
+        )
+        self._write_scenes(
+            {
+                "revision": 3,
+                "active": "默认",
+                "scenes": {"默认": {"disabled": ["canary-alpha"]}},
+            }
+        )
+
+        result = self.controller.delete_scene(
+            "默认", self.controller.SceneDeleteRequest(expected_revision=3)
+        )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["active"], "默认")
+        self.assertEqual(result["revision"], 4)
+        self.assertEqual(
+            result["scenes"],
+            [{"name": "默认", "disabled": [], "active": True}],
+        )
+        self.assertTrue((self.enabled / "canary-alpha").is_dir())
+        self.assertTrue((self.enabled / "canary-beta").is_dir())
+
+    def test_toggle_writes_back_to_active_scene(self):
+        self.controller.list_scenes()
+
+        disabled = self.controller.toggle_skill(
+            "canary-alpha",
+            self.controller.ToggleRequest(enabled=False, expected_revision=0),
+        )
+        self.assertEqual(disabled["active_scene"], "默认")
+        self.assertEqual(disabled["scenes_revision"], 1)
+        self.assertEqual(
+            self._scenes_on_disk()["scenes"]["默认"]["disabled"], ["canary-alpha"]
+        )
+
+        enabled = self.controller.toggle_skill(
+            "canary-alpha",
+            self.controller.ToggleRequest(enabled=True, expected_revision=1),
+        )
+        self.assertEqual(enabled["active_scene"], "默认")
+        self.assertEqual(enabled["scenes_revision"], 2)
+        self.assertEqual(self._scenes_on_disk()["scenes"]["默认"]["disabled"], [])
+
+    def test_toggle_writeback_failure_rolls_back_everything(self):
+        self.controller.list_skills()
+        real_write = self.controller._atomic_json_write
+
+        def fail_scenes(path, payload):
+            if Path(path) == self.controller.SCENES_FILE:
+                raise OSError("disk full")
+            return real_write(path, payload)
+
+        with patch.object(self.controller, "_atomic_json_write", side_effect=fail_scenes):
+            with self.assertRaises(HTTPException) as raised:
+                self.controller.toggle_skill(
+                    "canary-alpha",
+                    self.controller.ToggleRequest(enabled=False, expected_revision=0),
+                )
+
+        self.assertEqual(raised.exception.status_code, 507)
+        self.assertTrue((self.enabled / "canary-alpha").is_dir())
+        self.assertFalse((self.disabled / "canary-alpha").exists())
+        self.assertEqual(self.controller._load_state()["revision"], 0)
+        self.assertFalse(self.scenes_file.exists())
+
+    def test_no_change_toggle_repairs_scene_drift(self):
+        self.controller.list_scenes()
+        self._move_to_disabled("canary-alpha")
+        reconciled = self.controller.list_skills()
+        self.assertEqual(reconciled["revision"], 1)
+
+        result = self.controller.toggle_skill(
+            "canary-alpha",
+            self.controller.ToggleRequest(enabled=False, expected_revision=1),
+        )
+
+        self.assertFalse(result["changed"])
+        self.assertEqual(result["active_scene"], "默认")
+        self.assertEqual(result["scenes_revision"], 1)
+        self.assertEqual(
+            self._scenes_on_disk()["scenes"]["默认"]["disabled"], ["canary-alpha"]
+        )
+
+    def test_scene_validation_and_conflict_errors(self):
+        for bad in ("", "   ", "x" * 65):
+            with self.subTest(bad=bad), self.assertRaises(HTTPException) as raised:
+                self.controller.create_scene(self.controller.SceneCreateRequest(name=bad))
+            self.assertEqual(raised.exception.status_code, 400)
+
+        created = self.controller.create_scene(
+            self.controller.SceneCreateRequest(name="编码")
+        )
+        for duplicate in ("编码", " 编码 "):
+            with self.subTest(duplicate=duplicate), self.assertRaises(HTTPException) as raised:
+                self.controller.create_scene(self.controller.SceneCreateRequest(name=duplicate))
+            self.assertEqual(raised.exception.status_code, 409)
+            self.assertIn("already exists", raised.exception.detail["message"])
+
+        with self.assertRaises(HTTPException) as raised:
+            self.controller.activate_scene(
+                "未知", self.controller.SceneActivateRequest(expected_revision=created["revision"])
+            )
+        self.assertEqual(raised.exception.status_code, 404)
+
+        with self.assertRaises(HTTPException) as raised:
+            self.controller.activate_scene(
+                "编码", self.controller.SceneActivateRequest(expected_revision=99)
+            )
+        self.assertEqual(raised.exception.status_code, 409)
+        self.assertEqual(
+            raised.exception.detail["current_revision"], created["revision"]
+        )
+
+        with self.assertRaises(HTTPException) as raised:
+            self.controller.rename_scene(
+                "未知",
+                self.controller.SceneRenameRequest(
+                    new_name="绘图", expected_revision=created["revision"]
+                ),
+            )
+        self.assertEqual(raised.exception.status_code, 404)
+
+        with self.assertRaises(HTTPException) as raised:
+            self.controller.rename_scene(
+                "编码",
+                self.controller.SceneRenameRequest(
+                    new_name="默认", expected_revision=created["revision"]
+                ),
+            )
+        self.assertEqual(raised.exception.status_code, 409)
+        self.assertIn("already exists", raised.exception.detail["message"])
+
+        with self.assertRaises(HTTPException) as raised:
+            self.controller.rename_scene(
+                "编码",
+                self.controller.SceneRenameRequest(
+                    new_name="  ", expected_revision=created["revision"]
+                ),
+            )
+        self.assertEqual(raised.exception.status_code, 400)
+
+        with self.assertRaises(HTTPException) as raised:
+            self.controller.delete_scene(
+                "未知", self.controller.SceneDeleteRequest(expected_revision=created["revision"])
+            )
+        self.assertEqual(raised.exception.status_code, 404)
+
+        with self.assertRaises(HTTPException) as raised:
+            self.controller.delete_scene(
+                "编码", self.controller.SceneDeleteRequest(expected_revision=99)
+            )
+        self.assertEqual(raised.exception.status_code, 409)
+        self.assertEqual(
+            raised.exception.detail["current_revision"], created["revision"]
+        )
 
 
 if __name__ == "__main__":

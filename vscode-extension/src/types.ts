@@ -37,6 +37,35 @@ export interface ToggleResult {
   pids: ProcessIds;
   latency_ms: number;
   hermes_refresh?: "next-turn";
+  active_scene: string;
+  scenes_revision: number;
+}
+
+export interface Scene {
+  name: string;
+  disabled: string[];
+  active: boolean;
+}
+
+export interface SceneCatalog {
+  revision: number;
+  active: string;
+  scenes: Scene[];
+  pids: ProcessIds;
+}
+
+export interface SceneMutationResult extends SceneCatalog {
+  ok: boolean;
+  skill_revision: number;
+  latency_ms: number;
+}
+
+export interface ActivateSceneResult extends SceneMutationResult {
+  changed: boolean;
+}
+
+export interface DeleteSceneResult extends SceneCatalog {
+  ok: boolean;
 }
 
 export interface ProjectSkill {

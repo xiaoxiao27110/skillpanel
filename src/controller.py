@@ -25,6 +25,7 @@ from pydantic import BaseModel
 ENABLED_DIR = Path(os.getenv("SKILLPANEL_ENABLED_DIR", "/root/.config/opencode/skills"))
 DISABLED_DIR = Path(os.getenv("SKILLPANEL_DISABLED_DIR", "/root/.config/opencode/skills-disabled"))
 STATE_FILE = Path(os.getenv("SKILLPANEL_STATE_FILE", "/data/skill-state.json"))
+SCENES_FILE = Path(os.getenv("SKILLPANEL_SCENES_FILE", "/data/scenes.json"))
 LOCK_FILE = STATE_FILE.with_suffix(".lock")
 OPENCODE_URL = os.getenv("SKILLPANEL_OPENCODE_URL", "http://127.0.0.1:4096").rstrip("/")
 OPENCODE_DIRECTORY = os.getenv("SKILLPANEL_OPENCODE_DIRECTORY", "/workspace")
@@ -32,6 +33,8 @@ OPENCODE_TUI_DIR = Path(
     os.getenv("SKILLPANEL_OPENCODE_TUI_DIR", "/run/skillpanel-opencode-tuis")
 )
 SKILL_NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+DEFAULT_SCENE_NAME = "默认"
+SCENE_NAME_MAX_LENGTH = 64
 LOOPBACK_RUNTIME_RE = re.compile(r"^http://127\.0\.0\.1:([0-9]{1,5})$")
 SKILL_BASE_RE = re.compile(r"^Base directory for this skill: (.+)$", re.MULTILINE)
 
@@ -46,6 +49,23 @@ class _OpenCodeRuntime:
 
 class ToggleRequest(BaseModel):
     enabled: bool
+    expected_revision: int
+
+
+class SceneCreateRequest(BaseModel):
+    name: str
+
+
+class SceneActivateRequest(BaseModel):
+    expected_revision: int
+
+
+class SceneRenameRequest(BaseModel):
+    new_name: str
+    expected_revision: int
+
+
+class SceneDeleteRequest(BaseModel):
     expected_revision: int
 
 
@@ -554,6 +574,205 @@ def _rollback_toggle(
     return errors
 
 
+def _default_scenes(skills: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    return {
+        "revision": 0,
+        "updated_at": _utc_now(),
+        "active": DEFAULT_SCENE_NAME,
+        "scenes": {
+            DEFAULT_SCENE_NAME: {
+                "disabled": sorted(
+                    name for name, item in skills.items() if not item["enabled"]
+                )
+            }
+        },
+    }
+
+
+def _valid_scenes_payload(data: Any) -> bool:
+    if not isinstance(data, dict):
+        return False
+    revision = data.get("revision")
+    if not isinstance(revision, int) or isinstance(revision, bool):
+        return False
+    active = data.get("active")
+    scenes = data.get("scenes")
+    if not isinstance(active, str) or not isinstance(scenes, dict) or active not in scenes:
+        return False
+    for scene_name, entry in scenes.items():
+        if not isinstance(scene_name, str) or not isinstance(entry, dict):
+            return False
+        disabled = entry.get("disabled")
+        if not isinstance(disabled, list) or any(
+            not isinstance(item, str) for item in disabled
+        ):
+            return False
+    return True
+
+
+def _load_scenes_locked(skills: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    try:
+        data = json.loads(SCENES_FILE.read_text(encoding="utf-8"))
+        if _valid_scenes_payload(data):
+            return data
+    except (OSError, ValueError, TypeError):
+        pass
+    data = _default_scenes(skills)
+    _atomic_json_write(SCENES_FILE, data)
+    return data
+
+
+def _load_scenes_or_507(skills: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    try:
+        return _load_scenes_locked(skills)
+    except OSError as exc:
+        raise HTTPException(
+            status_code=507, detail=f"Scene state commit failed: {exc}"
+        ) from exc
+
+
+def _commit_scenes_locked(scenes_state: dict[str, Any]) -> dict[str, Any]:
+    next_scenes = {
+        **scenes_state,
+        "revision": scenes_state["revision"] + 1,
+        "updated_at": _utc_now(),
+    }
+    _atomic_json_write(SCENES_FILE, next_scenes)
+    return next_scenes
+
+
+def _scenes_view(scenes_state: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        {
+            "name": name,
+            "disabled": list(entry["disabled"]),
+            "active": name == scenes_state["active"],
+        }
+        for name, entry in sorted(scenes_state["scenes"].items())
+    ]
+
+
+def _scene_name_or_400(name: str) -> str:
+    normalized = name.strip()
+    if not normalized or len(normalized) > SCENE_NAME_MAX_LENGTH:
+        raise HTTPException(status_code=400, detail="Invalid scene name")
+    return normalized
+
+
+def _writeback_scene_locked(
+    skills: dict[str, dict[str, Any]], name: str, enabled: bool
+) -> dict[str, Any]:
+    scenes_state = _load_scenes_locked(skills)
+    active = scenes_state["active"]
+    disabled = list(scenes_state["scenes"][active]["disabled"])
+    if enabled and name in disabled:
+        disabled.remove(name)
+    elif not enabled and name not in disabled:
+        disabled.append(name)
+    else:
+        return scenes_state
+    return _commit_scenes_locked(
+        {
+            **scenes_state,
+            "scenes": {
+                **scenes_state["scenes"],
+                active: {"disabled": sorted(disabled)},
+            },
+        }
+    )
+
+
+def _rollback_apply(
+    moved: list[tuple[Path, Path]],
+    previous_state: dict[str, Any],
+) -> list[str]:
+    errors: list[str] = []
+    for source, target in reversed(moved):
+        errors.extend(_rollback_directory(source, target))
+
+    try:
+        _dispose_and_verify(dict(previous_state["skills"]))
+    except Exception as exc:
+        errors.append(f"OpenCode rollback failed: {exc}")
+
+    try:
+        _atomic_json_write(STATE_FILE, previous_state)
+    except OSError as exc:
+        errors.append(f"state rollback failed: {exc}")
+    return errors
+
+
+def _apply_scene_locked(
+    state: dict[str, Any],
+    skills: dict[str, dict[str, Any]],
+    disabled_names: list[str],
+    pending_scenes: dict[str, Any],
+) -> tuple[dict[str, Any], dict[str, dict[str, Any]], bool, dict[str, Any]]:
+    disabled_set = set(disabled_names)
+    targets = {name: name not in disabled_set for name in sorted(skills)}
+    moved: list[tuple[Path, Path]] = []
+    failing = ""
+    try:
+        for name, target_enabled in targets.items():
+            if skills[name]["enabled"] == target_enabled:
+                continue
+            failing = name
+            moved.append(_move(name, target_enabled))
+    except (OSError, RuntimeError) as exc:
+        errors: list[str] = []
+        for source, target in reversed(moved):
+            errors.extend(_rollback_directory(source, target))
+        rollback = "complete" if not errors else "; ".join(errors)
+        raise HTTPException(
+            status_code=503,
+            detail=f"Scene apply failed at skill {failing!r}; rollback was {rollback}: {exc}",
+        ) from exc
+
+    previous_state = state
+    try:
+        _dispose_and_verify(targets)
+    except (OSError, RuntimeError, urllib.error.URLError) as exc:
+        if moved:
+            rollback_errors = _rollback_apply(moved, previous_state)
+            rollback = "complete" if not rollback_errors else "; ".join(rollback_errors)
+            raise HTTPException(
+                status_code=503,
+                detail=f"OpenCode refresh failed; rollback was {rollback}: {exc}",
+            ) from exc
+        raise HTTPException(
+            status_code=503, detail=f"OpenCode refresh failed: {exc}"
+        ) from exc
+
+    if moved:
+        try:
+            skills, reconciliations = _scan()
+            next_state = _state_from_scan(state["revision"] + 1, skills, reconciliations)
+            _atomic_json_write(STATE_FILE, next_state)
+        except (OSError, RuntimeError) as exc:
+            rollback_errors = _rollback_apply(moved, previous_state)
+            rollback = "complete" if not rollback_errors else "; ".join(rollback_errors)
+            raise HTTPException(
+                status_code=507,
+                detail=f"State commit failed; rollback was {rollback}: {exc}",
+            ) from exc
+        state = next_state
+
+    try:
+        scenes_state = _commit_scenes_locked(pending_scenes)
+    except OSError as exc:
+        if moved:
+            rollback_errors = _rollback_apply(moved, previous_state)
+            rollback = "complete" if not rollback_errors else "; ".join(rollback_errors)
+            raise HTTPException(
+                status_code=507,
+                detail=f"Scene commit failed; rollback was {rollback}: {exc}",
+            ) from exc
+        raise HTTPException(
+            status_code=507, detail=f"Scene commit failed: {exc}"
+        ) from exc
+    return state, skills, bool(moved), scenes_state
+
+
 def _pids() -> dict[str, int | None]:
     return {name: _read_pid(name) for name in ("opencode", "hermes", "controller")}
 
@@ -561,7 +780,8 @@ def _pids() -> dict[str, int | None]:
 def _startup_reconcile() -> None:
     try:
         with _locked():
-            _reconcile_locked()
+            _, skills, _ = _reconcile_locked()
+            _load_scenes_locked(skills)
     except (OSError, RuntimeError, urllib.error.URLError):
         # Supervisor may still be starting OpenCode. No revision was committed,
         # so the next API request retries the same reconcile.
@@ -636,6 +856,12 @@ def toggle_skill(name: str, body: ToggleRequest) -> dict[str, Any]:
                 )
             except (OSError, RuntimeError, urllib.error.URLError) as exc:
                 raise HTTPException(status_code=503, detail=f"OpenCode refresh failed: {exc}") from exc
+            try:
+                scenes_state = _writeback_scene_locked(skills, name, body.enabled)
+            except OSError as exc:
+                raise HTTPException(
+                    status_code=507, detail=f"Scene state commit failed: {exc}"
+                ) from exc
             return {
                 "ok": True,
                 "changed": False,
@@ -644,6 +870,8 @@ def toggle_skill(name: str, body: ToggleRequest) -> dict[str, Any]:
                 "revision": state["revision"],
                 "reconciliations": state.get("reconciliations", []),
                 "opencode_skills": opencode_names,
+                "active_scene": scenes_state["active"],
+                "scenes_revision": scenes_state["revision"],
                 "pids": _pids(),
                 "latency_ms": round((time.monotonic() - started) * 1000, 2),
             }
@@ -674,6 +902,7 @@ def toggle_skill(name: str, body: ToggleRequest) -> dict[str, Any]:
             skills, reconciliations = _scan()
             next_state = _state_from_scan(state["revision"] + 1, skills, reconciliations)
             _atomic_json_write(STATE_FILE, next_state)
+            scenes_state = _writeback_scene_locked(skills, name, body.enabled)
         except (OSError, RuntimeError) as exc:
             rollback_errors = _rollback_toggle(source, target, current, previous_state)
             rollback = "complete" if not rollback_errors else "; ".join(rollback_errors)
@@ -692,6 +921,194 @@ def toggle_skill(name: str, body: ToggleRequest) -> dict[str, Any]:
             "reconciliations": state.get("reconciliations", []),
             "hermes_refresh": "next-turn",
             "opencode_skills": opencode_names,
+            "active_scene": scenes_state["active"],
+            "scenes_revision": scenes_state["revision"],
             "pids": _pids(),
             "latency_ms": round((time.monotonic() - started) * 1000, 2),
         }
+
+
+def _reconcile_for_scene_request() -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
+    try:
+        state, skills, _ = _reconcile_locked()
+    except (OSError, RuntimeError, urllib.error.URLError) as exc:
+        raise HTTPException(status_code=503, detail=f"Skill reconcile failed: {exc}") from exc
+    return state, skills
+
+
+def _scenes_revision_or_409(scenes_state: dict[str, Any], expected_revision: int) -> None:
+    if expected_revision != scenes_state["revision"]:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "message": "Revision conflict",
+                "current_revision": scenes_state["revision"],
+            },
+        )
+
+
+@app.get("/scenes")
+def list_scenes() -> dict[str, Any]:
+    with _locked():
+        _, skills = _reconcile_for_scene_request()
+        scenes_state = _load_scenes_or_507(skills)
+    return {
+        "revision": scenes_state["revision"],
+        "active": scenes_state["active"],
+        "scenes": _scenes_view(scenes_state),
+        "pids": _pids(),
+    }
+
+
+@app.post("/scenes")
+def create_scene(body: SceneCreateRequest) -> dict[str, Any]:
+    name = _scene_name_or_400(body.name)
+    started = time.monotonic()
+    with _locked():
+        state, skills = _reconcile_for_scene_request()
+        scenes_state = _load_scenes_or_507(skills)
+        if name in scenes_state["scenes"]:
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "message": f"Scene {name!r} already exists",
+                    "current_revision": scenes_state["revision"],
+                },
+            )
+        pending = {
+            **scenes_state,
+            "active": name,
+            "scenes": {**scenes_state["scenes"], name: {"disabled": []}},
+        }
+        state, _, _, scenes_state = _apply_scene_locked(state, skills, [], pending)
+    return {
+        "ok": True,
+        "revision": scenes_state["revision"],
+        "active": scenes_state["active"],
+        "skill_revision": state["revision"],
+        "scenes": _scenes_view(scenes_state),
+        "pids": _pids(),
+        "latency_ms": round((time.monotonic() - started) * 1000, 2),
+    }
+
+
+@app.put("/scenes/{name}/activate")
+def activate_scene(name: str, body: SceneActivateRequest) -> dict[str, Any]:
+    name = name.strip()
+    started = time.monotonic()
+    with _locked():
+        state, skills = _reconcile_for_scene_request()
+        scenes_state = _load_scenes_or_507(skills)
+        _scenes_revision_or_409(scenes_state, body.expected_revision)
+        if name not in scenes_state["scenes"]:
+            raise HTTPException(status_code=404, detail=f"Unknown scene {name!r}")
+        pending = {**scenes_state, "active": name}
+        state, _, changed, scenes_state = _apply_scene_locked(
+            state, skills, scenes_state["scenes"][name]["disabled"], pending
+        )
+    return {
+        "ok": True,
+        "revision": scenes_state["revision"],
+        "active": scenes_state["active"],
+        "skill_revision": state["revision"],
+        "changed": changed,
+        "scenes": _scenes_view(scenes_state),
+        "pids": _pids(),
+        "latency_ms": round((time.monotonic() - started) * 1000, 2),
+    }
+
+
+@app.put("/scenes/{name}")
+def rename_scene(name: str, body: SceneRenameRequest) -> dict[str, Any]:
+    name = name.strip()
+    new_name = _scene_name_or_400(body.new_name)
+    started = time.monotonic()
+    with _locked():
+        state, skills = _reconcile_for_scene_request()
+        scenes_state = _load_scenes_or_507(skills)
+        _scenes_revision_or_409(scenes_state, body.expected_revision)
+        if name not in scenes_state["scenes"]:
+            raise HTTPException(status_code=404, detail=f"Unknown scene {name!r}")
+        if new_name != name and new_name in scenes_state["scenes"]:
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "message": f"Scene {new_name!r} already exists",
+                    "current_revision": scenes_state["revision"],
+                },
+            )
+        remaining = {
+            scene_name: entry
+            for scene_name, entry in scenes_state["scenes"].items()
+            if scene_name != name
+        }
+        remaining[new_name] = scenes_state["scenes"][name]
+        pending = {**scenes_state, "scenes": remaining}
+        if scenes_state["active"] == name:
+            pending["active"] = new_name
+        try:
+            scenes_state = _commit_scenes_locked(pending)
+        except OSError as exc:
+            raise HTTPException(
+                status_code=507, detail=f"Scene state commit failed: {exc}"
+            ) from exc
+    return {
+        "ok": True,
+        "revision": scenes_state["revision"],
+        "active": scenes_state["active"],
+        "skill_revision": state["revision"],
+        "scenes": _scenes_view(scenes_state),
+        "pids": _pids(),
+        "latency_ms": round((time.monotonic() - started) * 1000, 2),
+    }
+
+
+@app.delete("/scenes/{name}")
+def delete_scene(name: str, body: SceneDeleteRequest) -> dict[str, Any]:
+    name = name.strip()
+    with _locked():
+        state, skills = _reconcile_for_scene_request()
+        scenes_state = _load_scenes_or_507(skills)
+        _scenes_revision_or_409(scenes_state, body.expected_revision)
+        if name not in scenes_state["scenes"]:
+            raise HTTPException(status_code=404, detail=f"Unknown scene {name!r}")
+        remaining = {
+            scene_name: entry
+            for scene_name, entry in scenes_state["scenes"].items()
+            if scene_name != name
+        }
+        if scenes_state["active"] != name:
+            try:
+                scenes_state = _commit_scenes_locked(
+                    {**scenes_state, "scenes": remaining}
+                )
+            except OSError as exc:
+                raise HTTPException(
+                    status_code=507, detail=f"Scene state commit failed: {exc}"
+                ) from exc
+        else:
+            if remaining:
+                successor = sorted(remaining)[0]
+                pending = {
+                    **scenes_state,
+                    "active": successor,
+                    "scenes": remaining,
+                }
+                disabled_names = remaining[successor]["disabled"]
+            else:
+                pending = {
+                    **scenes_state,
+                    "active": DEFAULT_SCENE_NAME,
+                    "scenes": {DEFAULT_SCENE_NAME: {"disabled": []}},
+                }
+                disabled_names = []
+            _, _, _, scenes_state = _apply_scene_locked(
+                state, skills, disabled_names, pending
+            )
+    return {
+        "ok": True,
+        "revision": scenes_state["revision"],
+        "active": scenes_state["active"],
+        "scenes": _scenes_view(scenes_state),
+        "pids": _pids(),
+    }

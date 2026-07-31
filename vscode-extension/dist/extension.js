@@ -1,142 +1,8374 @@
-"use strict";var Go=Object.create;var tt=Object.defineProperty;var Wo=Object.getOwnPropertyDescriptor;var Ho=Object.getOwnPropertyNames;var Qo=Object.getPrototypeOf,Xo=Object.prototype.hasOwnProperty;var g=(s,e)=>()=>{try{return e||s((e={exports:{}}).exports,e),e.exports}catch(t){throw e=0,t}},zo=(s,e)=>{for(var t in e)tt(s,t,{get:e[t],enumerable:!0})},Gi=(s,e,t,i)=>{if(e&&typeof e=="object"||typeof e=="function")for(let n of Ho(e))!Xo.call(s,n)&&n!==t&&tt(s,n,{get:()=>e[n],enumerable:!(i=Wo(e,n))||i.enumerable});return s};var ke=(s,e,t)=>(t=s!=null?Go(Qo(s)):{},Gi(e||!s||!s.__esModule?tt(t,"default",{value:s,enumerable:!0}):t,s)),Zo=s=>Gi(tt({},"__esModule",{value:!0}),s);var T=g($=>{"use strict";var cs=Symbol.for("yaml.alias"),Xi=Symbol.for("yaml.document"),ot=Symbol.for("yaml.map"),zi=Symbol.for("yaml.pair"),us=Symbol.for("yaml.scalar"),at=Symbol.for("yaml.seq"),V=Symbol.for("yaml.node.type"),oa=s=>!!s&&typeof s=="object"&&s[V]===cs,aa=s=>!!s&&typeof s=="object"&&s[V]===Xi,la=s=>!!s&&typeof s=="object"&&s[V]===ot,ca=s=>!!s&&typeof s=="object"&&s[V]===zi,Zi=s=>!!s&&typeof s=="object"&&s[V]===us,ua=s=>!!s&&typeof s=="object"&&s[V]===at;function en(s){if(s&&typeof s=="object")switch(s[V]){case ot:case at:return!0}return!1}function fa(s){if(s&&typeof s=="object")switch(s[V]){case cs:case ot:case us:case at:return!0}return!1}var da=s=>(Zi(s)||en(s))&&!!s.anchor;$.ALIAS=cs;$.DOC=Xi;$.MAP=ot;$.NODE_TYPE=V;$.PAIR=zi;$.SCALAR=us;$.SEQ=at;$.hasAnchor=da;$.isAlias=oa;$.isCollection=en;$.isDocument=aa;$.isMap=la;$.isNode=fa;$.isPair=ca;$.isScalar=Zi;$.isSeq=ua});var Ae=g(fs=>{"use strict";var L=T(),_=Symbol("break visit"),tn=Symbol("skip children"),R=Symbol("remove node");function lt(s,e){let t=sn(e);L.isDocument(s)?fe(null,s.contents,t,Object.freeze([s]))===R&&(s.contents=null):fe(null,s,t,Object.freeze([]))}lt.BREAK=_;lt.SKIP=tn;lt.REMOVE=R;function fe(s,e,t,i){let n=nn(s,e,t,i);if(L.isNode(n)||L.isPair(n))return rn(s,i,n),fe(s,n,t,i);if(typeof n!="symbol"){if(L.isCollection(e)){i=Object.freeze(i.concat(e));for(let r=0;r<e.items.length;++r){let o=fe(r,e.items[r],t,i);if(typeof o=="number")r=o-1;else{if(o===_)return _;o===R&&(e.items.splice(r,1),r-=1)}}}else if(L.isPair(e)){i=Object.freeze(i.concat(e));let r=fe("key",e.key,t,i);if(r===_)return _;r===R&&(e.key=null);let o=fe("value",e.value,t,i);if(o===_)return _;o===R&&(e.value=null)}}return n}async function ct(s,e){let t=sn(e);L.isDocument(s)?await de(null,s.contents,t,Object.freeze([s]))===R&&(s.contents=null):await de(null,s,t,Object.freeze([]))}ct.BREAK=_;ct.SKIP=tn;ct.REMOVE=R;async function de(s,e,t,i){let n=await nn(s,e,t,i);if(L.isNode(n)||L.isPair(n))return rn(s,i,n),de(s,n,t,i);if(typeof n!="symbol"){if(L.isCollection(e)){i=Object.freeze(i.concat(e));for(let r=0;r<e.items.length;++r){let o=await de(r,e.items[r],t,i);if(typeof o=="number")r=o-1;else{if(o===_)return _;o===R&&(e.items.splice(r,1),r-=1)}}}else if(L.isPair(e)){i=Object.freeze(i.concat(e));let r=await de("key",e.key,t,i);if(r===_)return _;r===R&&(e.key=null);let o=await de("value",e.value,t,i);if(o===_)return _;o===R&&(e.value=null)}}return n}function sn(s){return typeof s=="object"&&(s.Collection||s.Node||s.Value)?Object.assign({Alias:s.Node,Map:s.Node,Scalar:s.Node,Seq:s.Node},s.Value&&{Map:s.Value,Scalar:s.Value,Seq:s.Value},s.Collection&&{Map:s.Collection,Seq:s.Collection},s):s}function nn(s,e,t,i){if(typeof t=="function")return t(s,e,i);if(L.isMap(e))return t.Map?.(s,e,i);if(L.isSeq(e))return t.Seq?.(s,e,i);if(L.isPair(e))return t.Pair?.(s,e,i);if(L.isScalar(e))return t.Scalar?.(s,e,i);if(L.isAlias(e))return t.Alias?.(s,e,i)}function rn(s,e,t){let i=e[e.length-1];if(L.isCollection(i))i.items[s]=t;else if(L.isPair(i))s==="key"?i.key=t:i.value=t;else if(L.isDocument(i))i.contents=t;else{let n=L.isAlias(i)?"alias":"scalar";throw new Error(`Cannot replace node with ${n} parent`)}}fs.visit=lt;fs.visitAsync=ct});var ds=g(an=>{"use strict";var on=T(),ha=Ae(),pa={"!":"%21",",":"%2C","[":"%5B","]":"%5D","{":"%7B","}":"%7D"},ma=s=>s.replace(/[!,[\]{}]/g,e=>pa[e]),Te=class s{constructor(e,t){this.docStart=null,this.docEnd=!1,this.yaml=Object.assign({},s.defaultYaml,e),this.tags=Object.assign({},s.defaultTags,t)}clone(){let e=new s(this.yaml,this.tags);return e.docStart=this.docStart,e}atDocument(){let e=new s(this.yaml,this.tags);switch(this.yaml.version){case"1.1":this.atNextDocument=!0;break;case"1.2":this.atNextDocument=!1,this.yaml={explicit:s.defaultYaml.explicit,version:"1.2"},this.tags=Object.assign({},s.defaultTags);break}return e}add(e,t){this.atNextDocument&&(this.yaml={explicit:s.defaultYaml.explicit,version:"1.1"},this.tags=Object.assign({},s.defaultTags),this.atNextDocument=!1);let i=e.trim().split(/[ \t]+/),n=i.shift();switch(n){case"%TAG":{if(i.length!==2&&(t(0,"%TAG directive should contain exactly two parts"),i.length<2))return!1;let[r,o]=i;return this.tags[r]=o,!0}case"%YAML":{if(this.yaml.explicit=!0,i.length!==1)return t(0,"%YAML directive should contain exactly one part"),!1;let[r]=i;if(r==="1.1"||r==="1.2")return this.yaml.version=r,!0;{let o=/^\d+\.\d+$/.test(r);return t(6,`Unsupported YAML version ${r}`,o),!1}}default:return t(0,`Unknown directive ${n}`,!0),!1}}tagName(e,t){if(e==="!")return"!";if(e[0]!=="!")return t(`Not a valid tag: ${e}`),null;if(e[1]==="<"){let o=e.slice(2,-1);return o==="!"||o==="!!"?(t(`Verbatim tags aren't resolved, so ${e} is invalid.`),null):(e[e.length-1]!==">"&&t("Verbatim tags must end with a >"),o)}let[,i,n]=e.match(/^(.*!)([^!]*)$/s);n||t(`The ${e} tag has no suffix`);let r=this.tags[i];if(r)try{return r+decodeURIComponent(n)}catch(o){return t(String(o)),null}return i==="!"?e:(t(`Could not resolve tag: ${e}`),null)}tagString(e){for(let[t,i]of Object.entries(this.tags))if(e.startsWith(i))return t+ma(e.substring(i.length));return e[0]==="!"?e:`!<${e}>`}toString(e){let t=this.yaml.explicit?[`%YAML ${this.yaml.version||"1.2"}`]:[],i=Object.entries(this.tags),n;if(e&&i.length>0&&on.isNode(e.contents)){let r={};ha.visit(e.contents,(o,a)=>{on.isNode(a)&&a.tag&&(r[a.tag]=!0)}),n=Object.keys(r)}else n=[];for(let[r,o]of i)r==="!!"&&o==="tag:yaml.org,2002:"||(!e||n.some(a=>a.startsWith(o)))&&t.push(`%TAG ${r} ${o}`);return t.join(`
-`)}};Te.defaultYaml={explicit:!1,version:"1.2"};Te.defaultTags={"!!":"tag:yaml.org,2002:"};an.Directives=Te});var ut=g(qe=>{"use strict";var ln=T(),ga=Ae();function ya(s){if(/[\x00-\x19\s,[\]{}]/.test(s)){let t=`Anchor must not contain whitespace or control characters: ${JSON.stringify(s)}`;throw new Error(t)}return!0}function cn(s){let e=new Set;return ga.visit(s,{Value(t,i){i.anchor&&e.add(i.anchor)}}),e}function un(s,e){for(let t=1;;++t){let i=`${s}${t}`;if(!e.has(i))return i}}function ba(s,e){let t=[],i=new Map,n=null;return{onAnchor:r=>{t.push(r),n??(n=cn(s));let o=un(e,n);return n.add(o),o},setAnchors:()=>{for(let r of t){let o=i.get(r);if(typeof o=="object"&&o.anchor&&(ln.isScalar(o.node)||ln.isCollection(o.node)))o.node.anchor=o.anchor;else{let a=new Error("Failed to resolve repeated object (this should not happen)");throw a.source=r,a}}},sourceObjects:i}}qe.anchorIsValid=ya;qe.anchorNames=cn;qe.createNodeAnchors=ba;qe.findNewAnchor=un});var hs=g(fn=>{"use strict";function Ce(s,e,t,i){if(i&&typeof i=="object")if(Array.isArray(i))for(let n=0,r=i.length;n<r;++n){let o=i[n],a=Ce(s,i,String(n),o);a===void 0?delete i[n]:a!==o&&(i[n]=a)}else if(i instanceof Map)for(let n of Array.from(i.keys())){let r=i.get(n),o=Ce(s,i,n,r);o===void 0?i.delete(n):o!==r&&i.set(n,o)}else if(i instanceof Set)for(let n of Array.from(i)){let r=Ce(s,i,n,n);r===void 0?i.delete(n):r!==n&&(i.delete(n),i.add(r))}else for(let[n,r]of Object.entries(i)){let o=Ce(s,i,n,r);o===void 0?delete i[n]:o!==r&&(i[n]=o)}return s.call(e,t,i)}fn.applyReviver=Ce});var G=g(hn=>{"use strict";var Sa=T();function dn(s,e,t){if(Array.isArray(s))return s.map((i,n)=>dn(i,String(n),t));if(s&&typeof s.toJSON=="function"){if(!t||!Sa.hasAnchor(s))return s.toJSON(e,t);let i={aliasCount:0,count:1,res:void 0};t.anchors.set(s,i),t.onCreate=r=>{i.res=r,delete t.onCreate};let n=s.toJSON(e,t);return t.onCreate&&t.onCreate(n),n}return typeof s=="bigint"&&!t?.keep?Number(s):s}hn.toJS=dn});var ft=g(mn=>{"use strict";var wa=hs(),pn=T(),va=G(),ps=class{constructor(e){Object.defineProperty(this,pn.NODE_TYPE,{value:e})}clone(){let e=Object.create(Object.getPrototypeOf(this),Object.getOwnPropertyDescriptors(this));return this.range&&(e.range=this.range.slice()),e}toJS(e,{mapAsMap:t,maxAliasCount:i,onAnchor:n,reviver:r}={}){if(!pn.isDocument(e))throw new TypeError("A document argument is required");let o={anchors:new Map,doc:e,keep:!0,mapAsMap:t===!0,mapKeyWarned:!1,maxAliasCount:typeof i=="number"?i:100},a=va.toJS(this,"",o);if(typeof n=="function")for(let{count:l,res:c}of o.anchors.values())n(c,l);return typeof r=="function"?wa.applyReviver(r,{"":a},"",a):a}};mn.NodeBase=ps});var Ee=g(gn=>{"use strict";var ka=ut(),Na=Ae(),he=T(),Aa=ft(),Ta=G(),ms=class extends Aa.NodeBase{constructor(e){super(he.ALIAS),this.source=e,Object.defineProperty(this,"tag",{set(){throw new Error("Alias nodes cannot have tags")}})}resolve(e,t){if(t?.maxAliasCount===0)throw new ReferenceError("Alias resolution is disabled");let i;t?.aliasResolveCache?i=t.aliasResolveCache:(i=[],Na.visit(e,{Node:(r,o)=>{(he.isAlias(o)||he.hasAnchor(o))&&i.push(o)}}),t&&(t.aliasResolveCache=i));let n;for(let r of i){if(r===this)break;r.anchor===this.source&&(n=r)}return n}toJSON(e,t){if(!t)return{source:this.source};let{anchors:i,doc:n,maxAliasCount:r}=t,o=this.resolve(n,t);if(!o){let l=`Unresolved alias (the anchor must be set before the alias): ${this.source}`;throw new ReferenceError(l)}let a=i.get(o);if(a||(Ta.toJS(o,null,t),a=i.get(o)),a?.res===void 0){let l="This should not happen: Alias anchor was not resolved?";throw new ReferenceError(l)}if(r>=0&&(a.count+=1,a.aliasCount===0&&(a.aliasCount=dt(n,o,i)),a.count*a.aliasCount>r)){let l="Excessive alias count indicates a resource exhaustion attack";throw new ReferenceError(l)}return a.res}toString(e,t,i){let n=`*${this.source}`;if(e){if(ka.anchorIsValid(this.source),e.options.verifyAliasOrder&&!e.anchors.has(this.source)){let r=`Unresolved alias (the anchor must be set before the alias): ${this.source}`;throw new Error(r)}if(e.implicitKey)return`${n} `}return n}};function dt(s,e,t){if(he.isAlias(e)){let i=e.resolve(s),n=t&&i&&t.get(i);return n?n.count*n.aliasCount:0}else if(he.isCollection(e)){let i=0;for(let n of e.items){let r=dt(s,n,t);r>i&&(i=r)}return i}else if(he.isPair(e)){let i=dt(s,e.key,t),n=dt(s,e.value,t);return Math.max(i,n)}return 1}gn.Alias=ms});var O=g(gs=>{"use strict";var qa=T(),Ca=ft(),Ea=G(),Oa=s=>!s||typeof s!="function"&&typeof s!="object",W=class extends Ca.NodeBase{constructor(e){super(qa.SCALAR),this.value=e}toJSON(e,t){return t?.keep?this.value:Ea.toJS(this.value,e,t)}toString(){return String(this.value)}};W.BLOCK_FOLDED="BLOCK_FOLDED";W.BLOCK_LITERAL="BLOCK_LITERAL";W.PLAIN="PLAIN";W.QUOTE_DOUBLE="QUOTE_DOUBLE";W.QUOTE_SINGLE="QUOTE_SINGLE";gs.Scalar=W;gs.isScalarValue=Oa});var Oe=g(bn=>{"use strict";var Pa=Ee(),ne=T(),yn=O(),Ia="tag:yaml.org,2002:";function La(s,e,t){if(e){let i=t.filter(r=>r.tag===e),n=i.find(r=>!r.format)??i[0];if(!n)throw new Error(`Tag ${e} not found`);return n}return t.find(i=>i.identify?.(s)&&!i.format)}function Ma(s,e,t){if(ne.isDocument(s)&&(s=s.contents),ne.isNode(s))return s;if(ne.isPair(s)){let u=t.schema[ne.MAP].createNode?.(t.schema,null,t);return u.items.push(s),u}(s instanceof String||s instanceof Number||s instanceof Boolean||typeof BigInt<"u"&&s instanceof BigInt)&&(s=s.valueOf());let{aliasDuplicateObjects:i,onAnchor:n,onTagObj:r,schema:o,sourceObjects:a}=t,l;if(i&&s&&typeof s=="object"){if(l=a.get(s),l)return l.anchor??(l.anchor=n(s)),new Pa.Alias(l.anchor);l={anchor:null,node:null},a.set(s,l)}e?.startsWith("!!")&&(e=Ia+e.slice(2));let c=La(s,e,o.tags);if(!c){if(s&&typeof s.toJSON=="function"&&(s=s.toJSON()),!s||typeof s!="object"){let u=new yn.Scalar(s);return l&&(l.node=u),u}c=s instanceof Map?o[ne.MAP]:Symbol.iterator in Object(s)?o[ne.SEQ]:o[ne.MAP]}r&&(r(c),delete t.onTagObj);let h=c?.createNode?c.createNode(t.schema,s,t):typeof c?.nodeClass?.from=="function"?c.nodeClass.from(t.schema,s,t):new yn.Scalar(s);return e?h.tag=e:c.default||(h.tag=c.tag),l&&(l.node=h),h}bn.createNode=Ma});var pt=g(ht=>{"use strict";var $a=Oe(),F=T(),_a=ft();function ys(s,e,t){let i=t;for(let n=e.length-1;n>=0;--n){let r=e[n];if(typeof r=="number"&&Number.isInteger(r)&&r>=0){let o=[];o[r]=i,i=o}else i=new Map([[r,i]])}return $a.createNode(i,void 0,{aliasDuplicateObjects:!1,keepUndefined:!1,onAnchor:()=>{throw new Error("This should not happen, please report a bug.")},schema:s,sourceObjects:new Map})}var Sn=s=>s==null||typeof s=="object"&&!!s[Symbol.iterator]().next().done,bs=class extends _a.NodeBase{constructor(e,t){super(e),Object.defineProperty(this,"schema",{value:t,configurable:!0,enumerable:!1,writable:!0})}clone(e){let t=Object.create(Object.getPrototypeOf(this),Object.getOwnPropertyDescriptors(this));return e&&(t.schema=e),t.items=t.items.map(i=>F.isNode(i)||F.isPair(i)?i.clone(e):i),this.range&&(t.range=this.range.slice()),t}addIn(e,t){if(Sn(e))this.add(t);else{let[i,...n]=e,r=this.get(i,!0);if(F.isCollection(r))r.addIn(n,t);else if(r===void 0&&this.schema)this.set(i,ys(this.schema,n,t));else throw new Error(`Expected YAML collection at ${i}. Remaining path: ${n}`)}}deleteIn(e){let[t,...i]=e;if(i.length===0)return this.delete(t);let n=this.get(t,!0);if(F.isCollection(n))return n.deleteIn(i);throw new Error(`Expected YAML collection at ${t}. Remaining path: ${i}`)}getIn(e,t){let[i,...n]=e,r=this.get(i,!0);return n.length===0?!t&&F.isScalar(r)?r.value:r:F.isCollection(r)?r.getIn(n,t):void 0}hasAllNullValues(e){return this.items.every(t=>{if(!F.isPair(t))return!1;let i=t.value;return i==null||e&&F.isScalar(i)&&i.value==null&&!i.commentBefore&&!i.comment&&!i.tag})}hasIn(e){let[t,...i]=e;if(i.length===0)return this.has(t);let n=this.get(t,!0);return F.isCollection(n)?n.hasIn(i):!1}setIn(e,t){let[i,...n]=e;if(n.length===0)this.set(i,t);else{let r=this.get(i,!0);if(F.isCollection(r))r.setIn(n,t);else if(r===void 0&&this.schema)this.set(i,ys(this.schema,n,t));else throw new Error(`Expected YAML collection at ${i}. Remaining path: ${n}`)}}};ht.Collection=bs;ht.collectionFromPath=ys;ht.isEmptyPath=Sn});var Pe=g(mt=>{"use strict";var Da=s=>s.replace(/^(?!$)(?: $)?/gm,"#");function Ss(s,e){return/^\n+$/.test(s)?s.substring(1):e?s.replace(/^(?! *$)/gm,e):s}var ja=(s,e,t)=>s.endsWith(`
-`)?Ss(t,e):t.includes(`
-`)?`
-`+Ss(t,e):(s.endsWith(" ")?"":" ")+t;mt.indentComment=Ss;mt.lineComment=ja;mt.stringifyComment=Da});var vn=g(Ie=>{"use strict";var Ba="flow",ws="block",gt="quoted";function Ka(s,e,t="flow",{indentAtStart:i,lineWidth:n=80,minContentWidth:r=20,onFold:o,onOverflow:a}={}){if(!n||n<0)return s;n<r&&(r=0);let l=Math.max(1+r,1+n-e.length);if(s.length<=l)return s;let c=[],h={},u=n-e.length;typeof i=="number"&&(i>n-Math.max(2,r)?c.push(0):u=n-i);let f,m,y=!1,d=-1,p=-1,S=-1;t===ws&&(d=wn(s,d,e.length),d!==-1&&(u=d+l));for(let v;v=s[d+=1];){if(t===gt&&v==="\\"){switch(p=d,s[d+1]){case"x":d+=3;break;case"u":d+=5;break;case"U":d+=9;break;default:d+=1}S=d}if(v===`
-`)t===ws&&(d=wn(s,d,e.length)),u=d+e.length+l,f=void 0;else{if(v===" "&&m&&m!==" "&&m!==`
-`&&m!=="	"){let k=s[d+1];k&&k!==" "&&k!==`
-`&&k!=="	"&&(f=d)}if(d>=u)if(f)c.push(f),u=f+l,f=void 0;else if(t===gt){for(;m===" "||m==="	";)m=v,v=s[d+=1],y=!0;let k=d>S+1?d-2:p-1;if(h[k])return s;c.push(k),h[k]=!0,u=k+l,f=void 0}else y=!0}m=v}if(y&&a&&a(),c.length===0)return s;o&&o();let w=s.slice(0,c[0]);for(let v=0;v<c.length;++v){let k=c[v],N=c[v+1]||s.length;k===0?w=`
-${e}${s.slice(0,N)}`:(t===gt&&h[k]&&(w+=`${s[k]}\\`),w+=`
-${e}${s.slice(k+1,N)}`)}return w}function wn(s,e,t){let i=e,n=e+1,r=s[n];for(;r===" "||r==="	";)if(e<n+t)r=s[++e];else{do r=s[++e];while(r&&r!==`
-`);i=e,n=e+1,r=s[n]}return i}Ie.FOLD_BLOCK=ws;Ie.FOLD_FLOW=Ba;Ie.FOLD_QUOTED=gt;Ie.foldFlowLines=Ka});var Me=g(kn=>{"use strict";var B=O(),H=vn(),bt=(s,e)=>({indentAtStart:e?s.indent.length:s.indentAtStart,lineWidth:s.options.lineWidth,minContentWidth:s.options.minContentWidth}),St=s=>/^(%|---|\.\.\.)/m.test(s);function Ra(s,e,t){if(!e||e<0)return!1;let i=e-t,n=s.length;if(n<=i)return!1;for(let r=0,o=0;r<n;++r)if(s[r]===`
-`){if(r-o>i)return!0;if(o=r+1,n-o<=i)return!1}return!0}function Le(s,e){let t=JSON.stringify(s);if(e.options.doubleQuotedAsJSON)return t;let{implicitKey:i}=e,n=e.options.doubleQuotedMinMultiLineLength,r=e.indent||(St(s)?"  ":""),o="",a=0;for(let l=0,c=t[l];c;c=t[++l])if(c===" "&&t[l+1]==="\\"&&t[l+2]==="n"&&(o+=t.slice(a,l)+"\\ ",l+=1,a=l,c="\\"),c==="\\")switch(t[l+1]){case"u":{o+=t.slice(a,l);let h=t.substr(l+2,4);switch(h){case"0000":o+="\\0";break;case"0007":o+="\\a";break;case"000b":o+="\\v";break;case"001b":o+="\\e";break;case"0085":o+="\\N";break;case"00a0":o+="\\_";break;case"2028":o+="\\L";break;case"2029":o+="\\P";break;default:h.substr(0,2)==="00"?o+="\\x"+h.substr(2):o+=t.substr(l,6)}l+=5,a=l+1}break;case"n":if(i||t[l+2]==='"'||t.length<n)l+=1;else{for(o+=t.slice(a,l)+`
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __commonJS = (cb, mod) => function __require() {
+  try {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  } catch (e) {
+    throw mod = 0, e;
+  }
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-`;t[l+2]==="\\"&&t[l+3]==="n"&&t[l+4]!=='"';)o+=`
-`,l+=2;o+=r,t[l+2]===" "&&(o+="\\"),l+=1,a=l+1}break;default:l+=1}return o=a?o+t.slice(a):t,i?o:H.foldFlowLines(o,r,H.FOLD_QUOTED,bt(e,!1))}function vs(s,e){if(e.options.singleQuote===!1||e.implicitKey&&s.includes(`
-`)||/[ \t]\n|\n[ \t]/.test(s))return Le(s,e);let t=e.indent||(St(s)?"  ":""),i="'"+s.replace(/'/g,"''").replace(/\n+/g,`$&
-${t}`)+"'";return e.implicitKey?i:H.foldFlowLines(i,t,H.FOLD_FLOW,bt(e,!1))}function pe(s,e){let{singleQuote:t}=e.options,i;if(t===!1)i=Le;else{let n=s.includes('"'),r=s.includes("'");n&&!r?i=vs:r&&!n?i=Le:i=t?vs:Le}return i(s,e)}var ks;try{ks=new RegExp(`(^|(?<!
-))
-+(?!
-|$)`,"g")}catch{ks=/\n+(?!\n|$)/g}function yt({comment:s,type:e,value:t},i,n,r){let{blockQuote:o,commentString:a,lineWidth:l}=i.options;if(!o||/\n[\t ]+$/.test(t))return pe(t,i);let c=i.indent||(i.forceBlockIndent||St(t)?"  ":""),h=o==="literal"?!0:o==="folded"||e===B.Scalar.BLOCK_FOLDED?!1:e===B.Scalar.BLOCK_LITERAL?!0:!Ra(t,l,c.length);if(!t)return h?`|
-`:`>
-`;let u,f;for(f=t.length;f>0;--f){let N=t[f-1];if(N!==`
-`&&N!=="	"&&N!==" ")break}let m=t.substring(f),y=m.indexOf(`
-`);y===-1?u="-":t===m||y!==m.length-1?(u="+",r&&r()):u="",m&&(t=t.slice(0,-m.length),m[m.length-1]===`
-`&&(m=m.slice(0,-1)),m=m.replace(ks,`$&${c}`));let d=!1,p,S=-1;for(p=0;p<t.length;++p){let N=t[p];if(N===" ")d=!0;else if(N===`
-`)S=p;else break}let w=t.substring(0,S<p?S+1:p);w&&(t=t.substring(w.length),w=w.replace(/\n+/g,`$&${c}`));let k=(d?c?"2":"1":"")+u;if(s&&(k+=" "+a(s.replace(/ ?[\r\n]+/g," ")),n&&n()),!h){let N=t.replace(/\n+/g,`
-$&`).replace(/(?:^|\n)([\t ].*)(?:([\n\t ]*)\n(?![\n\t ]))?/g,"$1$2").replace(/\n+/g,`$&${c}`),A=!1,E=bt(i,!0);o!=="folded"&&e!==B.Scalar.BLOCK_FOLDED&&(E.onOverflow=()=>{A=!0});let b=H.foldFlowLines(`${w}${N}${m}`,c,H.FOLD_BLOCK,E);if(!A)return`>${k}
-${c}${b}`}return t=t.replace(/\n+/g,`$&${c}`),`|${k}
-${c}${w}${t}${m}`}function Fa(s,e,t,i){let{type:n,value:r}=s,{actualString:o,implicitKey:a,indent:l,indentStep:c,inFlow:h}=e;if(a&&r.includes(`
-`)||h&&/[[\]{},]/.test(r))return pe(r,e);if(/^[\n\t ,[\]{}#&*!|>'"%@`]|^[?-]$|^[?-][ \t]|[\n:][ \t]|[ \t]\n|[\n\t ]#|[\n\t :]$/.test(r))return a||h||!r.includes(`
-`)?pe(r,e):yt(s,e,t,i);if(!a&&!h&&n!==B.Scalar.PLAIN&&r.includes(`
-`))return yt(s,e,t,i);if(St(r)){if(l==="")return e.forceBlockIndent=!0,yt(s,e,t,i);if(a&&l===c)return pe(r,e)}let u=r.replace(/\n+/g,`$&
-${l}`);if(o){let f=d=>d.default&&d.tag!=="tag:yaml.org,2002:str"&&d.test?.test(u),{compat:m,tags:y}=e.doc.schema;if(y.some(f)||m?.some(f))return pe(r,e)}return a?u:H.foldFlowLines(u,l,H.FOLD_FLOW,bt(e,!1))}function Ua(s,e,t,i){let{implicitKey:n,inFlow:r}=e,o=typeof s.value=="string"?s:Object.assign({},s,{value:String(s.value)}),{type:a}=s;a!==B.Scalar.QUOTE_DOUBLE&&/[\x00-\x08\x0b-\x1f\x7f-\x9f\u{D800}-\u{DFFF}]/u.test(o.value)&&(a=B.Scalar.QUOTE_DOUBLE);let l=h=>{switch(h){case B.Scalar.BLOCK_FOLDED:case B.Scalar.BLOCK_LITERAL:return n||r?pe(o.value,e):yt(o,e,t,i);case B.Scalar.QUOTE_DOUBLE:return Le(o.value,e);case B.Scalar.QUOTE_SINGLE:return vs(o.value,e);case B.Scalar.PLAIN:return Fa(o,e,t,i);default:return null}},c=l(a);if(c===null){let{defaultKeyType:h,defaultStringType:u}=e.options,f=n&&h||u;if(c=l(f),c===null)throw new Error(`Unsupported default string type ${f}`)}return c}kn.stringifyString=Ua});var $e=g(Ns=>{"use strict";var Ya=ut(),Q=T(),Va=Pe(),Ja=Me();function xa(s,e){let t=Object.assign({blockQuote:!0,commentString:Va.stringifyComment,defaultKeyType:null,defaultStringType:"PLAIN",directives:null,doubleQuotedAsJSON:!1,doubleQuotedMinMultiLineLength:40,falseStr:"false",flowCollectionPadding:!0,indentSeq:!0,lineWidth:80,minContentWidth:20,nullStr:"null",simpleKeys:!1,singleQuote:null,trailingComma:!1,trueStr:"true",verifyAliasOrder:!0},s.schema.toStringOptions,e),i;switch(t.collectionStyle){case"block":i=!1;break;case"flow":i=!0;break;default:i=null}return{anchors:new Set,doc:s,flowCollectionPadding:t.flowCollectionPadding?" ":"",indent:"",indentStep:typeof t.indent=="number"?" ".repeat(t.indent):"  ",inFlow:i,options:t}}function Ga(s,e){if(e.tag){let n=s.filter(r=>r.tag===e.tag);if(n.length>0)return n.find(r=>r.format===e.format)??n[0]}let t,i;if(Q.isScalar(e)){i=e.value;let n=s.filter(r=>r.identify?.(i));if(n.length>1){let r=n.filter(o=>o.test);r.length>0&&(n=r)}t=n.find(r=>r.format===e.format)??n.find(r=>!r.format)}else i=e,t=s.find(n=>n.nodeClass&&i instanceof n.nodeClass);if(!t){let n=i?.constructor?.name??(i===null?"null":typeof i);throw new Error(`Tag not resolved for ${n} value`)}return t}function Wa(s,e,{anchors:t,doc:i}){if(!i.directives)return"";let n=[],r=(Q.isScalar(s)||Q.isCollection(s))&&s.anchor;r&&Ya.anchorIsValid(r)&&(t.add(r),n.push(`&${r}`));let o=s.tag??(e.default?null:e.tag);return o&&n.push(i.directives.tagString(o)),n.join(" ")}function Ha(s,e,t,i){if(Q.isPair(s))return s.toString(e,t,i);if(Q.isAlias(s)){if(e.doc.directives)return s.toString(e);if(e.resolvedAliases?.has(s))throw new TypeError("Cannot stringify circular structure without alias nodes");e.resolvedAliases?e.resolvedAliases.add(s):e.resolvedAliases=new Set([s]),s=s.resolve(e.doc)}let n,r=Q.isNode(s)?s:e.doc.createNode(s,{onTagObj:l=>n=l});n??(n=Ga(e.doc.schema.tags,r));let o=Wa(r,n,e);o.length>0&&(e.indentAtStart=(e.indentAtStart??0)+o.length+1);let a=typeof n.stringify=="function"?n.stringify(r,e,t,i):Q.isScalar(r)?Ja.stringifyString(r,e,t,i):r.toString(e,t,i);return o?Q.isScalar(r)||a[0]==="{"||a[0]==="["?`${o} ${a}`:`${o}
-${e.indent}${a}`:a}Ns.createStringifyContext=xa;Ns.stringify=Ha});var qn=g(Tn=>{"use strict";var J=T(),Nn=O(),An=$e(),_e=Pe();function Qa({key:s,value:e},t,i,n){let{allNullValues:r,doc:o,indent:a,indentStep:l,options:{commentString:c,indentSeq:h,simpleKeys:u}}=t,f=J.isNode(s)&&s.comment||null;if(u){if(f)throw new Error("With simple keys, key nodes cannot have comments");if(J.isCollection(s)||!J.isNode(s)&&typeof s=="object"){let E="With simple keys, collection cannot be used as a key value";throw new Error(E)}}let m=!u&&(!s||f&&e==null&&!t.inFlow||J.isCollection(s)||(J.isScalar(s)?s.type===Nn.Scalar.BLOCK_FOLDED||s.type===Nn.Scalar.BLOCK_LITERAL:typeof s=="object"));t=Object.assign({},t,{allNullValues:!1,implicitKey:!m&&(u||!r),indent:a+l});let y=!1,d=!1,p=An.stringify(s,t,()=>y=!0,()=>d=!0);if(!m&&!t.inFlow&&p.length>1024){if(u)throw new Error("With simple keys, single line scalar must not span more than 1024 characters");m=!0}if(t.inFlow){if(r||e==null)return y&&i&&i(),p===""?"?":m?`? ${p}`:p}else if(r&&!u||e==null&&m)return p=`? ${p}`,f&&!y?p+=_e.lineComment(p,t.indent,c(f)):d&&n&&n(),p;y&&(f=null),m?(f&&(p+=_e.lineComment(p,t.indent,c(f))),p=`? ${p}
-${a}:`):(p=`${p}:`,f&&(p+=_e.lineComment(p,t.indent,c(f))));let S,w,v;J.isNode(e)?(S=!!e.spaceBefore,w=e.commentBefore,v=e.comment):(S=!1,w=null,v=null,e&&typeof e=="object"&&(e=o.createNode(e))),t.implicitKey=!1,!m&&!f&&J.isScalar(e)&&(t.indentAtStart=p.length+1),d=!1,!h&&l.length>=2&&!t.inFlow&&!m&&J.isSeq(e)&&!e.flow&&!e.tag&&!e.anchor&&(t.indent=t.indent.substring(2));let k=!1,N=An.stringify(e,t,()=>k=!0,()=>d=!0),A=" ";if(f||S||w){if(A=S?`
-`:"",w){let E=c(w);A+=`
-${_e.indentComment(E,t.indent)}`}N===""&&!t.inFlow?A===`
-`&&v&&(A=`
+// node_modules/yaml/dist/nodes/identity.js
+var require_identity = __commonJS({
+  "node_modules/yaml/dist/nodes/identity.js"(exports2) {
+    "use strict";
+    var ALIAS = /* @__PURE__ */ Symbol.for("yaml.alias");
+    var DOC = /* @__PURE__ */ Symbol.for("yaml.document");
+    var MAP = /* @__PURE__ */ Symbol.for("yaml.map");
+    var PAIR = /* @__PURE__ */ Symbol.for("yaml.pair");
+    var SCALAR = /* @__PURE__ */ Symbol.for("yaml.scalar");
+    var SEQ = /* @__PURE__ */ Symbol.for("yaml.seq");
+    var NODE_TYPE = /* @__PURE__ */ Symbol.for("yaml.node.type");
+    var isAlias = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === ALIAS;
+    var isDocument = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === DOC;
+    var isMap = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === MAP;
+    var isPair = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === PAIR;
+    var isScalar = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SCALAR;
+    var isSeq = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SEQ;
+    function isCollection(node) {
+      if (node && typeof node === "object")
+        switch (node[NODE_TYPE]) {
+          case MAP:
+          case SEQ:
+            return true;
+        }
+      return false;
+    }
+    function isNode(node) {
+      if (node && typeof node === "object")
+        switch (node[NODE_TYPE]) {
+          case ALIAS:
+          case MAP:
+          case SCALAR:
+          case SEQ:
+            return true;
+        }
+      return false;
+    }
+    var hasAnchor = (node) => (isScalar(node) || isCollection(node)) && !!node.anchor;
+    exports2.ALIAS = ALIAS;
+    exports2.DOC = DOC;
+    exports2.MAP = MAP;
+    exports2.NODE_TYPE = NODE_TYPE;
+    exports2.PAIR = PAIR;
+    exports2.SCALAR = SCALAR;
+    exports2.SEQ = SEQ;
+    exports2.hasAnchor = hasAnchor;
+    exports2.isAlias = isAlias;
+    exports2.isCollection = isCollection;
+    exports2.isDocument = isDocument;
+    exports2.isMap = isMap;
+    exports2.isNode = isNode;
+    exports2.isPair = isPair;
+    exports2.isScalar = isScalar;
+    exports2.isSeq = isSeq;
+  }
+});
 
-`):A+=`
-${t.indent}`}else if(!m&&J.isCollection(e)){let E=N[0],b=N.indexOf(`
-`),P=b!==-1,x=t.inFlow??e.flow??e.items.length===0;if(P||!x){let ue=!1;if(P&&(E==="&"||E==="!")){let I=N.indexOf(" ");E==="&"&&I!==-1&&I<b&&N[I+1]==="!"&&(I=N.indexOf(" ",I+1)),(I===-1||b<I)&&(ue=!0)}ue||(A=`
-${t.indent}`)}}else(N===""||N[0]===`
-`)&&(A="");return p+=A+N,t.inFlow?k&&i&&i():v&&!k?p+=_e.lineComment(p,t.indent,c(v)):d&&n&&n(),p}Tn.stringifyPair=Qa});var Ts=g(As=>{"use strict";var Cn=require("process");function Xa(s,...e){s==="debug"&&console.log(...e)}function za(s,e){(s==="debug"||s==="warn")&&(typeof Cn.emitWarning=="function"?Cn.emitWarning(e):console.warn(e))}As.debug=Xa;As.warn=za});var At=g(Nt=>{"use strict";var kt=T(),En=O(),wt="<<",vt={identify:s=>s===wt||typeof s=="symbol"&&s.description===wt,default:"key",tag:"tag:yaml.org,2002:merge",test:/^<<$/,resolve:()=>Object.assign(new En.Scalar(Symbol(wt)),{addToJSMap:On}),stringify:()=>wt},Za=(s,e)=>(vt.identify(e)||kt.isScalar(e)&&(!e.type||e.type===En.Scalar.PLAIN)&&vt.identify(e.value))&&s?.doc.schema.tags.some(t=>t.tag===vt.tag&&t.default);function On(s,e,t){let i=Pn(s,t);if(kt.isSeq(i))for(let n of i.items)qs(s,e,n);else if(Array.isArray(i))for(let n of i)qs(s,e,n);else qs(s,e,i)}function qs(s,e,t){let i=Pn(s,t);if(!kt.isMap(i))throw new Error("Merge sources must be maps or map aliases");let n=i.toJSON(null,s,Map);for(let[r,o]of n)e instanceof Map?e.has(r)||e.set(r,o):e instanceof Set?e.add(r):Object.prototype.hasOwnProperty.call(e,r)||Object.defineProperty(e,r,{value:o,writable:!0,enumerable:!0,configurable:!0});return e}function Pn(s,e){return s&&kt.isAlias(e)?e.resolve(s.doc,s):e}Nt.addMergeToJSMap=On;Nt.isMergeKey=Za;Nt.merge=vt});var Es=g(Mn=>{"use strict";var el=Ts(),In=At(),tl=$e(),Ln=T(),Cs=G();function sl(s,e,{key:t,value:i}){if(Ln.isNode(t)&&t.addToJSMap)t.addToJSMap(s,e,i);else if(In.isMergeKey(s,t))In.addMergeToJSMap(s,e,i);else{let n=Cs.toJS(t,"",s);if(e instanceof Map)e.set(n,Cs.toJS(i,n,s));else if(e instanceof Set)e.add(n);else{let r=il(t,n,s),o=Cs.toJS(i,r,s);r in e?Object.defineProperty(e,r,{value:o,writable:!0,enumerable:!0,configurable:!0}):e[r]=o}}return e}function il(s,e,t){if(e===null)return"";if(typeof e!="object")return String(e);if(Ln.isNode(s)&&t?.doc){let i=tl.createStringifyContext(t.doc,{});i.anchors=new Set;for(let r of t.anchors.keys())i.anchors.add(r.anchor);i.inFlow=!0,i.inStringifyKey=!0;let n=s.toString(i);if(!t.mapKeyWarned){let r=JSON.stringify(n);r.length>40&&(r=r.substring(0,36)+'..."'),el.warn(t.doc.options.logLevel,`Keys with collection values will be stringified due to JS Object restrictions: ${r}. Set mapAsMap: true to use object keys.`),t.mapKeyWarned=!0}return n}return JSON.stringify(e)}Mn.addPairToJSMap=sl});var X=g(Os=>{"use strict";var $n=Oe(),nl=qn(),rl=Es(),Tt=T();function ol(s,e,t){let i=$n.createNode(s,void 0,t),n=$n.createNode(e,void 0,t);return new qt(i,n)}var qt=class s{constructor(e,t=null){Object.defineProperty(this,Tt.NODE_TYPE,{value:Tt.PAIR}),this.key=e,this.value=t}clone(e){let{key:t,value:i}=this;return Tt.isNode(t)&&(t=t.clone(e)),Tt.isNode(i)&&(i=i.clone(e)),new s(t,i)}toJSON(e,t){let i=t?.mapAsMap?new Map:{};return rl.addPairToJSMap(t,i,this)}toString(e,t,i){return e?.doc?nl.stringifyPair(this,e,t,i):JSON.stringify(this)}};Os.Pair=qt;Os.createPair=ol});var Ps=g(Dn=>{"use strict";var re=T(),_n=$e(),Ct=Pe();function al(s,e,t){return(e.inFlow??s.flow?cl:ll)(s,e,t)}function ll({comment:s,items:e},t,{blockItemPrefix:i,flowChars:n,itemIndent:r,onChompKeep:o,onComment:a}){let{indent:l,options:{commentString:c}}=t,h=Object.assign({},t,{indent:r,type:null}),u=!1,f=[];for(let y=0;y<e.length;++y){let d=e[y],p=null;if(re.isNode(d))!u&&d.spaceBefore&&f.push(""),Et(t,f,d.commentBefore,u),d.comment&&(p=d.comment);else if(re.isPair(d)){let w=re.isNode(d.key)?d.key:null;w&&(!u&&w.spaceBefore&&f.push(""),Et(t,f,w.commentBefore,u))}u=!1;let S=_n.stringify(d,h,()=>p=null,()=>u=!0);p&&(S+=Ct.lineComment(S,r,c(p))),u&&p&&(u=!1),f.push(i+S)}let m;if(f.length===0)m=n.start+n.end;else{m=f[0];for(let y=1;y<f.length;++y){let d=f[y];m+=d?`
-${l}${d}`:`
-`}}return s?(m+=`
-`+Ct.indentComment(c(s),l),a&&a()):u&&o&&o(),m}function cl({items:s},e,{flowChars:t,itemIndent:i}){let{indent:n,indentStep:r,flowCollectionPadding:o,options:{commentString:a}}=e;i+=r;let l=Object.assign({},e,{indent:i,inFlow:!0,type:null}),c=!1,h=0,u=[];for(let y=0;y<s.length;++y){let d=s[y],p=null;if(re.isNode(d))d.spaceBefore&&u.push(""),Et(e,u,d.commentBefore,!1),d.comment&&(p=d.comment);else if(re.isPair(d)){let w=re.isNode(d.key)?d.key:null;w&&(w.spaceBefore&&u.push(""),Et(e,u,w.commentBefore,!1),w.comment&&(c=!0));let v=re.isNode(d.value)?d.value:null;v?(v.comment&&(p=v.comment),v.commentBefore&&(c=!0)):d.value==null&&w?.comment&&(p=w.comment)}p&&(c=!0);let S=_n.stringify(d,l,()=>p=null);c||(c=u.length>h||S.includes(`
-`)),y<s.length-1?S+=",":e.options.trailingComma&&(e.options.lineWidth>0&&(c||(c=u.reduce((w,v)=>w+v.length+2,2)+(S.length+2)>e.options.lineWidth)),c&&(S+=",")),p&&(S+=Ct.lineComment(S,i,a(p))),u.push(S),h=u.length}let{start:f,end:m}=t;if(u.length===0)return f+m;if(!c){let y=u.reduce((d,p)=>d+p.length+2,2);c=e.options.lineWidth>0&&y>e.options.lineWidth}if(c){let y=f;for(let d of u)y+=d?`
-${r}${n}${d}`:`
-`;return`${y}
-${n}${m}`}else return`${f}${o}${u.join(" ")}${o}${m}`}function Et({indent:s,options:{commentString:e}},t,i,n){if(i&&n&&(i=i.replace(/^\n+/,"")),i){let r=Ct.indentComment(e(i),s);t.push(r.trimStart())}}Dn.stringifyCollection=al});var Z=g(Ls=>{"use strict";var ul=Ps(),fl=Es(),dl=pt(),z=T(),Ot=X(),hl=O();function De(s,e){let t=z.isScalar(e)?e.value:e;for(let i of s)if(z.isPair(i)&&(i.key===e||i.key===t||z.isScalar(i.key)&&i.key.value===t))return i}var Is=class extends dl.Collection{static get tagName(){return"tag:yaml.org,2002:map"}constructor(e){super(z.MAP,e),this.items=[]}static from(e,t,i){let{keepUndefined:n,replacer:r}=i,o=new this(e),a=(l,c)=>{if(typeof r=="function")c=r.call(t,l,c);else if(Array.isArray(r)&&!r.includes(l))return;(c!==void 0||n)&&o.items.push(Ot.createPair(l,c,i))};if(t instanceof Map)for(let[l,c]of t)a(l,c);else if(t&&typeof t=="object")for(let l of Object.keys(t))a(l,t[l]);return typeof e.sortMapEntries=="function"&&o.items.sort(e.sortMapEntries),o}add(e,t){let i;z.isPair(e)?i=e:!e||typeof e!="object"||!("key"in e)?i=new Ot.Pair(e,e?.value):i=new Ot.Pair(e.key,e.value);let n=De(this.items,i.key),r=this.schema?.sortMapEntries;if(n){if(!t)throw new Error(`Key ${i.key} already set`);z.isScalar(n.value)&&hl.isScalarValue(i.value)?n.value.value=i.value:n.value=i.value}else if(r){let o=this.items.findIndex(a=>r(i,a)<0);o===-1?this.items.push(i):this.items.splice(o,0,i)}else this.items.push(i)}delete(e){let t=De(this.items,e);return t?this.items.splice(this.items.indexOf(t),1).length>0:!1}get(e,t){let n=De(this.items,e)?.value;return(!t&&z.isScalar(n)?n.value:n)??void 0}has(e){return!!De(this.items,e)}set(e,t){this.add(new Ot.Pair(e,t),!0)}toJSON(e,t,i){let n=i?new i:t?.mapAsMap?new Map:{};t?.onCreate&&t.onCreate(n);for(let r of this.items)fl.addPairToJSMap(t,n,r);return n}toString(e,t,i){if(!e)return JSON.stringify(this);for(let n of this.items)if(!z.isPair(n))throw new Error(`Map items must all be pairs; found ${JSON.stringify(n)} instead`);return!e.allNullValues&&this.hasAllNullValues(!1)&&(e=Object.assign({},e,{allNullValues:!0})),ul.stringifyCollection(this,e,{blockItemPrefix:"",flowChars:{start:"{",end:"}"},itemIndent:e.indent||"",onChompKeep:i,onComment:t})}};Ls.YAMLMap=Is;Ls.findPair=De});var me=g(Bn=>{"use strict";var pl=T(),jn=Z(),ml={collection:"map",default:!0,nodeClass:jn.YAMLMap,tag:"tag:yaml.org,2002:map",resolve(s,e){return pl.isMap(s)||e("Expected a mapping for this tag"),s},createNode:(s,e,t)=>jn.YAMLMap.from(s,e,t)};Bn.map=ml});var ee=g(Kn=>{"use strict";var gl=Oe(),yl=Ps(),bl=pt(),It=T(),Sl=O(),wl=G(),Ms=class extends bl.Collection{static get tagName(){return"tag:yaml.org,2002:seq"}constructor(e){super(It.SEQ,e),this.items=[]}add(e){this.items.push(e)}delete(e){let t=Pt(e);return typeof t!="number"?!1:this.items.splice(t,1).length>0}get(e,t){let i=Pt(e);if(typeof i!="number")return;let n=this.items[i];return!t&&It.isScalar(n)?n.value:n}has(e){let t=Pt(e);return typeof t=="number"&&t<this.items.length}set(e,t){let i=Pt(e);if(typeof i!="number")throw new Error(`Expected a valid index, not ${e}.`);let n=this.items[i];It.isScalar(n)&&Sl.isScalarValue(t)?n.value=t:this.items[i]=t}toJSON(e,t){let i=[];t?.onCreate&&t.onCreate(i);let n=0;for(let r of this.items)i.push(wl.toJS(r,String(n++),t));return i}toString(e,t,i){return e?yl.stringifyCollection(this,e,{blockItemPrefix:"- ",flowChars:{start:"[",end:"]"},itemIndent:(e.indent||"")+"  ",onChompKeep:i,onComment:t}):JSON.stringify(this)}static from(e,t,i){let{replacer:n}=i,r=new this(e);if(t&&Symbol.iterator in Object(t)){let o=0;for(let a of t){if(typeof n=="function"){let l=t instanceof Set?a:String(o++);a=n.call(t,l,a)}r.items.push(gl.createNode(a,void 0,i))}}return r}};function Pt(s){let e=It.isScalar(s)?s.value:s;return e&&typeof e=="string"&&(e=Number(e)),typeof e=="number"&&Number.isInteger(e)&&e>=0?e:null}Kn.YAMLSeq=Ms});var ge=g(Fn=>{"use strict";var vl=T(),Rn=ee(),kl={collection:"seq",default:!0,nodeClass:Rn.YAMLSeq,tag:"tag:yaml.org,2002:seq",resolve(s,e){return vl.isSeq(s)||e("Expected a sequence for this tag"),s},createNode:(s,e,t)=>Rn.YAMLSeq.from(s,e,t)};Fn.seq=kl});var je=g(Un=>{"use strict";var Nl=Me(),Al={identify:s=>typeof s=="string",default:!0,tag:"tag:yaml.org,2002:str",resolve:s=>s,stringify(s,e,t,i){return e=Object.assign({actualString:!0},e),Nl.stringifyString(s,e,t,i)}};Un.string=Al});var Lt=g(Jn=>{"use strict";var Yn=O(),Vn={identify:s=>s==null,createNode:()=>new Yn.Scalar(null),default:!0,tag:"tag:yaml.org,2002:null",test:/^(?:~|[Nn]ull|NULL)?$/,resolve:()=>new Yn.Scalar(null),stringify:({source:s},e)=>typeof s=="string"&&Vn.test.test(s)?s:e.options.nullStr};Jn.nullTag=Vn});var $s=g(Gn=>{"use strict";var Tl=O(),xn={identify:s=>typeof s=="boolean",default:!0,tag:"tag:yaml.org,2002:bool",test:/^(?:[Tt]rue|TRUE|[Ff]alse|FALSE)$/,resolve:s=>new Tl.Scalar(s[0]==="t"||s[0]==="T"),stringify({source:s,value:e},t){if(s&&xn.test.test(s)){let i=s[0]==="t"||s[0]==="T";if(e===i)return s}return e?t.options.trueStr:t.options.falseStr}};Gn.boolTag=xn});var ye=g(Wn=>{"use strict";function ql({format:s,minFractionDigits:e,tag:t,value:i}){if(typeof i=="bigint")return String(i);let n=typeof i=="number"?i:Number(i);if(!isFinite(n))return isNaN(n)?".nan":n<0?"-.inf":".inf";let r=Object.is(i,-0)?"-0":JSON.stringify(i);if(!s&&e&&(!t||t==="tag:yaml.org,2002:float")&&/^-?\d/.test(r)&&!r.includes("e")){let o=r.indexOf(".");o<0&&(o=r.length,r+=".");let a=e-(r.length-o-1);for(;a-- >0;)r+="0"}return r}Wn.stringifyNumber=ql});var Ds=g(Mt=>{"use strict";var Cl=O(),_s=ye(),El={identify:s=>typeof s=="number",default:!0,tag:"tag:yaml.org,2002:float",test:/^(?:[-+]?\.(?:inf|Inf|INF)|\.nan|\.NaN|\.NAN)$/,resolve:s=>s.slice(-3).toLowerCase()==="nan"?NaN:s[0]==="-"?Number.NEGATIVE_INFINITY:Number.POSITIVE_INFINITY,stringify:_s.stringifyNumber},Ol={identify:s=>typeof s=="number",default:!0,tag:"tag:yaml.org,2002:float",format:"EXP",test:/^[-+]?(?:\.[0-9]+|[0-9]+(?:\.[0-9]*)?)[eE][-+]?[0-9]+$/,resolve:s=>parseFloat(s),stringify(s){let e=Number(s.value);return isFinite(e)?e.toExponential():_s.stringifyNumber(s)}},Pl={identify:s=>typeof s=="number",default:!0,tag:"tag:yaml.org,2002:float",test:/^[-+]?(?:\.[0-9]+|[0-9]+\.[0-9]*)$/,resolve(s){let e=new Cl.Scalar(parseFloat(s)),t=s.indexOf(".");return t!==-1&&s[s.length-1]==="0"&&(e.minFractionDigits=s.length-t-1),e},stringify:_s.stringifyNumber};Mt.float=Pl;Mt.floatExp=Ol;Mt.floatNaN=El});var Bs=g(_t=>{"use strict";var Hn=ye(),$t=s=>typeof s=="bigint"||Number.isInteger(s),js=(s,e,t,{intAsBigInt:i})=>i?BigInt(s):parseInt(s.substring(e),t);function Qn(s,e,t){let{value:i}=s;return $t(i)&&i>=0?t+i.toString(e):Hn.stringifyNumber(s)}var Il={identify:s=>$t(s)&&s>=0,default:!0,tag:"tag:yaml.org,2002:int",format:"OCT",test:/^0o[0-7]+$/,resolve:(s,e,t)=>js(s,2,8,t),stringify:s=>Qn(s,8,"0o")},Ll={identify:$t,default:!0,tag:"tag:yaml.org,2002:int",test:/^[-+]?[0-9]+$/,resolve:(s,e,t)=>js(s,0,10,t),stringify:Hn.stringifyNumber},Ml={identify:s=>$t(s)&&s>=0,default:!0,tag:"tag:yaml.org,2002:int",format:"HEX",test:/^0x[0-9a-fA-F]+$/,resolve:(s,e,t)=>js(s,2,16,t),stringify:s=>Qn(s,16,"0x")};_t.int=Ll;_t.intHex=Ml;_t.intOct=Il});var zn=g(Xn=>{"use strict";var $l=me(),_l=Lt(),Dl=ge(),jl=je(),Bl=$s(),Ks=Ds(),Rs=Bs(),Kl=[$l.map,Dl.seq,jl.string,_l.nullTag,Bl.boolTag,Rs.intOct,Rs.int,Rs.intHex,Ks.floatNaN,Ks.floatExp,Ks.float];Xn.schema=Kl});var tr=g(er=>{"use strict";var Rl=O(),Fl=me(),Ul=ge();function Zn(s){return typeof s=="bigint"||Number.isInteger(s)}var Dt=({value:s})=>JSON.stringify(s),Yl=[{identify:s=>typeof s=="string",default:!0,tag:"tag:yaml.org,2002:str",resolve:s=>s,stringify:Dt},{identify:s=>s==null,createNode:()=>new Rl.Scalar(null),default:!0,tag:"tag:yaml.org,2002:null",test:/^null$/,resolve:()=>null,stringify:Dt},{identify:s=>typeof s=="boolean",default:!0,tag:"tag:yaml.org,2002:bool",test:/^true$|^false$/,resolve:s=>s==="true",stringify:Dt},{identify:Zn,default:!0,tag:"tag:yaml.org,2002:int",test:/^-?(?:0|[1-9][0-9]*)$/,resolve:(s,e,{intAsBigInt:t})=>t?BigInt(s):parseInt(s,10),stringify:({value:s})=>Zn(s)?s.toString():JSON.stringify(s)},{identify:s=>typeof s=="number",default:!0,tag:"tag:yaml.org,2002:float",test:/^-?(?:0|[1-9][0-9]*)(?:\.[0-9]*)?(?:[eE][-+]?[0-9]+)?$/,resolve:s=>parseFloat(s),stringify:Dt}],Vl={default:!0,tag:"",test:/^/,resolve(s,e){return e(`Unresolved plain scalar ${JSON.stringify(s)}`),s}},Jl=[Fl.map,Ul.seq].concat(Yl,Vl);er.schema=Jl});var Us=g(sr=>{"use strict";var Be=require("buffer"),Fs=O(),xl=Me(),Gl={identify:s=>s instanceof Uint8Array,default:!1,tag:"tag:yaml.org,2002:binary",resolve(s,e){if(typeof Be.Buffer=="function")return Be.Buffer.from(s,"base64");if(typeof atob=="function"){let t=atob(s.replace(/[\n\r]/g,"")),i=new Uint8Array(t.length);for(let n=0;n<t.length;++n)i[n]=t.charCodeAt(n);return i}else return e("This environment does not support reading binary tags; either Buffer or atob is required"),s},stringify({comment:s,type:e,value:t},i,n,r){if(!t)return"";let o=t,a;if(typeof Be.Buffer=="function")a=o instanceof Be.Buffer?o.toString("base64"):Be.Buffer.from(o.buffer).toString("base64");else if(typeof btoa=="function"){let l="";for(let c=0;c<o.length;++c)l+=String.fromCharCode(o[c]);a=btoa(l)}else throw new Error("This environment does not support writing binary tags; either Buffer or btoa is required");if(e??(e=Fs.Scalar.BLOCK_LITERAL),e!==Fs.Scalar.QUOTE_DOUBLE){let l=Math.max(i.options.lineWidth-i.indent.length,i.options.minContentWidth),c=Math.ceil(a.length/l),h=new Array(c);for(let u=0,f=0;u<c;++u,f+=l)h[u]=a.substr(f,l);a=h.join(e===Fs.Scalar.BLOCK_LITERAL?`
-`:" ")}return xl.stringifyString({comment:s,type:e,value:a},i,n,r)}};sr.binary=Gl});var Kt=g(Bt=>{"use strict";var jt=T(),Ys=X(),Wl=O(),Hl=ee();function ir(s,e){if(jt.isSeq(s))for(let t=0;t<s.items.length;++t){let i=s.items[t];if(!jt.isPair(i)){if(jt.isMap(i)){i.items.length>1&&e("Each pair must have its own sequence indicator");let n=i.items[0]||new Ys.Pair(new Wl.Scalar(null));if(i.commentBefore&&(n.key.commentBefore=n.key.commentBefore?`${i.commentBefore}
-${n.key.commentBefore}`:i.commentBefore),i.comment){let r=n.value??n.key;r.comment=r.comment?`${i.comment}
-${r.comment}`:i.comment}i=n}s.items[t]=jt.isPair(i)?i:new Ys.Pair(i)}}else e("Expected a sequence for this tag");return s}function nr(s,e,t){let{replacer:i}=t,n=new Hl.YAMLSeq(s);n.tag="tag:yaml.org,2002:pairs";let r=0;if(e&&Symbol.iterator in Object(e))for(let o of e){typeof i=="function"&&(o=i.call(e,String(r++),o));let a,l;if(Array.isArray(o))if(o.length===2)a=o[0],l=o[1];else throw new TypeError(`Expected [key, value] tuple: ${o}`);else if(o&&o instanceof Object){let c=Object.keys(o);if(c.length===1)a=c[0],l=o[a];else throw new TypeError(`Expected tuple with one key, not ${c.length} keys`)}else a=o;n.items.push(Ys.createPair(a,l,t))}return n}var Ql={collection:"seq",default:!1,tag:"tag:yaml.org,2002:pairs",resolve:ir,createNode:nr};Bt.createPairs=nr;Bt.pairs=Ql;Bt.resolvePairs=ir});var xs=g(Js=>{"use strict";var rr=T(),Vs=G(),Ke=Z(),Xl=ee(),or=Kt(),oe=class s extends Xl.YAMLSeq{constructor(){super(),this.add=Ke.YAMLMap.prototype.add.bind(this),this.delete=Ke.YAMLMap.prototype.delete.bind(this),this.get=Ke.YAMLMap.prototype.get.bind(this),this.has=Ke.YAMLMap.prototype.has.bind(this),this.set=Ke.YAMLMap.prototype.set.bind(this),this.tag=s.tag}toJSON(e,t){if(!t)return super.toJSON(e);let i=new Map;t?.onCreate&&t.onCreate(i);for(let n of this.items){let r,o;if(rr.isPair(n)?(r=Vs.toJS(n.key,"",t),o=Vs.toJS(n.value,r,t)):r=Vs.toJS(n,"",t),i.has(r))throw new Error("Ordered maps must not include duplicate keys");i.set(r,o)}return i}static from(e,t,i){let n=or.createPairs(e,t,i),r=new this;return r.items=n.items,r}};oe.tag="tag:yaml.org,2002:omap";var zl={collection:"seq",identify:s=>s instanceof Map,nodeClass:oe,default:!1,tag:"tag:yaml.org,2002:omap",resolve(s,e){let t=or.resolvePairs(s,e),i=[];for(let{key:n}of t.items)rr.isScalar(n)&&(i.includes(n.value)?e(`Ordered maps must not include duplicate keys: ${n.value}`):i.push(n.value));return Object.assign(new oe,t)},createNode:(s,e,t)=>oe.from(s,e,t)};Js.YAMLOMap=oe;Js.omap=zl});var fr=g(Gs=>{"use strict";var ar=O();function lr({value:s,source:e},t){return e&&(s?cr:ur).test.test(e)?e:s?t.options.trueStr:t.options.falseStr}var cr={identify:s=>s===!0,default:!0,tag:"tag:yaml.org,2002:bool",test:/^(?:Y|y|[Yy]es|YES|[Tt]rue|TRUE|[Oo]n|ON)$/,resolve:()=>new ar.Scalar(!0),stringify:lr},ur={identify:s=>s===!1,default:!0,tag:"tag:yaml.org,2002:bool",test:/^(?:N|n|[Nn]o|NO|[Ff]alse|FALSE|[Oo]ff|OFF)$/,resolve:()=>new ar.Scalar(!1),stringify:lr};Gs.falseTag=ur;Gs.trueTag=cr});var dr=g(Rt=>{"use strict";var Zl=O(),Ws=ye(),ec={identify:s=>typeof s=="number",default:!0,tag:"tag:yaml.org,2002:float",test:/^(?:[-+]?\.(?:inf|Inf|INF)|\.nan|\.NaN|\.NAN)$/,resolve:s=>s.slice(-3).toLowerCase()==="nan"?NaN:s[0]==="-"?Number.NEGATIVE_INFINITY:Number.POSITIVE_INFINITY,stringify:Ws.stringifyNumber},tc={identify:s=>typeof s=="number",default:!0,tag:"tag:yaml.org,2002:float",format:"EXP",test:/^[-+]?(?:[0-9][0-9_]*)?(?:\.[0-9_]*)?[eE][-+]?[0-9]+$/,resolve:s=>parseFloat(s.replace(/_/g,"")),stringify(s){let e=Number(s.value);return isFinite(e)?e.toExponential():Ws.stringifyNumber(s)}},sc={identify:s=>typeof s=="number",default:!0,tag:"tag:yaml.org,2002:float",test:/^[-+]?(?:[0-9][0-9_]*)?\.[0-9_]*$/,resolve(s){let e=new Zl.Scalar(parseFloat(s.replace(/_/g,""))),t=s.indexOf(".");if(t!==-1){let i=s.substring(t+1).replace(/_/g,"");i[i.length-1]==="0"&&(e.minFractionDigits=i.length)}return e},stringify:Ws.stringifyNumber};Rt.float=sc;Rt.floatExp=tc;Rt.floatNaN=ec});var pr=g(Fe=>{"use strict";var hr=ye(),Re=s=>typeof s=="bigint"||Number.isInteger(s);function Ft(s,e,t,{intAsBigInt:i}){let n=s[0];if((n==="-"||n==="+")&&(e+=1),s=s.substring(e).replace(/_/g,""),i){switch(t){case 2:s=`0b${s}`;break;case 8:s=`0o${s}`;break;case 16:s=`0x${s}`;break}let o=BigInt(s);return n==="-"?BigInt(-1)*o:o}let r=parseInt(s,t);return n==="-"?-1*r:r}function Hs(s,e,t){let{value:i}=s;if(Re(i)){let n=i.toString(e);return i<0?"-"+t+n.substr(1):t+n}return hr.stringifyNumber(s)}var ic={identify:Re,default:!0,tag:"tag:yaml.org,2002:int",format:"BIN",test:/^[-+]?0b[0-1_]+$/,resolve:(s,e,t)=>Ft(s,2,2,t),stringify:s=>Hs(s,2,"0b")},nc={identify:Re,default:!0,tag:"tag:yaml.org,2002:int",format:"OCT",test:/^[-+]?0[0-7_]+$/,resolve:(s,e,t)=>Ft(s,1,8,t),stringify:s=>Hs(s,8,"0")},rc={identify:Re,default:!0,tag:"tag:yaml.org,2002:int",test:/^[-+]?[0-9][0-9_]*$/,resolve:(s,e,t)=>Ft(s,0,10,t),stringify:hr.stringifyNumber},oc={identify:Re,default:!0,tag:"tag:yaml.org,2002:int",format:"HEX",test:/^[-+]?0x[0-9a-fA-F_]+$/,resolve:(s,e,t)=>Ft(s,2,16,t),stringify:s=>Hs(s,16,"0x")};Fe.int=rc;Fe.intBin=ic;Fe.intHex=oc;Fe.intOct=nc});var Xs=g(Qs=>{"use strict";var Vt=T(),Ut=X(),Yt=Z(),ae=class s extends Yt.YAMLMap{constructor(e){super(e),this.tag=s.tag}add(e){let t;Vt.isPair(e)?t=e:e&&typeof e=="object"&&"key"in e&&"value"in e&&e.value===null?t=new Ut.Pair(e.key,null):t=new Ut.Pair(e,null),Yt.findPair(this.items,t.key)||this.items.push(t)}get(e,t){let i=Yt.findPair(this.items,e);return!t&&Vt.isPair(i)?Vt.isScalar(i.key)?i.key.value:i.key:i}set(e,t){if(typeof t!="boolean")throw new Error(`Expected boolean value for set(key, value) in a YAML set, not ${typeof t}`);let i=Yt.findPair(this.items,e);i&&!t?this.items.splice(this.items.indexOf(i),1):!i&&t&&this.items.push(new Ut.Pair(e))}toJSON(e,t){return super.toJSON(e,t,Set)}toString(e,t,i){if(!e)return JSON.stringify(this);if(this.hasAllNullValues(!0))return super.toString(Object.assign({},e,{allNullValues:!0}),t,i);throw new Error("Set items must all have null values")}static from(e,t,i){let{replacer:n}=i,r=new this(e);if(t&&Symbol.iterator in Object(t))for(let o of t)typeof n=="function"&&(o=n.call(t,o,o)),r.items.push(Ut.createPair(o,null,i));return r}};ae.tag="tag:yaml.org,2002:set";var ac={collection:"map",identify:s=>s instanceof Set,nodeClass:ae,default:!1,tag:"tag:yaml.org,2002:set",createNode:(s,e,t)=>ae.from(s,e,t),resolve(s,e){if(Vt.isMap(s)){if(s.hasAllNullValues(!0))return Object.assign(new ae,s);e("Set items must all have null values")}else e("Expected a mapping for this tag");return s}};Qs.YAMLSet=ae;Qs.set=ac});var Zs=g(Jt=>{"use strict";var lc=ye();function zs(s,e){let t=s[0],i=t==="-"||t==="+"?s.substring(1):s,n=o=>e?BigInt(o):Number(o),r=i.replace(/_/g,"").split(":").reduce((o,a)=>o*n(60)+n(a),n(0));return t==="-"?n(-1)*r:r}function mr(s){let{value:e}=s,t=o=>o;if(typeof e=="bigint")t=o=>BigInt(o);else if(isNaN(e)||!isFinite(e))return lc.stringifyNumber(s);let i="";e<0&&(i="-",e*=t(-1));let n=t(60),r=[e%n];return e<60?r.unshift(0):(e=(e-r[0])/n,r.unshift(e%n),e>=60&&(e=(e-r[0])/n,r.unshift(e))),i+r.map(o=>String(o).padStart(2,"0")).join(":").replace(/000000\d*$/,"")}var cc={identify:s=>typeof s=="bigint"||Number.isInteger(s),default:!0,tag:"tag:yaml.org,2002:int",format:"TIME",test:/^[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+$/,resolve:(s,e,{intAsBigInt:t})=>zs(s,t),stringify:mr},uc={identify:s=>typeof s=="number",default:!0,tag:"tag:yaml.org,2002:float",format:"TIME",test:/^[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\.[0-9_]*$/,resolve:s=>zs(s,!1),stringify:mr},gr={identify:s=>s instanceof Date,default:!0,tag:"tag:yaml.org,2002:timestamp",test:RegExp("^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})(?:(?:t|T|[ \\t]+)([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2}(\\.[0-9]+)?)(?:[ \\t]*(Z|[-+][012]?[0-9](?::[0-9]{2})?))?)?$"),resolve(s){let e=s.match(gr.test);if(!e)throw new Error("!!timestamp expects a date, starting with yyyy-mm-dd");let[,t,i,n,r,o,a]=e.map(Number),l=e[7]?Number((e[7]+"00").substr(1,3)):0,c=Date.UTC(t,i-1,n,r||0,o||0,a||0,l),h=e[8];if(h&&h!=="Z"){let u=zs(h,!1);Math.abs(u)<30&&(u*=60),c-=6e4*u}return new Date(c)},stringify:({value:s})=>s?.toISOString().replace(/(T00:00:00)?\.000Z$/,"")??""};Jt.floatTime=uc;Jt.intTime=cc;Jt.timestamp=gr});var Sr=g(br=>{"use strict";var fc=me(),dc=Lt(),hc=ge(),pc=je(),mc=Us(),yr=fr(),ei=dr(),xt=pr(),gc=At(),yc=xs(),bc=Kt(),Sc=Xs(),ti=Zs(),wc=[fc.map,hc.seq,pc.string,dc.nullTag,yr.trueTag,yr.falseTag,xt.intBin,xt.intOct,xt.int,xt.intHex,ei.floatNaN,ei.floatExp,ei.float,mc.binary,gc.merge,yc.omap,bc.pairs,Sc.set,ti.intTime,ti.floatTime,ti.timestamp];br.schema=wc});var Or=g(ni=>{"use strict";var Nr=me(),vc=Lt(),Ar=ge(),kc=je(),Nc=$s(),si=Ds(),ii=Bs(),Ac=zn(),Tc=tr(),Tr=Us(),Ue=At(),qr=xs(),Cr=Kt(),wr=Sr(),Er=Xs(),Gt=Zs(),vr=new Map([["core",Ac.schema],["failsafe",[Nr.map,Ar.seq,kc.string]],["json",Tc.schema],["yaml11",wr.schema],["yaml-1.1",wr.schema]]),kr={binary:Tr.binary,bool:Nc.boolTag,float:si.float,floatExp:si.floatExp,floatNaN:si.floatNaN,floatTime:Gt.floatTime,int:ii.int,intHex:ii.intHex,intOct:ii.intOct,intTime:Gt.intTime,map:Nr.map,merge:Ue.merge,null:vc.nullTag,omap:qr.omap,pairs:Cr.pairs,seq:Ar.seq,set:Er.set,timestamp:Gt.timestamp},qc={"tag:yaml.org,2002:binary":Tr.binary,"tag:yaml.org,2002:merge":Ue.merge,"tag:yaml.org,2002:omap":qr.omap,"tag:yaml.org,2002:pairs":Cr.pairs,"tag:yaml.org,2002:set":Er.set,"tag:yaml.org,2002:timestamp":Gt.timestamp};function Cc(s,e,t){let i=vr.get(e);if(i&&!s)return t&&!i.includes(Ue.merge)?i.concat(Ue.merge):i.slice();let n=i;if(!n)if(Array.isArray(s))n=[];else{let r=Array.from(vr.keys()).filter(o=>o!=="yaml11").map(o=>JSON.stringify(o)).join(", ");throw new Error(`Unknown schema "${e}"; use one of ${r} or define customTags array`)}if(Array.isArray(s))for(let r of s)n=n.concat(r);else typeof s=="function"&&(n=s(n.slice()));return t&&(n=n.concat(Ue.merge)),n.reduce((r,o)=>{let a=typeof o=="string"?kr[o]:o;if(!a){let l=JSON.stringify(o),c=Object.keys(kr).map(h=>JSON.stringify(h)).join(", ");throw new Error(`Unknown custom tag ${l}; use one of ${c}`)}return r.includes(a)||r.push(a),r},[])}ni.coreKnownTags=qc;ni.getTags=Cc});var ai=g(Pr=>{"use strict";var ri=T(),Ec=me(),Oc=ge(),Pc=je(),Wt=Or(),Ic=(s,e)=>s.key<e.key?-1:s.key>e.key?1:0,oi=class s{constructor({compat:e,customTags:t,merge:i,resolveKnownTags:n,schema:r,sortMapEntries:o,toStringDefaults:a}){this.compat=Array.isArray(e)?Wt.getTags(e,"compat"):e?Wt.getTags(null,e):null,this.name=typeof r=="string"&&r||"core",this.knownTags=n?Wt.coreKnownTags:{},this.tags=Wt.getTags(t,this.name,i),this.toStringOptions=a??null,Object.defineProperty(this,ri.MAP,{value:Ec.map}),Object.defineProperty(this,ri.SCALAR,{value:Pc.string}),Object.defineProperty(this,ri.SEQ,{value:Oc.seq}),this.sortMapEntries=typeof o=="function"?o:o===!0?Ic:null}clone(){let e=Object.create(s.prototype,Object.getOwnPropertyDescriptors(this));return e.tags=this.tags.slice(),e}};Pr.Schema=oi});var Lr=g(Ir=>{"use strict";var Lc=T(),li=$e(),Ye=Pe();function Mc(s,e){let t=[],i=e.directives===!0;if(e.directives!==!1&&s.directives){let l=s.directives.toString(s);l?(t.push(l),i=!0):s.directives.docStart&&(i=!0)}i&&t.push("---");let n=li.createStringifyContext(s,e),{commentString:r}=n.options;if(s.commentBefore){t.length!==1&&t.unshift("");let l=r(s.commentBefore);t.unshift(Ye.indentComment(l,""))}let o=!1,a=null;if(s.contents){if(Lc.isNode(s.contents)){if(s.contents.spaceBefore&&i&&t.push(""),s.contents.commentBefore){let h=r(s.contents.commentBefore);t.push(Ye.indentComment(h,""))}n.forceBlockIndent=!!s.comment,a=s.contents.comment}let l=a?void 0:()=>o=!0,c=li.stringify(s.contents,n,()=>a=null,l);a&&(c+=Ye.lineComment(c,"",r(a))),(c[0]==="|"||c[0]===">")&&t[t.length-1]==="---"?t[t.length-1]=`--- ${c}`:t.push(c)}else t.push(li.stringify(s.contents,n));if(s.directives?.docEnd)if(s.comment){let l=r(s.comment);l.includes(`
-`)?(t.push("..."),t.push(Ye.indentComment(l,""))):t.push(`... ${l}`)}else t.push("...");else{let l=s.comment;l&&o&&(l=l.replace(/^\n+/,"")),l&&((!o||a)&&t[t.length-1]!==""&&t.push(""),t.push(Ye.indentComment(r(l),"")))}return t.join(`
-`)+`
-`}Ir.stringifyDocument=Mc});var Ve=g(Mr=>{"use strict";var $c=Ee(),be=pt(),j=T(),_c=X(),Dc=G(),jc=ai(),Bc=Lr(),ci=ut(),Kc=hs(),Rc=Oe(),ui=ds(),fi=class s{constructor(e,t,i){this.commentBefore=null,this.comment=null,this.errors=[],this.warnings=[],Object.defineProperty(this,j.NODE_TYPE,{value:j.DOC});let n=null;typeof t=="function"||Array.isArray(t)?n=t:i===void 0&&t&&(i=t,t=void 0);let r=Object.assign({intAsBigInt:!1,keepSourceTokens:!1,logLevel:"warn",prettyErrors:!0,strict:!0,stringKeys:!1,uniqueKeys:!0,version:"1.2"},i);this.options=r;let{version:o}=r;i?._directives?(this.directives=i._directives.atDocument(),this.directives.yaml.explicit&&(o=this.directives.yaml.version)):this.directives=new ui.Directives({version:o}),this.setSchema(o,i),this.contents=e===void 0?null:this.createNode(e,n,i)}clone(){let e=Object.create(s.prototype,{[j.NODE_TYPE]:{value:j.DOC}});return e.commentBefore=this.commentBefore,e.comment=this.comment,e.errors=this.errors.slice(),e.warnings=this.warnings.slice(),e.options=Object.assign({},this.options),this.directives&&(e.directives=this.directives.clone()),e.schema=this.schema.clone(),e.contents=j.isNode(this.contents)?this.contents.clone(e.schema):this.contents,this.range&&(e.range=this.range.slice()),e}add(e){Se(this.contents)&&this.contents.add(e)}addIn(e,t){Se(this.contents)&&this.contents.addIn(e,t)}createAlias(e,t){if(!e.anchor){let i=ci.anchorNames(this);e.anchor=!t||i.has(t)?ci.findNewAnchor(t||"a",i):t}return new $c.Alias(e.anchor)}createNode(e,t,i){let n;if(typeof t=="function")e=t.call({"":e},"",e),n=t;else if(Array.isArray(t)){let p=w=>typeof w=="number"||w instanceof String||w instanceof Number,S=t.filter(p).map(String);S.length>0&&(t=t.concat(S)),n=t}else i===void 0&&t&&(i=t,t=void 0);let{aliasDuplicateObjects:r,anchorPrefix:o,flow:a,keepUndefined:l,onTagObj:c,tag:h}=i??{},{onAnchor:u,setAnchors:f,sourceObjects:m}=ci.createNodeAnchors(this,o||"a"),y={aliasDuplicateObjects:r??!0,keepUndefined:l??!1,onAnchor:u,onTagObj:c,replacer:n,schema:this.schema,sourceObjects:m},d=Rc.createNode(e,h,y);return a&&j.isCollection(d)&&(d.flow=!0),f(),d}createPair(e,t,i={}){let n=this.createNode(e,null,i),r=this.createNode(t,null,i);return new _c.Pair(n,r)}delete(e){return Se(this.contents)?this.contents.delete(e):!1}deleteIn(e){return be.isEmptyPath(e)?this.contents==null?!1:(this.contents=null,!0):Se(this.contents)?this.contents.deleteIn(e):!1}get(e,t){return j.isCollection(this.contents)?this.contents.get(e,t):void 0}getIn(e,t){return be.isEmptyPath(e)?!t&&j.isScalar(this.contents)?this.contents.value:this.contents:j.isCollection(this.contents)?this.contents.getIn(e,t):void 0}has(e){return j.isCollection(this.contents)?this.contents.has(e):!1}hasIn(e){return be.isEmptyPath(e)?this.contents!==void 0:j.isCollection(this.contents)?this.contents.hasIn(e):!1}set(e,t){this.contents==null?this.contents=be.collectionFromPath(this.schema,[e],t):Se(this.contents)&&this.contents.set(e,t)}setIn(e,t){be.isEmptyPath(e)?this.contents=t:this.contents==null?this.contents=be.collectionFromPath(this.schema,Array.from(e),t):Se(this.contents)&&this.contents.setIn(e,t)}setSchema(e,t={}){typeof e=="number"&&(e=String(e));let i;switch(e){case"1.1":this.directives?this.directives.yaml.version="1.1":this.directives=new ui.Directives({version:"1.1"}),i={resolveKnownTags:!1,schema:"yaml-1.1"};break;case"1.2":case"next":this.directives?this.directives.yaml.version=e:this.directives=new ui.Directives({version:e}),i={resolveKnownTags:!0,schema:"core"};break;case null:this.directives&&delete this.directives,i=null;break;default:{let n=JSON.stringify(e);throw new Error(`Expected '1.1', '1.2' or null as first argument, but found: ${n}`)}}if(t.schema instanceof Object)this.schema=t.schema;else if(i)this.schema=new jc.Schema(Object.assign(i,t));else throw new Error("With a null YAML version, the { schema: Schema } option is required")}toJS({json:e,jsonArg:t,mapAsMap:i,maxAliasCount:n,onAnchor:r,reviver:o}={}){let a={anchors:new Map,doc:this,keep:!e,mapAsMap:i===!0,mapKeyWarned:!1,maxAliasCount:typeof n=="number"?n:100},l=Dc.toJS(this.contents,t??"",a);if(typeof r=="function")for(let{count:c,res:h}of a.anchors.values())r(h,c);return typeof o=="function"?Kc.applyReviver(o,{"":l},"",l):l}toJSON(e,t){return this.toJS({json:!0,jsonArg:e,mapAsMap:!1,onAnchor:t})}toString(e={}){if(this.errors.length>0)throw new Error("Document with errors cannot be stringified");if("indent"in e&&(!Number.isInteger(e.indent)||Number(e.indent)<=0)){let t=JSON.stringify(e.indent);throw new Error(`"indent" option must be a positive integer, not ${t}`)}return Bc.stringifyDocument(this,e)}};function Se(s){if(j.isCollection(s))return!0;throw new Error("Expected a YAML collection as document contents")}Mr.Document=fi});var Ge=g(xe=>{"use strict";var Je=class extends Error{constructor(e,t,i,n){super(),this.name=e,this.code=i,this.message=n,this.pos=t}},di=class extends Je{constructor(e,t,i){super("YAMLParseError",e,t,i)}},hi=class extends Je{constructor(e,t,i){super("YAMLWarning",e,t,i)}},Fc=(s,e)=>t=>{if(t.pos[0]===-1)return;t.linePos=t.pos.map(a=>e.linePos(a));let{line:i,col:n}=t.linePos[0];t.message+=` at line ${i}, column ${n}`;let r=n-1,o=s.substring(e.lineStarts[i-1],e.lineStarts[i]).replace(/[\n\r]+$/,"");if(r>=60&&o.length>80){let a=Math.min(r-39,o.length-79);o="\u2026"+o.substring(a),r-=a-1}if(o.length>80&&(o=o.substring(0,79)+"\u2026"),i>1&&/^ *$/.test(o.substring(0,r))){let a=s.substring(e.lineStarts[i-2],e.lineStarts[i-1]);a.length>80&&(a=a.substring(0,79)+`\u2026
-`),o=a+o}if(/[^ ]/.test(o)){let a=1,l=t.linePos[1];l?.line===i&&l.col>n&&(a=Math.max(1,Math.min(l.col-n,80-r)));let c=" ".repeat(r)+"^".repeat(a);t.message+=`:
+// node_modules/yaml/dist/visit.js
+var require_visit = __commonJS({
+  "node_modules/yaml/dist/visit.js"(exports2) {
+    "use strict";
+    var identity = require_identity();
+    var BREAK = /* @__PURE__ */ Symbol("break visit");
+    var SKIP = /* @__PURE__ */ Symbol("skip children");
+    var REMOVE = /* @__PURE__ */ Symbol("remove node");
+    function visit(node, visitor) {
+      const visitor_ = initVisitor(visitor);
+      if (identity.isDocument(node)) {
+        const cd = visit_(null, node.contents, visitor_, Object.freeze([node]));
+        if (cd === REMOVE)
+          node.contents = null;
+      } else
+        visit_(null, node, visitor_, Object.freeze([]));
+    }
+    visit.BREAK = BREAK;
+    visit.SKIP = SKIP;
+    visit.REMOVE = REMOVE;
+    function visit_(key, node, visitor, path2) {
+      const ctrl = callVisitor(key, node, visitor, path2);
+      if (identity.isNode(ctrl) || identity.isPair(ctrl)) {
+        replaceNode(key, path2, ctrl);
+        return visit_(key, ctrl, visitor, path2);
+      }
+      if (typeof ctrl !== "symbol") {
+        if (identity.isCollection(node)) {
+          path2 = Object.freeze(path2.concat(node));
+          for (let i = 0; i < node.items.length; ++i) {
+            const ci = visit_(i, node.items[i], visitor, path2);
+            if (typeof ci === "number")
+              i = ci - 1;
+            else if (ci === BREAK)
+              return BREAK;
+            else if (ci === REMOVE) {
+              node.items.splice(i, 1);
+              i -= 1;
+            }
+          }
+        } else if (identity.isPair(node)) {
+          path2 = Object.freeze(path2.concat(node));
+          const ck = visit_("key", node.key, visitor, path2);
+          if (ck === BREAK)
+            return BREAK;
+          else if (ck === REMOVE)
+            node.key = null;
+          const cv = visit_("value", node.value, visitor, path2);
+          if (cv === BREAK)
+            return BREAK;
+          else if (cv === REMOVE)
+            node.value = null;
+        }
+      }
+      return ctrl;
+    }
+    async function visitAsync(node, visitor) {
+      const visitor_ = initVisitor(visitor);
+      if (identity.isDocument(node)) {
+        const cd = await visitAsync_(null, node.contents, visitor_, Object.freeze([node]));
+        if (cd === REMOVE)
+          node.contents = null;
+      } else
+        await visitAsync_(null, node, visitor_, Object.freeze([]));
+    }
+    visitAsync.BREAK = BREAK;
+    visitAsync.SKIP = SKIP;
+    visitAsync.REMOVE = REMOVE;
+    async function visitAsync_(key, node, visitor, path2) {
+      const ctrl = await callVisitor(key, node, visitor, path2);
+      if (identity.isNode(ctrl) || identity.isPair(ctrl)) {
+        replaceNode(key, path2, ctrl);
+        return visitAsync_(key, ctrl, visitor, path2);
+      }
+      if (typeof ctrl !== "symbol") {
+        if (identity.isCollection(node)) {
+          path2 = Object.freeze(path2.concat(node));
+          for (let i = 0; i < node.items.length; ++i) {
+            const ci = await visitAsync_(i, node.items[i], visitor, path2);
+            if (typeof ci === "number")
+              i = ci - 1;
+            else if (ci === BREAK)
+              return BREAK;
+            else if (ci === REMOVE) {
+              node.items.splice(i, 1);
+              i -= 1;
+            }
+          }
+        } else if (identity.isPair(node)) {
+          path2 = Object.freeze(path2.concat(node));
+          const ck = await visitAsync_("key", node.key, visitor, path2);
+          if (ck === BREAK)
+            return BREAK;
+          else if (ck === REMOVE)
+            node.key = null;
+          const cv = await visitAsync_("value", node.value, visitor, path2);
+          if (cv === BREAK)
+            return BREAK;
+          else if (cv === REMOVE)
+            node.value = null;
+        }
+      }
+      return ctrl;
+    }
+    function initVisitor(visitor) {
+      if (typeof visitor === "object" && (visitor.Collection || visitor.Node || visitor.Value)) {
+        return Object.assign({
+          Alias: visitor.Node,
+          Map: visitor.Node,
+          Scalar: visitor.Node,
+          Seq: visitor.Node
+        }, visitor.Value && {
+          Map: visitor.Value,
+          Scalar: visitor.Value,
+          Seq: visitor.Value
+        }, visitor.Collection && {
+          Map: visitor.Collection,
+          Seq: visitor.Collection
+        }, visitor);
+      }
+      return visitor;
+    }
+    function callVisitor(key, node, visitor, path2) {
+      if (typeof visitor === "function")
+        return visitor(key, node, path2);
+      if (identity.isMap(node))
+        return visitor.Map?.(key, node, path2);
+      if (identity.isSeq(node))
+        return visitor.Seq?.(key, node, path2);
+      if (identity.isPair(node))
+        return visitor.Pair?.(key, node, path2);
+      if (identity.isScalar(node))
+        return visitor.Scalar?.(key, node, path2);
+      if (identity.isAlias(node))
+        return visitor.Alias?.(key, node, path2);
+      return void 0;
+    }
+    function replaceNode(key, path2, node) {
+      const parent = path2[path2.length - 1];
+      if (identity.isCollection(parent)) {
+        parent.items[key] = node;
+      } else if (identity.isPair(parent)) {
+        if (key === "key")
+          parent.key = node;
+        else
+          parent.value = node;
+      } else if (identity.isDocument(parent)) {
+        parent.contents = node;
+      } else {
+        const pt = identity.isAlias(parent) ? "alias" : "scalar";
+        throw new Error(`Cannot replace node with ${pt} parent`);
+      }
+    }
+    exports2.visit = visit;
+    exports2.visitAsync = visitAsync;
+  }
+});
 
-${o}
-${c}
-`}};xe.YAMLError=Je;xe.YAMLParseError=di;xe.YAMLWarning=hi;xe.prettifyError=Fc});var We=g($r=>{"use strict";function Uc(s,{flow:e,indicator:t,next:i,offset:n,onError:r,parentIndent:o,startOnNewline:a}){let l=!1,c=a,h=a,u="",f="",m=!1,y=!1,d=null,p=null,S=null,w=null,v=null,k=null,N=null;for(let b of s)switch(y&&(b.type!=="space"&&b.type!=="newline"&&b.type!=="comma"&&r(b.offset,"MISSING_CHAR","Tags and anchors must be separated from the next token by white space"),y=!1),d&&(c&&b.type!=="comment"&&b.type!=="newline"&&r(d,"TAB_AS_INDENT","Tabs are not allowed as indentation"),d=null),b.type){case"space":!e&&(t!=="doc-start"||i?.type!=="flow-collection")&&b.source.includes("	")&&(d=b),h=!0;break;case"comment":{h||r(b,"MISSING_CHAR","Comments must be separated from other tokens by white space characters");let P=b.source.substring(1)||" ";u?u+=f+P:u=P,f="",c=!1;break}case"newline":c?u?u+=b.source:(!k||t!=="seq-item-ind")&&(l=!0):f+=b.source,c=!0,m=!0,(p||S)&&(w=b),h=!0;break;case"anchor":p&&r(b,"MULTIPLE_ANCHORS","A node can have at most one anchor"),b.source.endsWith(":")&&r(b.offset+b.source.length-1,"BAD_ALIAS","Anchor ending in : is ambiguous",!0),p=b,N??(N=b.offset),c=!1,h=!1,y=!0;break;case"tag":{S&&r(b,"MULTIPLE_TAGS","A node can have at most one tag"),S=b,N??(N=b.offset),c=!1,h=!1,y=!0;break}case t:(p||S)&&r(b,"BAD_PROP_ORDER",`Anchors and tags must be after the ${b.source} indicator`),k&&r(b,"UNEXPECTED_TOKEN",`Unexpected ${b.source} in ${e??"collection"}`),k=b,c=t==="seq-item-ind"||t==="explicit-key-ind",h=!1;break;case"comma":if(e){v&&r(b,"UNEXPECTED_TOKEN",`Unexpected , in ${e}`),v=b,c=!1,h=!1;break}default:r(b,"UNEXPECTED_TOKEN",`Unexpected ${b.type} token`),c=!1,h=!1}let A=s[s.length-1],E=A?A.offset+A.source.length:n;return y&&i&&i.type!=="space"&&i.type!=="newline"&&i.type!=="comma"&&(i.type!=="scalar"||i.source!=="")&&r(i.offset,"MISSING_CHAR","Tags and anchors must be separated from the next token by white space"),d&&(c&&d.indent<=o||i?.type==="block-map"||i?.type==="block-seq")&&r(d,"TAB_AS_INDENT","Tabs are not allowed as indentation"),{comma:v,found:k,spaceBefore:l,comment:u,hasNewline:m,anchor:p,tag:S,newlineAfterProp:w,end:E,start:N??E}}$r.resolveProps=Uc});var Ht=g(_r=>{"use strict";function pi(s){if(!s)return null;switch(s.type){case"alias":case"scalar":case"double-quoted-scalar":case"single-quoted-scalar":if(s.source.includes(`
-`))return!0;if(s.end){for(let e of s.end)if(e.type==="newline")return!0}return!1;case"flow-collection":for(let e of s.items){for(let t of e.start)if(t.type==="newline")return!0;if(e.sep){for(let t of e.sep)if(t.type==="newline")return!0}if(pi(e.key)||pi(e.value))return!0}return!1;default:return!0}}_r.containsNewline=pi});var mi=g(Dr=>{"use strict";var Yc=Ht();function Vc(s,e,t){if(e?.type==="flow-collection"){let i=e.end[0];i.indent===s&&(i.source==="]"||i.source==="}")&&Yc.containsNewline(e)&&t(i,"BAD_INDENT","Flow end indicator should be more indented than parent",!0)}}Dr.flowIndentCheck=Vc});var gi=g(Br=>{"use strict";var jr=T();function Jc(s,e,t){let{uniqueKeys:i}=s.options;if(i===!1)return!1;let n=typeof i=="function"?i:(r,o)=>r===o||jr.isScalar(r)&&jr.isScalar(o)&&r.value===o.value;return e.some(r=>n(r.key,t))}Br.mapIncludes=Jc});var Vr=g(Yr=>{"use strict";var Kr=X(),xc=Z(),Rr=We(),Gc=Ht(),Fr=mi(),Wc=gi(),Ur="All mapping items must start at the same column";function Hc({composeNode:s,composeEmptyNode:e},t,i,n,r){let o=r?.nodeClass??xc.YAMLMap,a=new o(t.schema);t.atRoot&&(t.atRoot=!1);let l=i.offset,c=null;for(let h of i.items){let{start:u,key:f,sep:m,value:y}=h,d=Rr.resolveProps(u,{indicator:"explicit-key-ind",next:f??m?.[0],offset:l,onError:n,parentIndent:i.indent,startOnNewline:!0}),p=!d.found;if(p){if(f&&(f.type==="block-seq"?n(l,"BLOCK_AS_IMPLICIT_KEY","A block sequence may not be used as an implicit map key"):"indent"in f&&f.indent!==i.indent&&n(l,"BAD_INDENT",Ur)),!d.anchor&&!d.tag&&!m){c=d.end,d.comment&&(a.comment?a.comment+=`
-`+d.comment:a.comment=d.comment);continue}(d.newlineAfterProp||Gc.containsNewline(f))&&n(f??u[u.length-1],"MULTILINE_IMPLICIT_KEY","Implicit keys need to be on a single line")}else d.found?.indent!==i.indent&&n(l,"BAD_INDENT",Ur);t.atKey=!0;let S=d.end,w=f?s(t,f,d,n):e(t,S,u,null,d,n);t.schema.compat&&Fr.flowIndentCheck(i.indent,f,n),t.atKey=!1,Wc.mapIncludes(t,a.items,w)&&n(S,"DUPLICATE_KEY","Map keys must be unique");let v=Rr.resolveProps(m??[],{indicator:"map-value-ind",next:y,offset:w.range[2],onError:n,parentIndent:i.indent,startOnNewline:!f||f.type==="block-scalar"});if(l=v.end,v.found){p&&(y?.type==="block-map"&&!v.hasNewline&&n(l,"BLOCK_AS_IMPLICIT_KEY","Nested mappings are not allowed in compact mappings"),t.options.strict&&d.start<v.found.offset-1024&&n(w.range,"KEY_OVER_1024_CHARS","The : indicator must be at most 1024 chars after the start of an implicit block mapping key"));let k=y?s(t,y,v,n):e(t,l,m,null,v,n);t.schema.compat&&Fr.flowIndentCheck(i.indent,y,n),l=k.range[2];let N=new Kr.Pair(w,k);t.options.keepSourceTokens&&(N.srcToken=h),a.items.push(N)}else{p&&n(w.range,"MISSING_CHAR","Implicit map keys need to be followed by map values"),v.comment&&(w.comment?w.comment+=`
-`+v.comment:w.comment=v.comment);let k=new Kr.Pair(w);t.options.keepSourceTokens&&(k.srcToken=h),a.items.push(k)}}return c&&c<l&&n(c,"IMPOSSIBLE","Map comment with trailing content"),a.range=[i.offset,l,c??l],a}Yr.resolveBlockMap=Hc});var xr=g(Jr=>{"use strict";var Qc=ee(),Xc=We(),zc=mi();function Zc({composeNode:s,composeEmptyNode:e},t,i,n,r){let o=r?.nodeClass??Qc.YAMLSeq,a=new o(t.schema);t.atRoot&&(t.atRoot=!1),t.atKey&&(t.atKey=!1);let l=i.offset,c=null;for(let{start:h,value:u}of i.items){let f=Xc.resolveProps(h,{indicator:"seq-item-ind",next:u,offset:l,onError:n,parentIndent:i.indent,startOnNewline:!0});if(!f.found)if(f.anchor||f.tag||u)u?.type==="block-seq"?n(f.end,"BAD_INDENT","All sequence items must start at the same column"):n(l,"MISSING_CHAR","Sequence item without - indicator");else{c=f.end,f.comment&&(a.comment=f.comment);continue}let m=u?s(t,u,f,n):e(t,f.end,h,null,f,n);t.schema.compat&&zc.flowIndentCheck(i.indent,u,n),l=m.range[2],a.items.push(m)}return a.range=[i.offset,l,c??l],a}Jr.resolveBlockSeq=Zc});var we=g(Gr=>{"use strict";function eu(s,e,t,i){let n="";if(s){let r=!1,o="";for(let a of s){let{source:l,type:c}=a;switch(c){case"space":r=!0;break;case"comment":{t&&!r&&i(a,"MISSING_CHAR","Comments must be separated from other tokens by white space characters");let h=l.substring(1)||" ";n?n+=o+h:n=h,o="";break}case"newline":n&&(o+=l),r=!0;break;default:i(a,"UNEXPECTED_TOKEN",`Unexpected ${c} at node end`)}e+=l.length}}return{comment:n,offset:e}}Gr.resolveEnd=eu});var Xr=g(Qr=>{"use strict";var tu=T(),su=X(),Wr=Z(),iu=ee(),nu=we(),Hr=We(),ru=Ht(),ou=gi(),yi="Block collections are not allowed within flow collections",bi=s=>s&&(s.type==="block-map"||s.type==="block-seq");function au({composeNode:s,composeEmptyNode:e},t,i,n,r){let o=i.start.source==="{",a=o?"flow map":"flow sequence",l=r?.nodeClass??(o?Wr.YAMLMap:iu.YAMLSeq),c=new l(t.schema);c.flow=!0;let h=t.atRoot;h&&(t.atRoot=!1),t.atKey&&(t.atKey=!1);let u=i.offset+i.start.source.length;for(let p=0;p<i.items.length;++p){let S=i.items[p],{start:w,key:v,sep:k,value:N}=S,A=Hr.resolveProps(w,{flow:a,indicator:"explicit-key-ind",next:v??k?.[0],offset:u,onError:n,parentIndent:i.indent,startOnNewline:!1});if(!A.found){if(!A.anchor&&!A.tag&&!k&&!N){p===0&&A.comma?n(A.comma,"UNEXPECTED_TOKEN",`Unexpected , in ${a}`):p<i.items.length-1&&n(A.start,"UNEXPECTED_TOKEN",`Unexpected empty item in ${a}`),A.comment&&(c.comment?c.comment+=`
-`+A.comment:c.comment=A.comment),u=A.end;continue}!o&&t.options.strict&&ru.containsNewline(v)&&n(v,"MULTILINE_IMPLICIT_KEY","Implicit keys of flow sequence pairs need to be on a single line")}if(p===0)A.comma&&n(A.comma,"UNEXPECTED_TOKEN",`Unexpected , in ${a}`);else if(A.comma||n(A.start,"MISSING_CHAR",`Missing , between ${a} items`),A.comment){let E="";e:for(let b of w)switch(b.type){case"comma":case"space":break;case"comment":E=b.source.substring(1);break e;default:break e}if(E){let b=c.items[c.items.length-1];tu.isPair(b)&&(b=b.value??b.key),b.comment?b.comment+=`
-`+E:b.comment=E,A.comment=A.comment.substring(E.length+1)}}if(!o&&!k&&!A.found){let E=N?s(t,N,A,n):e(t,A.end,k,null,A,n);c.items.push(E),u=E.range[2],bi(N)&&n(E.range,"BLOCK_IN_FLOW",yi)}else{t.atKey=!0;let E=A.end,b=v?s(t,v,A,n):e(t,E,w,null,A,n);bi(v)&&n(b.range,"BLOCK_IN_FLOW",yi),t.atKey=!1;let P=Hr.resolveProps(k??[],{flow:a,indicator:"map-value-ind",next:N,offset:b.range[2],onError:n,parentIndent:i.indent,startOnNewline:!1});if(P.found){if(!o&&!A.found&&t.options.strict){if(k)for(let I of k){if(I===P.found)break;if(I.type==="newline"){n(I,"MULTILINE_IMPLICIT_KEY","Implicit keys of flow sequence pairs need to be on a single line");break}}A.start<P.found.offset-1024&&n(P.found,"KEY_OVER_1024_CHARS","The : indicator must be at most 1024 chars after the start of an implicit flow sequence key")}}else N&&("source"in N&&N.source?.[0]===":"?n(N,"MISSING_CHAR",`Missing space after : in ${a}`):n(P.start,"MISSING_CHAR",`Missing , or : between ${a} items`));let x=N?s(t,N,P,n):P.found?e(t,P.end,k,null,P,n):null;x?bi(N)&&n(x.range,"BLOCK_IN_FLOW",yi):P.comment&&(b.comment?b.comment+=`
-`+P.comment:b.comment=P.comment);let ue=new su.Pair(b,x);if(t.options.keepSourceTokens&&(ue.srcToken=S),o){let I=c;ou.mapIncludes(t,I.items,b)&&n(E,"DUPLICATE_KEY","Map keys must be unique"),I.items.push(ue)}else{let I=new Wr.YAMLMap(t.schema);I.flow=!0,I.items.push(ue);let xi=(x??b).range;I.range=[b.range[0],xi[1],xi[2]],c.items.push(I)}u=x?x.range[2]:P.end}}let f=o?"}":"]",[m,...y]=i.end,d=u;if(m?.source===f)d=m.offset+m.source.length;else{let p=a[0].toUpperCase()+a.substring(1),S=h?`${p} must end with a ${f}`:`${p} in block collection must be sufficiently indented and end with a ${f}`;n(u,h?"MISSING_CHAR":"BAD_INDENT",S),m&&m.source.length!==1&&y.unshift(m)}if(y.length>0){let p=nu.resolveEnd(y,d,t.options.strict,n);p.comment&&(c.comment?c.comment+=`
-`+p.comment:c.comment=p.comment),c.range=[i.offset,d,p.offset]}else c.range=[i.offset,d,d];return c}Qr.resolveFlowCollection=au});var Zr=g(zr=>{"use strict";var lu=T(),cu=O(),uu=Z(),fu=ee(),du=Vr(),hu=xr(),pu=Xr();function Si(s,e,t,i,n,r){let o=t.type==="block-map"?du.resolveBlockMap(s,e,t,i,r):t.type==="block-seq"?hu.resolveBlockSeq(s,e,t,i,r):pu.resolveFlowCollection(s,e,t,i,r),a=o.constructor;return n==="!"||n===a.tagName?(o.tag=a.tagName,o):(n&&(o.tag=n),o)}function mu(s,e,t,i,n){let r=i.tag,o=r?e.directives.tagName(r.source,f=>n(r,"TAG_RESOLVE_FAILED",f)):null;if(t.type==="block-seq"){let{anchor:f,newlineAfterProp:m}=i,y=f&&r?f.offset>r.offset?f:r:f??r;y&&(!m||m.offset<y.offset)&&n(y,"MISSING_CHAR","Missing newline after block sequence props")}let a=t.type==="block-map"?"map":t.type==="block-seq"?"seq":t.start.source==="{"?"map":"seq";if(!r||!o||o==="!"||o===uu.YAMLMap.tagName&&a==="map"||o===fu.YAMLSeq.tagName&&a==="seq")return Si(s,e,t,n,o);let l=e.schema.tags.find(f=>f.tag===o&&f.collection===a);if(!l){let f=e.schema.knownTags[o];if(f?.collection===a)e.schema.tags.push(Object.assign({},f,{default:!1})),l=f;else return f?n(r,"BAD_COLLECTION_TYPE",`${f.tag} used for ${a} collection, but expects ${f.collection??"scalar"}`,!0):n(r,"TAG_RESOLVE_FAILED",`Unresolved tag: ${o}`,!0),Si(s,e,t,n,o)}let c=Si(s,e,t,n,o,l),h=l.resolve?.(c,f=>n(r,"TAG_RESOLVE_FAILED",f),e.options)??c,u=lu.isNode(h)?h:new cu.Scalar(h);return u.range=c.range,u.tag=o,l?.format&&(u.format=l.format),u}zr.composeCollection=mu});var vi=g(eo=>{"use strict";var wi=O();function gu(s,e,t){let i=e.offset,n=yu(e,s.options.strict,t);if(!n)return{value:"",type:null,comment:"",range:[i,i,i]};let r=n.mode===">"?wi.Scalar.BLOCK_FOLDED:wi.Scalar.BLOCK_LITERAL,o=e.source?bu(e.source):[],a=o.length;for(let d=o.length-1;d>=0;--d){let p=o[d][1];if(p===""||p==="\r")a=d;else break}if(a===0){let d=n.chomp==="+"&&o.length>0?`
-`.repeat(Math.max(1,o.length-1)):"",p=i+n.length;return e.source&&(p+=e.source.length),{value:d,type:r,comment:n.comment,range:[i,p,p]}}let l=e.indent+n.indent,c=e.offset+n.length,h=0;for(let d=0;d<a;++d){let[p,S]=o[d];if(S===""||S==="\r")n.indent===0&&p.length>l&&(l=p.length);else{p.length<l&&t(c+p.length,"MISSING_CHAR","Block scalars with more-indented leading empty lines must use an explicit indentation indicator"),n.indent===0&&(l=p.length),h=d,l===0&&!s.atRoot&&t(c,"BAD_INDENT","Block scalar values in collections must be indented");break}c+=p.length+S.length+1}for(let d=o.length-1;d>=a;--d)o[d][0].length>l&&(a=d+1);let u="",f="",m=!1;for(let d=0;d<h;++d)u+=o[d][0].slice(l)+`
-`;for(let d=h;d<a;++d){let[p,S]=o[d];c+=p.length+S.length+1;let w=S[S.length-1]==="\r";if(w&&(S=S.slice(0,-1)),S&&p.length<l){let k=`Block scalar lines must not be less indented than their ${n.indent?"explicit indentation indicator":"first line"}`;t(c-S.length-(w?2:1),"BAD_INDENT",k),p=""}r===wi.Scalar.BLOCK_LITERAL?(u+=f+p.slice(l)+S,f=`
-`):p.length>l||S[0]==="	"?(f===" "?f=`
-`:!m&&f===`
-`&&(f=`
+// node_modules/yaml/dist/doc/directives.js
+var require_directives = __commonJS({
+  "node_modules/yaml/dist/doc/directives.js"(exports2) {
+    "use strict";
+    var identity = require_identity();
+    var visit = require_visit();
+    var escapeChars = {
+      "!": "%21",
+      ",": "%2C",
+      "[": "%5B",
+      "]": "%5D",
+      "{": "%7B",
+      "}": "%7D"
+    };
+    var escapeTagName = (tn) => tn.replace(/[!,[\]{}]/g, (ch) => escapeChars[ch]);
+    var Directives = class _Directives {
+      constructor(yaml, tags) {
+        this.docStart = null;
+        this.docEnd = false;
+        this.yaml = Object.assign({}, _Directives.defaultYaml, yaml);
+        this.tags = Object.assign({}, _Directives.defaultTags, tags);
+      }
+      clone() {
+        const copy = new _Directives(this.yaml, this.tags);
+        copy.docStart = this.docStart;
+        return copy;
+      }
+      /**
+       * During parsing, get a Directives instance for the current document and
+       * update the stream state according to the current version's spec.
+       */
+      atDocument() {
+        const res = new _Directives(this.yaml, this.tags);
+        switch (this.yaml.version) {
+          case "1.1":
+            this.atNextDocument = true;
+            break;
+          case "1.2":
+            this.atNextDocument = false;
+            this.yaml = {
+              explicit: _Directives.defaultYaml.explicit,
+              version: "1.2"
+            };
+            this.tags = Object.assign({}, _Directives.defaultTags);
+            break;
+        }
+        return res;
+      }
+      /**
+       * @param onError - May be called even if the action was successful
+       * @returns `true` on success
+       */
+      add(line, onError) {
+        if (this.atNextDocument) {
+          this.yaml = { explicit: _Directives.defaultYaml.explicit, version: "1.1" };
+          this.tags = Object.assign({}, _Directives.defaultTags);
+          this.atNextDocument = false;
+        }
+        const parts = line.trim().split(/[ \t]+/);
+        const name = parts.shift();
+        switch (name) {
+          case "%TAG": {
+            if (parts.length !== 2) {
+              onError(0, "%TAG directive should contain exactly two parts");
+              if (parts.length < 2)
+                return false;
+            }
+            const [handle, prefix] = parts;
+            this.tags[handle] = prefix;
+            return true;
+          }
+          case "%YAML": {
+            this.yaml.explicit = true;
+            if (parts.length !== 1) {
+              onError(0, "%YAML directive should contain exactly one part");
+              return false;
+            }
+            const [version] = parts;
+            if (version === "1.1" || version === "1.2") {
+              this.yaml.version = version;
+              return true;
+            } else {
+              const isValid = /^\d+\.\d+$/.test(version);
+              onError(6, `Unsupported YAML version ${version}`, isValid);
+              return false;
+            }
+          }
+          default:
+            onError(0, `Unknown directive ${name}`, true);
+            return false;
+        }
+      }
+      /**
+       * Resolves a tag, matching handles to those defined in %TAG directives.
+       *
+       * @returns Resolved tag, which may also be the non-specific tag `'!'` or a
+       *   `'!local'` tag, or `null` if unresolvable.
+       */
+      tagName(source, onError) {
+        if (source === "!")
+          return "!";
+        if (source[0] !== "!") {
+          onError(`Not a valid tag: ${source}`);
+          return null;
+        }
+        if (source[1] === "<") {
+          const verbatim = source.slice(2, -1);
+          if (verbatim === "!" || verbatim === "!!") {
+            onError(`Verbatim tags aren't resolved, so ${source} is invalid.`);
+            return null;
+          }
+          if (source[source.length - 1] !== ">")
+            onError("Verbatim tags must end with a >");
+          return verbatim;
+        }
+        const [, handle, suffix] = source.match(/^(.*!)([^!]*)$/s);
+        if (!suffix)
+          onError(`The ${source} tag has no suffix`);
+        const prefix = this.tags[handle];
+        if (prefix) {
+          try {
+            return prefix + decodeURIComponent(suffix);
+          } catch (error) {
+            onError(String(error));
+            return null;
+          }
+        }
+        if (handle === "!")
+          return source;
+        onError(`Could not resolve tag: ${source}`);
+        return null;
+      }
+      /**
+       * Given a fully resolved tag, returns its printable string form,
+       * taking into account current tag prefixes and defaults.
+       */
+      tagString(tag) {
+        for (const [handle, prefix] of Object.entries(this.tags)) {
+          if (tag.startsWith(prefix))
+            return handle + escapeTagName(tag.substring(prefix.length));
+        }
+        return tag[0] === "!" ? tag : `!<${tag}>`;
+      }
+      toString(doc) {
+        const lines = this.yaml.explicit ? [`%YAML ${this.yaml.version || "1.2"}`] : [];
+        const tagEntries = Object.entries(this.tags);
+        let tagNames;
+        if (doc && tagEntries.length > 0 && identity.isNode(doc.contents)) {
+          const tags = {};
+          visit.visit(doc.contents, (_key, node) => {
+            if (identity.isNode(node) && node.tag)
+              tags[node.tag] = true;
+          });
+          tagNames = Object.keys(tags);
+        } else
+          tagNames = [];
+        for (const [handle, prefix] of tagEntries) {
+          if (handle === "!!" && prefix === "tag:yaml.org,2002:")
+            continue;
+          if (!doc || tagNames.some((tn) => tn.startsWith(prefix)))
+            lines.push(`%TAG ${handle} ${prefix}`);
+        }
+        return lines.join("\n");
+      }
+    };
+    Directives.defaultYaml = { explicit: false, version: "1.2" };
+    Directives.defaultTags = { "!!": "tag:yaml.org,2002:" };
+    exports2.Directives = Directives;
+  }
+});
 
-`),u+=f+p.slice(l)+S,f=`
-`,m=!0):S===""?f===`
-`?u+=`
-`:f=`
-`:(u+=f+S,f=" ",m=!1)}switch(n.chomp){case"-":break;case"+":for(let d=a;d<o.length;++d)u+=`
-`+o[d][0].slice(l);u[u.length-1]!==`
-`&&(u+=`
-`);break;default:u+=`
-`}let y=i+n.length+e.source.length;return{value:u,type:r,comment:n.comment,range:[i,y,y]}}function yu({offset:s,props:e},t,i){if(e[0].type!=="block-scalar-header")return i(e[0],"IMPOSSIBLE","Block scalar header not found"),null;let{source:n}=e[0],r=n[0],o=0,a="",l=-1;for(let f=1;f<n.length;++f){let m=n[f];if(!a&&(m==="-"||m==="+"))a=m;else{let y=Number(m);!o&&y?o=y:l===-1&&(l=s+f)}}l!==-1&&i(l,"UNEXPECTED_TOKEN",`Block scalar header includes extra characters: ${n}`);let c=!1,h="",u=n.length;for(let f=1;f<e.length;++f){let m=e[f];switch(m.type){case"space":c=!0;case"newline":u+=m.source.length;break;case"comment":t&&!c&&i(m,"MISSING_CHAR","Comments must be separated from other tokens by white space characters"),u+=m.source.length,h=m.source.substring(1);break;case"error":i(m,"UNEXPECTED_TOKEN",m.message),u+=m.source.length;break;default:{let y=`Unexpected token in block scalar header: ${m.type}`;i(m,"UNEXPECTED_TOKEN",y);let d=m.source;d&&typeof d=="string"&&(u+=d.length)}}}return{mode:r,indent:o,chomp:a,comment:h,length:u}}function bu(s){let e=s.split(/\n( *)/),t=e[0],i=t.match(/^( *)/),r=[i?.[1]?[i[1],t.slice(i[1].length)]:["",t]];for(let o=1;o<e.length;o+=2)r.push([e[o],e[o+1]]);return r}eo.resolveBlockScalar=gu});var Ni=g(so=>{"use strict";var ki=O(),Su=we();function wu(s,e,t){let{offset:i,type:n,source:r,end:o}=s,a,l,c=(f,m,y)=>t(i+f,m,y);switch(n){case"scalar":a=ki.Scalar.PLAIN,l=vu(r,c);break;case"single-quoted-scalar":a=ki.Scalar.QUOTE_SINGLE,l=ku(r,c);break;case"double-quoted-scalar":a=ki.Scalar.QUOTE_DOUBLE,l=Nu(r,c);break;default:return t(s,"UNEXPECTED_TOKEN",`Expected a flow scalar value, but found: ${n}`),{value:"",type:null,comment:"",range:[i,i+r.length,i+r.length]}}let h=i+r.length,u=Su.resolveEnd(o,h,e,t);return{value:l,type:a,comment:u.comment,range:[i,h,u.offset]}}function vu(s,e){let t="";switch(s[0]){case"	":t="a tab character";break;case",":t="flow indicator character ,";break;case"%":t="directive indicator character %";break;case"|":case">":{t=`block scalar indicator ${s[0]}`;break}case"@":case"`":{t=`reserved character ${s[0]}`;break}}return t&&e(0,"BAD_SCALAR_START",`Plain value cannot start with ${t}`),to(s)}function ku(s,e){return(s[s.length-1]!=="'"||s.length===1)&&e(s.length,"MISSING_CHAR","Missing closing 'quote"),to(s.slice(1,-1)).replace(/''/g,"'")}function to(s){let e,t;try{e=new RegExp(`(.*?)(?<![ 	])[ 	]*\r?
-`,"sy"),t=new RegExp(`[ 	]*(.*?)(?:(?<![ 	])[ 	]*)?\r?
-`,"sy")}catch{e=/(.*?)[ \t]*\r?\n/sy,t=/[ \t]*(.*?)[ \t]*\r?\n/sy}let i=e.exec(s);if(!i)return s;let n=i[1],r=" ",o=e.lastIndex;for(t.lastIndex=o;i=t.exec(s);)i[1]===""?r===`
-`?n+=r:r=`
-`:(n+=r+i[1],r=" "),o=t.lastIndex;let a=/[ \t]*(.*)/sy;return a.lastIndex=o,i=a.exec(s),n+r+(i?.[1]??"")}function Nu(s,e){let t="";for(let i=1;i<s.length-1;++i){let n=s[i];if(!(n==="\r"&&s[i+1]===`
-`))if(n===`
-`){let{fold:r,offset:o}=Au(s,i);t+=r,i=o}else if(n==="\\"){let r=s[++i],o=Tu[r];if(o)t+=o;else if(r===`
-`)for(r=s[i+1];r===" "||r==="	";)r=s[++i+1];else if(r==="\r"&&s[i+1]===`
-`)for(r=s[++i+1];r===" "||r==="	";)r=s[++i+1];else if(r==="x"||r==="u"||r==="U"){let a=r==="x"?2:r==="u"?4:8;t+=qu(s,i+1,a,e),i+=a}else{let a=s.substr(i-1,2);e(i-1,"BAD_DQ_ESCAPE",`Invalid escape sequence ${a}`),t+=a}}else if(n===" "||n==="	"){let r=i,o=s[i+1];for(;o===" "||o==="	";)o=s[++i+1];o!==`
-`&&!(o==="\r"&&s[i+2]===`
-`)&&(t+=i>r?s.slice(r,i+1):n)}else t+=n}return(s[s.length-1]!=='"'||s.length===1)&&e(s.length,"MISSING_CHAR",'Missing closing "quote'),t}function Au(s,e){let t="",i=s[e+1];for(;(i===" "||i==="	"||i===`
-`||i==="\r")&&!(i==="\r"&&s[e+2]!==`
-`);)i===`
-`&&(t+=`
-`),e+=1,i=s[e+1];return t||(t=" "),{fold:t,offset:e}}var Tu={0:"\0",a:"\x07",b:"\b",e:"\x1B",f:"\f",n:`
-`,r:"\r",t:"	",v:"\v",N:"\x85",_:"\xA0",L:"\u2028",P:"\u2029"," ":" ",'"':'"',"/":"/","\\":"\\","	":"	"};function qu(s,e,t,i){let n=s.substr(e,t),o=n.length===t&&/^[0-9a-fA-F]+$/.test(n)?parseInt(n,16):NaN;try{return String.fromCodePoint(o)}catch{let a=s.substr(e-2,t+2);return i(e-2,"BAD_DQ_ESCAPE",`Invalid escape sequence ${a}`),a}}so.resolveFlowScalar=wu});var ro=g(no=>{"use strict";var le=T(),io=O(),Cu=vi(),Eu=Ni();function Ou(s,e,t,i){let{value:n,type:r,comment:o,range:a}=e.type==="block-scalar"?Cu.resolveBlockScalar(s,e,i):Eu.resolveFlowScalar(e,s.options.strict,i),l=t?s.directives.tagName(t.source,u=>i(t,"TAG_RESOLVE_FAILED",u)):null,c;s.options.stringKeys&&s.atKey?c=s.schema[le.SCALAR]:l?c=Pu(s.schema,n,l,t,i):e.type==="scalar"?c=Iu(s,n,e,i):c=s.schema[le.SCALAR];let h;try{let u=c.resolve(n,f=>i(t??e,"TAG_RESOLVE_FAILED",f),s.options);h=le.isScalar(u)?u:new io.Scalar(u)}catch(u){let f=u instanceof Error?u.message:String(u);i(t??e,"TAG_RESOLVE_FAILED",f),h=new io.Scalar(n)}return h.range=a,h.source=n,r&&(h.type=r),l&&(h.tag=l),c.format&&(h.format=c.format),o&&(h.comment=o),h}function Pu(s,e,t,i,n){if(t==="!")return s[le.SCALAR];let r=[];for(let a of s.tags)if(!a.collection&&a.tag===t)if(a.default&&a.test)r.push(a);else return a;for(let a of r)if(a.test?.test(e))return a;let o=s.knownTags[t];return o&&!o.collection?(s.tags.push(Object.assign({},o,{default:!1,test:void 0})),o):(n(i,"TAG_RESOLVE_FAILED",`Unresolved tag: ${t}`,t!=="tag:yaml.org,2002:str"),s[le.SCALAR])}function Iu({atKey:s,directives:e,schema:t},i,n,r){let o=t.tags.find(a=>(a.default===!0||s&&a.default==="key")&&a.test?.test(i))||t[le.SCALAR];if(t.compat){let a=t.compat.find(l=>l.default&&l.test?.test(i))??t[le.SCALAR];if(o.tag!==a.tag){let l=e.tagString(o.tag),c=e.tagString(a.tag),h=`Value may be parsed as either ${l} or ${c}`;r(n,"TAG_RESOLVE_FAILED",h,!0)}}return o}no.composeScalar=Ou});var ao=g(oo=>{"use strict";function Lu(s,e,t){if(e){t??(t=e.length);for(let i=t-1;i>=0;--i){let n=e[i];switch(n.type){case"space":case"comment":case"newline":s-=n.source.length;continue}for(n=e[++i];n?.type==="space";)s+=n.source.length,n=e[++i];break}}return s}oo.emptyScalarPosition=Lu});var uo=g(Ti=>{"use strict";var Mu=Ee(),$u=T(),_u=Zr(),lo=ro(),Du=we(),ju=ao(),Bu={composeNode:co,composeEmptyNode:Ai};function co(s,e,t,i){let n=s.atKey,{spaceBefore:r,comment:o,anchor:a,tag:l}=t,c,h=!0;switch(e.type){case"alias":c=Ku(s,e,i),(a||l)&&i(e,"ALIAS_PROPS","An alias node must not specify any properties");break;case"scalar":case"single-quoted-scalar":case"double-quoted-scalar":case"block-scalar":c=lo.composeScalar(s,e,l,i),a&&(c.anchor=a.source.substring(1));break;case"block-map":case"block-seq":case"flow-collection":try{c=_u.composeCollection(Bu,s,e,t,i),a&&(c.anchor=a.source.substring(1))}catch(u){let f=u instanceof Error?u.message:String(u);i(e,"RESOURCE_EXHAUSTION",f)}break;default:{let u=e.type==="error"?e.message:`Unsupported token (type: ${e.type})`;i(e,"UNEXPECTED_TOKEN",u),h=!1}}return c??(c=Ai(s,e.offset,void 0,null,t,i)),a&&c.anchor===""&&i(a,"BAD_ALIAS","Anchor cannot be an empty string"),n&&s.options.stringKeys&&(!$u.isScalar(c)||typeof c.value!="string"||c.tag&&c.tag!=="tag:yaml.org,2002:str")&&i(l??e,"NON_STRING_KEY","With stringKeys, all keys must be strings"),r&&(c.spaceBefore=!0),o&&(e.type==="scalar"&&e.source===""?c.comment=o:c.commentBefore=o),s.options.keepSourceTokens&&h&&(c.srcToken=e),c}function Ai(s,e,t,i,{spaceBefore:n,comment:r,anchor:o,tag:a,end:l},c){let h={type:"scalar",offset:ju.emptyScalarPosition(e,t,i),indent:-1,source:""},u=lo.composeScalar(s,h,a,c);return o&&(u.anchor=o.source.substring(1),u.anchor===""&&c(o,"BAD_ALIAS","Anchor cannot be an empty string")),n&&(u.spaceBefore=!0),r&&(u.comment=r,u.range[2]=l),u}function Ku({options:s},{offset:e,source:t,end:i},n){let r=new Mu.Alias(t.substring(1));r.source===""&&n(e,"BAD_ALIAS","Alias cannot be an empty string"),r.source.endsWith(":")&&n(e+t.length-1,"BAD_ALIAS","Alias ending in : is ambiguous",!0);let o=e+t.length,a=Du.resolveEnd(i,o,s.strict,n);return r.range=[e,o,a.offset],a.comment&&(r.comment=a.comment),r}Ti.composeEmptyNode=Ai;Ti.composeNode=co});var po=g(ho=>{"use strict";var Ru=Ve(),fo=uo(),Fu=we(),Uu=We();function Yu(s,e,{offset:t,start:i,value:n,end:r},o){let a=Object.assign({_directives:e},s),l=new Ru.Document(void 0,a),c={atKey:!1,atRoot:!0,directives:l.directives,options:l.options,schema:l.schema},h=Uu.resolveProps(i,{indicator:"doc-start",next:n??r?.[0],offset:t,onError:o,parentIndent:0,startOnNewline:!0});h.found&&(l.directives.docStart=!0,n&&(n.type==="block-map"||n.type==="block-seq")&&!h.hasNewline&&o(h.end,"MISSING_CHAR","Block collection cannot start on same line with directives-end marker")),l.contents=n?fo.composeNode(c,n,h,o):fo.composeEmptyNode(c,h.end,i,null,h,o);let u=l.contents.range[2],f=Fu.resolveEnd(r,u,!1,o);return f.comment&&(l.comment=f.comment),l.range=[t,u,f.offset],l}ho.composeDoc=Yu});var Ci=g(yo=>{"use strict";var Vu=require("process"),Ju=ds(),xu=Ve(),He=Ge(),mo=T(),Gu=po(),Wu=we();function Qe(s){if(typeof s=="number")return[s,s+1];if(Array.isArray(s))return s.length===2?s:[s[0],s[1]];let{offset:e,source:t}=s;return[e,e+(typeof t=="string"?t.length:1)]}function go(s){let e="",t=!1,i=!1;for(let n=0;n<s.length;++n){let r=s[n];switch(r[0]){case"#":e+=(e===""?"":i?`
+// node_modules/yaml/dist/doc/anchors.js
+var require_anchors = __commonJS({
+  "node_modules/yaml/dist/doc/anchors.js"(exports2) {
+    "use strict";
+    var identity = require_identity();
+    var visit = require_visit();
+    function anchorIsValid(anchor) {
+      if (/[\x00-\x19\s,[\]{}]/.test(anchor)) {
+        const sa = JSON.stringify(anchor);
+        const msg = `Anchor must not contain whitespace or control characters: ${sa}`;
+        throw new Error(msg);
+      }
+      return true;
+    }
+    function anchorNames(root) {
+      const anchors = /* @__PURE__ */ new Set();
+      visit.visit(root, {
+        Value(_key, node) {
+          if (node.anchor)
+            anchors.add(node.anchor);
+        }
+      });
+      return anchors;
+    }
+    function findNewAnchor(prefix, exclude) {
+      for (let i = 1; true; ++i) {
+        const name = `${prefix}${i}`;
+        if (!exclude.has(name))
+          return name;
+      }
+    }
+    function createNodeAnchors(doc, prefix) {
+      const aliasObjects = [];
+      const sourceObjects = /* @__PURE__ */ new Map();
+      let prevAnchors = null;
+      return {
+        onAnchor: (source) => {
+          aliasObjects.push(source);
+          prevAnchors ?? (prevAnchors = anchorNames(doc));
+          const anchor = findNewAnchor(prefix, prevAnchors);
+          prevAnchors.add(anchor);
+          return anchor;
+        },
+        /**
+         * With circular references, the source node is only resolved after all
+         * of its child nodes are. This is why anchors are set only after all of
+         * the nodes have been created.
+         */
+        setAnchors: () => {
+          for (const source of aliasObjects) {
+            const ref = sourceObjects.get(source);
+            if (typeof ref === "object" && ref.anchor && (identity.isScalar(ref.node) || identity.isCollection(ref.node))) {
+              ref.node.anchor = ref.anchor;
+            } else {
+              const error = new Error("Failed to resolve repeated object (this should not happen)");
+              error.source = source;
+              throw error;
+            }
+          }
+        },
+        sourceObjects
+      };
+    }
+    exports2.anchorIsValid = anchorIsValid;
+    exports2.anchorNames = anchorNames;
+    exports2.createNodeAnchors = createNodeAnchors;
+    exports2.findNewAnchor = findNewAnchor;
+  }
+});
 
-`:`
-`)+(r.substring(1)||" "),t=!0,i=!1;break;case"%":s[n+1]?.[0]!=="#"&&(n+=1),t=!1;break;default:t||(i=!0),t=!1}}return{comment:e,afterEmptyLine:i}}var qi=class{constructor(e={}){this.doc=null,this.atDirectives=!1,this.prelude=[],this.errors=[],this.warnings=[],this.onError=(t,i,n,r)=>{let o=Qe(t);r?this.warnings.push(new He.YAMLWarning(o,i,n)):this.errors.push(new He.YAMLParseError(o,i,n))},this.directives=new Ju.Directives({version:e.version||"1.2"}),this.options=e}decorate(e,t){let{comment:i,afterEmptyLine:n}=go(this.prelude);if(i){let r=e.contents;if(t)e.comment=e.comment?`${e.comment}
-${i}`:i;else if(n||e.directives.docStart||!r)e.commentBefore=i;else if(mo.isCollection(r)&&!r.flow&&r.items.length>0){let o=r.items[0];mo.isPair(o)&&(o=o.key);let a=o.commentBefore;o.commentBefore=a?`${i}
-${a}`:i}else{let o=r.commentBefore;r.commentBefore=o?`${i}
-${o}`:i}}if(t){for(let r=0;r<this.errors.length;++r)e.errors.push(this.errors[r]);for(let r=0;r<this.warnings.length;++r)e.warnings.push(this.warnings[r])}else e.errors=this.errors,e.warnings=this.warnings;this.prelude=[],this.errors=[],this.warnings=[]}streamInfo(){return{comment:go(this.prelude).comment,directives:this.directives,errors:this.errors,warnings:this.warnings}}*compose(e,t=!1,i=-1){for(let n of e)yield*this.next(n);yield*this.end(t,i)}*next(e){switch(Vu.env.LOG_STREAM&&console.dir(e,{depth:null}),e.type){case"directive":this.directives.add(e.source,(t,i,n)=>{let r=Qe(e);r[0]+=t,this.onError(r,"BAD_DIRECTIVE",i,n)}),this.prelude.push(e.source),this.atDirectives=!0;break;case"document":{let t=Gu.composeDoc(this.options,this.directives,e,this.onError);this.atDirectives&&!t.directives.docStart&&this.onError(e,"MISSING_CHAR","Missing directives-end/doc-start indicator line"),this.decorate(t,!1),this.doc&&(yield this.doc),this.doc=t,this.atDirectives=!1;break}case"byte-order-mark":case"space":break;case"comment":case"newline":this.prelude.push(e.source);break;case"error":{let t=e.source?`${e.message}: ${JSON.stringify(e.source)}`:e.message,i=new He.YAMLParseError(Qe(e),"UNEXPECTED_TOKEN",t);this.atDirectives||!this.doc?this.errors.push(i):this.doc.errors.push(i);break}case"doc-end":{if(!this.doc){let i="Unexpected doc-end without preceding document";this.errors.push(new He.YAMLParseError(Qe(e),"UNEXPECTED_TOKEN",i));break}this.doc.directives.docEnd=!0;let t=Wu.resolveEnd(e.end,e.offset+e.source.length,this.doc.options.strict,this.onError);if(this.decorate(this.doc,!0),t.comment){let i=this.doc.comment;this.doc.comment=i?`${i}
-${t.comment}`:t.comment}this.doc.range[2]=t.offset;break}default:this.errors.push(new He.YAMLParseError(Qe(e),"UNEXPECTED_TOKEN",`Unsupported token ${e.type}`))}}*end(e=!1,t=-1){if(this.doc)this.decorate(this.doc,!0),yield this.doc,this.doc=null;else if(e){let i=Object.assign({_directives:this.directives},this.options),n=new xu.Document(void 0,i);this.atDirectives&&this.onError(t,"MISSING_CHAR","Missing directives-end indicator line"),n.range=[0,t,t],this.decorate(n,!1),yield n}}};yo.Composer=qi});var wo=g(Qt=>{"use strict";var Hu=vi(),Qu=Ni(),Xu=Ge(),bo=Me();function zu(s,e=!0,t){if(s){let i=(n,r,o)=>{let a=typeof n=="number"?n:Array.isArray(n)?n[0]:n.offset;if(t)t(a,r,o);else throw new Xu.YAMLParseError([a,a+1],r,o)};switch(s.type){case"scalar":case"single-quoted-scalar":case"double-quoted-scalar":return Qu.resolveFlowScalar(s,e,i);case"block-scalar":return Hu.resolveBlockScalar({options:{strict:e}},s,i)}}return null}function Zu(s,e){let{implicitKey:t=!1,indent:i,inFlow:n=!1,offset:r=-1,type:o="PLAIN"}=e,a=bo.stringifyString({type:o,value:s},{implicitKey:t,indent:i>0?" ".repeat(i):"",inFlow:n,options:{blockQuote:!0,lineWidth:-1}}),l=e.end??[{type:"newline",offset:-1,indent:i,source:`
-`}];switch(a[0]){case"|":case">":{let c=a.indexOf(`
-`),h=a.substring(0,c),u=a.substring(c+1)+`
-`,f=[{type:"block-scalar-header",offset:r,indent:i,source:h}];return So(f,l)||f.push({type:"newline",offset:-1,indent:i,source:`
-`}),{type:"block-scalar",offset:r,indent:i,props:f,source:u}}case'"':return{type:"double-quoted-scalar",offset:r,indent:i,source:a,end:l};case"'":return{type:"single-quoted-scalar",offset:r,indent:i,source:a,end:l};default:return{type:"scalar",offset:r,indent:i,source:a,end:l}}}function ef(s,e,t={}){let{afterKey:i=!1,implicitKey:n=!1,inFlow:r=!1,type:o}=t,a="indent"in s?s.indent:null;if(i&&typeof a=="number"&&(a+=2),!o)switch(s.type){case"single-quoted-scalar":o="QUOTE_SINGLE";break;case"double-quoted-scalar":o="QUOTE_DOUBLE";break;case"block-scalar":{let c=s.props[0];if(c.type!=="block-scalar-header")throw new Error("Invalid block scalar header");o=c.source[0]===">"?"BLOCK_FOLDED":"BLOCK_LITERAL";break}default:o="PLAIN"}let l=bo.stringifyString({type:o,value:e},{implicitKey:n||a===null,indent:a!==null&&a>0?" ".repeat(a):"",inFlow:r,options:{blockQuote:!0,lineWidth:-1}});switch(l[0]){case"|":case">":tf(s,l);break;case'"':Ei(s,l,"double-quoted-scalar");break;case"'":Ei(s,l,"single-quoted-scalar");break;default:Ei(s,l,"scalar")}}function tf(s,e){let t=e.indexOf(`
-`),i=e.substring(0,t),n=e.substring(t+1)+`
-`;if(s.type==="block-scalar"){let r=s.props[0];if(r.type!=="block-scalar-header")throw new Error("Invalid block scalar header");r.source=i,s.source=n}else{let{offset:r}=s,o="indent"in s?s.indent:-1,a=[{type:"block-scalar-header",offset:r,indent:o,source:i}];So(a,"end"in s?s.end:void 0)||a.push({type:"newline",offset:-1,indent:o,source:`
-`});for(let l of Object.keys(s))l!=="type"&&l!=="offset"&&delete s[l];Object.assign(s,{type:"block-scalar",indent:o,props:a,source:n})}}function So(s,e){if(e)for(let t of e)switch(t.type){case"space":case"comment":s.push(t);break;case"newline":return s.push(t),!0}return!1}function Ei(s,e,t){switch(s.type){case"scalar":case"double-quoted-scalar":case"single-quoted-scalar":s.type=t,s.source=e;break;case"block-scalar":{let i=s.props.slice(1),n=e.length;s.props[0].type==="block-scalar-header"&&(n-=s.props[0].source.length);for(let r of i)r.offset+=n;delete s.props,Object.assign(s,{type:t,source:e,end:i});break}case"block-map":case"block-seq":{let n={type:"newline",offset:s.offset+e.length,indent:s.indent,source:`
-`};delete s.items,Object.assign(s,{type:t,source:e,end:[n]});break}default:{let i="indent"in s?s.indent:-1,n="end"in s&&Array.isArray(s.end)?s.end.filter(r=>r.type==="space"||r.type==="comment"||r.type==="newline"):[];for(let r of Object.keys(s))r!=="type"&&r!=="offset"&&delete s[r];Object.assign(s,{type:t,indent:i,source:e,end:n})}}}Qt.createScalarToken=Zu;Qt.resolveAsScalar=zu;Qt.setScalarValue=ef});var ko=g(vo=>{"use strict";var sf=s=>"type"in s?zt(s):Xt(s);function zt(s){switch(s.type){case"block-scalar":{let e="";for(let t of s.props)e+=zt(t);return e+s.source}case"block-map":case"block-seq":{let e="";for(let t of s.items)e+=Xt(t);return e}case"flow-collection":{let e=s.start.source;for(let t of s.items)e+=Xt(t);for(let t of s.end)e+=t.source;return e}case"document":{let e=Xt(s);if(s.end)for(let t of s.end)e+=t.source;return e}default:{let e=s.source;if("end"in s&&s.end)for(let t of s.end)e+=t.source;return e}}}function Xt({start:s,key:e,sep:t,value:i}){let n="";for(let r of s)n+=r.source;if(e&&(n+=zt(e)),t)for(let r of t)n+=r.source;return i&&(n+=zt(i)),n}vo.stringify=sf});var qo=g(To=>{"use strict";var Oi=Symbol("break visit"),nf=Symbol("skip children"),No=Symbol("remove item");function ce(s,e){"type"in s&&s.type==="document"&&(s={start:s.start,value:s.value}),Ao(Object.freeze([]),s,e)}ce.BREAK=Oi;ce.SKIP=nf;ce.REMOVE=No;ce.itemAtPath=(s,e)=>{let t=s;for(let[i,n]of e){let r=t?.[i];if(r&&"items"in r)t=r.items[n];else return}return t};ce.parentCollection=(s,e)=>{let t=ce.itemAtPath(s,e.slice(0,-1)),i=e[e.length-1][0],n=t?.[i];if(n&&"items"in n)return n;throw new Error("Parent collection not found")};function Ao(s,e,t){let i=t(e,s);if(typeof i=="symbol")return i;for(let n of["key","value"]){let r=e[n];if(r&&"items"in r){for(let o=0;o<r.items.length;++o){let a=Ao(Object.freeze(s.concat([[n,o]])),r.items[o],t);if(typeof a=="number")o=a-1;else{if(a===Oi)return Oi;a===No&&(r.items.splice(o,1),o-=1)}}typeof i=="function"&&n==="key"&&(i=i(e,s))}}return typeof i=="function"?i(e,s):i}To.visit=ce});var Zt=g(D=>{"use strict";var Pi=wo(),rf=ko(),of=qo(),Ii="\uFEFF",Li="",Mi="",$i="",af=s=>!!s&&"items"in s,lf=s=>!!s&&(s.type==="scalar"||s.type==="single-quoted-scalar"||s.type==="double-quoted-scalar"||s.type==="block-scalar");function cf(s){switch(s){case Ii:return"<BOM>";case Li:return"<DOC>";case Mi:return"<FLOW_END>";case $i:return"<SCALAR>";default:return JSON.stringify(s)}}function uf(s){switch(s){case Ii:return"byte-order-mark";case Li:return"doc-mode";case Mi:return"flow-error-end";case $i:return"scalar";case"---":return"doc-start";case"...":return"doc-end";case"":case`
-`:case`\r
-`:return"newline";case"-":return"seq-item-ind";case"?":return"explicit-key-ind";case":":return"map-value-ind";case"{":return"flow-map-start";case"}":return"flow-map-end";case"[":return"flow-seq-start";case"]":return"flow-seq-end";case",":return"comma"}switch(s[0]){case" ":case"	":return"space";case"#":return"comment";case"%":return"directive-line";case"*":return"alias";case"&":return"anchor";case"!":return"tag";case"'":return"single-quoted-scalar";case'"':return"double-quoted-scalar";case"|":case">":return"block-scalar-header"}return null}D.createScalarToken=Pi.createScalarToken;D.resolveAsScalar=Pi.resolveAsScalar;D.setScalarValue=Pi.setScalarValue;D.stringify=rf.stringify;D.visit=of.visit;D.BOM=Ii;D.DOCUMENT=Li;D.FLOW_END=Mi;D.SCALAR=$i;D.isCollection=af;D.isScalar=lf;D.prettyToken=cf;D.tokenType=uf});var ji=g(Eo=>{"use strict";var Xe=Zt();function K(s){switch(s){case void 0:case" ":case`
-`:case"\r":case"	":return!0;default:return!1}}var Co=new Set("0123456789ABCDEFabcdef"),ff=new Set("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-#;/?:@&=+$_.!~*'()"),es=new Set(",[]{}"),df=new Set(` ,[]{}
-\r	`),_i=s=>!s||df.has(s),Di=class{constructor(){this.atEnd=!1,this.blockScalarIndent=-1,this.blockScalarKeep=!1,this.buffer="",this.flowKey=!1,this.flowLevel=0,this.indentNext=0,this.indentValue=0,this.lineEndPos=null,this.next=null,this.pos=0}*lex(e,t=!1){if(e){if(typeof e!="string")throw TypeError("source is not a string");this.buffer=this.buffer?this.buffer+e:e,this.lineEndPos=null}this.atEnd=!t;let i=this.next??"stream";for(;i&&(t||this.hasChars(1));)i=yield*this.parseNext(i)}atLineEnd(){let e=this.pos,t=this.buffer[e];for(;t===" "||t==="	";)t=this.buffer[++e];return!t||t==="#"||t===`
-`?!0:t==="\r"?this.buffer[e+1]===`
-`:!1}charAt(e){return this.buffer[this.pos+e]}continueScalar(e){let t=this.buffer[e];if(this.indentNext>0){let i=0;for(;t===" ";)t=this.buffer[++i+e];if(t==="\r"){let n=this.buffer[i+e+1];if(n===`
-`||!n&&!this.atEnd)return e+i+1}return t===`
-`||i>=this.indentNext||!t&&!this.atEnd?e+i:-1}if(t==="-"||t==="."){let i=this.buffer.substr(e,3);if((i==="---"||i==="...")&&K(this.buffer[e+3]))return-1}return e}getLine(){let e=this.lineEndPos;return(typeof e!="number"||e!==-1&&e<this.pos)&&(e=this.buffer.indexOf(`
-`,this.pos),this.lineEndPos=e),e===-1?this.atEnd?this.buffer.substring(this.pos):null:(this.buffer[e-1]==="\r"&&(e-=1),this.buffer.substring(this.pos,e))}hasChars(e){return this.pos+e<=this.buffer.length}setNext(e){return this.buffer=this.buffer.substring(this.pos),this.pos=0,this.lineEndPos=null,this.next=e,null}peek(e){return this.buffer.substr(this.pos,e)}*parseNext(e){switch(e){case"stream":return yield*this.parseStream();case"line-start":return yield*this.parseLineStart();case"block-start":return yield*this.parseBlockStart();case"doc":return yield*this.parseDocument();case"flow":return yield*this.parseFlowCollection();case"quoted-scalar":return yield*this.parseQuotedScalar();case"block-scalar":return yield*this.parseBlockScalar();case"plain-scalar":return yield*this.parsePlainScalar()}}*parseStream(){let e=this.getLine();if(e===null)return this.setNext("stream");if(e[0]===Xe.BOM&&(yield*this.pushCount(1),e=e.substring(1)),e[0]==="%"){let t=e.length,i=e.indexOf("#");for(;i!==-1;){let r=e[i-1];if(r===" "||r==="	"){t=i-1;break}else i=e.indexOf("#",i+1)}for(;;){let r=e[t-1];if(r===" "||r==="	")t-=1;else break}let n=(yield*this.pushCount(t))+(yield*this.pushSpaces(!0));return yield*this.pushCount(e.length-n),this.pushNewline(),"stream"}if(this.atLineEnd()){let t=yield*this.pushSpaces(!0);return yield*this.pushCount(e.length-t),yield*this.pushNewline(),"stream"}return yield Xe.DOCUMENT,yield*this.parseLineStart()}*parseLineStart(){let e=this.charAt(0);if(!e&&!this.atEnd)return this.setNext("line-start");if(e==="-"||e==="."){if(!this.atEnd&&!this.hasChars(4))return this.setNext("line-start");let t=this.peek(3);if((t==="---"||t==="...")&&K(this.charAt(3)))return yield*this.pushCount(3),this.indentValue=0,this.indentNext=0,t==="---"?"doc":"stream"}return this.indentValue=yield*this.pushSpaces(!1),this.indentNext>this.indentValue&&!K(this.charAt(1))&&(this.indentNext=this.indentValue),yield*this.parseBlockStart()}*parseBlockStart(){let[e,t]=this.peek(2);if(!t&&!this.atEnd)return this.setNext("block-start");if((e==="-"||e==="?"||e===":")&&K(t)){let i=(yield*this.pushCount(1))+(yield*this.pushSpaces(!0));return this.indentNext=this.indentValue+1,this.indentValue+=i,"block-start"}return"doc"}*parseDocument(){yield*this.pushSpaces(!0);let e=this.getLine();if(e===null)return this.setNext("doc");let t=yield*this.pushIndicators();switch(e[t]){case"#":yield*this.pushCount(e.length-t);case void 0:return yield*this.pushNewline(),yield*this.parseLineStart();case"{":case"[":return yield*this.pushCount(1),this.flowKey=!1,this.flowLevel=1,"flow";case"}":case"]":return yield*this.pushCount(1),"doc";case"*":return yield*this.pushUntil(_i),"doc";case'"':case"'":return yield*this.parseQuotedScalar();case"|":case">":return t+=yield*this.parseBlockScalarHeader(),t+=yield*this.pushSpaces(!0),yield*this.pushCount(e.length-t),yield*this.pushNewline(),yield*this.parseBlockScalar();default:return yield*this.parsePlainScalar()}}*parseFlowCollection(){let e,t,i=-1;do e=yield*this.pushNewline(),e>0?(t=yield*this.pushSpaces(!1),this.indentValue=i=t):t=0,t+=yield*this.pushSpaces(!0);while(e+t>0);let n=this.getLine();if(n===null)return this.setNext("flow");if((i!==-1&&i<this.indentNext&&n[0]!=="#"||i===0&&(n.startsWith("---")||n.startsWith("..."))&&K(n[3]))&&!(i===this.indentNext-1&&this.flowLevel===1&&(n[0]==="]"||n[0]==="}")))return this.flowLevel=0,yield Xe.FLOW_END,yield*this.parseLineStart();let r=0;for(;n[r]===",";)r+=yield*this.pushCount(1),r+=yield*this.pushSpaces(!0),this.flowKey=!1;switch(r+=yield*this.pushIndicators(),n[r]){case void 0:return"flow";case"#":return yield*this.pushCount(n.length-r),"flow";case"{":case"[":return yield*this.pushCount(1),this.flowKey=!1,this.flowLevel+=1,"flow";case"}":case"]":return yield*this.pushCount(1),this.flowKey=!0,this.flowLevel-=1,this.flowLevel?"flow":"doc";case"*":return yield*this.pushUntil(_i),"flow";case'"':case"'":return this.flowKey=!0,yield*this.parseQuotedScalar();case":":{let o=this.charAt(1);if(this.flowKey||K(o)||o===",")return this.flowKey=!1,yield*this.pushCount(1),yield*this.pushSpaces(!0),"flow"}default:return this.flowKey=!1,yield*this.parsePlainScalar()}}*parseQuotedScalar(){let e=this.charAt(0),t=this.buffer.indexOf(e,this.pos+1);if(e==="'")for(;t!==-1&&this.buffer[t+1]==="'";)t=this.buffer.indexOf("'",t+2);else for(;t!==-1;){let r=0;for(;this.buffer[t-1-r]==="\\";)r+=1;if(r%2===0)break;t=this.buffer.indexOf('"',t+1)}let i=this.buffer.substring(0,t),n=i.indexOf(`
-`,this.pos);if(n!==-1){for(;n!==-1;){let r=this.continueScalar(n+1);if(r===-1)break;n=i.indexOf(`
-`,r)}n!==-1&&(t=n-(i[n-1]==="\r"?2:1))}if(t===-1){if(!this.atEnd)return this.setNext("quoted-scalar");t=this.buffer.length}return yield*this.pushToIndex(t+1,!1),this.flowLevel?"flow":"doc"}*parseBlockScalarHeader(){this.blockScalarIndent=-1,this.blockScalarKeep=!1;let e=this.pos;for(;;){let t=this.buffer[++e];if(t==="+")this.blockScalarKeep=!0;else if(t>"0"&&t<="9")this.blockScalarIndent=Number(t)-1;else if(t!=="-")break}return yield*this.pushUntil(t=>K(t)||t==="#")}*parseBlockScalar(){let e=this.pos-1,t=0,i;e:for(let r=this.pos;i=this.buffer[r];++r)switch(i){case" ":t+=1;break;case`
-`:e=r,t=0;break;case"\r":{let o=this.buffer[r+1];if(!o&&!this.atEnd)return this.setNext("block-scalar");if(o===`
-`)break}default:break e}if(!i&&!this.atEnd)return this.setNext("block-scalar");if(t>=this.indentNext){this.blockScalarIndent===-1?this.indentNext=t:this.indentNext=this.blockScalarIndent+(this.indentNext===0?1:this.indentNext);do{let r=this.continueScalar(e+1);if(r===-1)break;e=this.buffer.indexOf(`
-`,r)}while(e!==-1);if(e===-1){if(!this.atEnd)return this.setNext("block-scalar");e=this.buffer.length}}let n=e+1;for(i=this.buffer[n];i===" ";)i=this.buffer[++n];if(i==="	"){for(;i==="	"||i===" "||i==="\r"||i===`
-`;)i=this.buffer[++n];e=n-1}else if(!this.blockScalarKeep)do{let r=e-1,o=this.buffer[r];o==="\r"&&(o=this.buffer[--r]);let a=r;for(;o===" ";)o=this.buffer[--r];if(o===`
-`&&r>=this.pos&&r+1+t>a)e=r;else break}while(!0);return yield Xe.SCALAR,yield*this.pushToIndex(e+1,!0),yield*this.parseLineStart()}*parsePlainScalar(){let e=this.flowLevel>0,t=this.pos-1,i=this.pos-1,n;for(;n=this.buffer[++i];)if(n===":"){let r=this.buffer[i+1];if(K(r)||e&&es.has(r))break;t=i}else if(K(n)){let r=this.buffer[i+1];if(n==="\r"&&(r===`
-`?(i+=1,n=`
-`,r=this.buffer[i+1]):t=i),r==="#"||e&&es.has(r))break;if(n===`
-`){let o=this.continueScalar(i+1);if(o===-1)break;i=Math.max(i,o-2)}}else{if(e&&es.has(n))break;t=i}return!n&&!this.atEnd?this.setNext("plain-scalar"):(yield Xe.SCALAR,yield*this.pushToIndex(t+1,!0),e?"flow":"doc")}*pushCount(e){return e>0?(yield this.buffer.substr(this.pos,e),this.pos+=e,e):0}*pushToIndex(e,t){let i=this.buffer.slice(this.pos,e);return i?(yield i,this.pos+=i.length,i.length):(t&&(yield""),0)}*pushIndicators(){let e=0;e:for(;;){switch(this.charAt(0)){case"!":e+=yield*this.pushTag(),e+=yield*this.pushSpaces(!0);continue e;case"&":e+=yield*this.pushUntil(_i),e+=yield*this.pushSpaces(!0);continue e;case"-":case"?":case":":{let t=this.flowLevel>0,i=this.charAt(1);if(K(i)||t&&es.has(i)){t?this.flowKey&&(this.flowKey=!1):this.indentNext=this.indentValue+1,e+=yield*this.pushCount(1),e+=yield*this.pushSpaces(!0);continue e}}}break e}return e}*pushTag(){if(this.charAt(1)==="<"){let e=this.pos+2,t=this.buffer[e];for(;!K(t)&&t!==">";)t=this.buffer[++e];return yield*this.pushToIndex(t===">"?e+1:e,!1)}else{let e=this.pos+1,t=this.buffer[e];for(;t;)if(ff.has(t))t=this.buffer[++e];else if(t==="%"&&Co.has(this.buffer[e+1])&&Co.has(this.buffer[e+2]))t=this.buffer[e+=3];else break;return yield*this.pushToIndex(e,!1)}}*pushNewline(){let e=this.buffer[this.pos];return e===`
-`?yield*this.pushCount(1):e==="\r"&&this.charAt(1)===`
-`?yield*this.pushCount(2):0}*pushSpaces(e){let t=this.pos-1,i;do i=this.buffer[++t];while(i===" "||e&&i==="	");let n=t-this.pos;return n>0&&(yield this.buffer.substr(this.pos,n),this.pos=t),n}*pushUntil(e){let t=this.pos,i=this.buffer[t];for(;!e(i);)i=this.buffer[++t];return yield*this.pushToIndex(t,!1)}};Eo.Lexer=Di});var Ki=g(Oo=>{"use strict";var Bi=class{constructor(){this.lineStarts=[],this.addNewLine=e=>this.lineStarts.push(e),this.linePos=e=>{let t=0,i=this.lineStarts.length;for(;t<i;){let r=t+i>>1;this.lineStarts[r]<e?t=r+1:i=r}if(this.lineStarts[t]===e)return{line:t+1,col:1};if(t===0)return{line:0,col:e};let n=this.lineStarts[t-1];return{line:t,col:e-n+1}}}};Oo.LineCounter=Bi});var Fi=g($o=>{"use strict";var hf=require("process"),Po=Zt(),pf=ji();function te(s,e){for(let t=0;t<s.length;++t)if(s[t].type===e)return!0;return!1}function Io(s){for(let e=0;e<s.length;++e)switch(s[e].type){case"space":case"comment":case"newline":break;default:return e}return-1}function Mo(s){switch(s?.type){case"alias":case"scalar":case"single-quoted-scalar":case"double-quoted-scalar":case"flow-collection":return!0;default:return!1}}function ts(s){switch(s.type){case"document":return s.start;case"block-map":{let e=s.items[s.items.length-1];return e.sep??e.start}case"block-seq":return s.items[s.items.length-1].start;default:return[]}}function ve(s){if(s.length===0)return[];let e=s.length;e:for(;--e>=0;)switch(s[e].type){case"doc-start":case"explicit-key-ind":case"map-value-ind":case"seq-item-ind":case"newline":break e}for(;s[++e]?.type==="space";);return s.splice(e,s.length)}function ss(s,e){if(e.length<1e5)Array.prototype.push.apply(s,e);else for(let t=0;t<e.length;++t)s.push(e[t])}function Lo(s){if(s.start.type==="flow-seq-start")for(let e of s.items)e.sep&&!e.value&&!te(e.start,"explicit-key-ind")&&!te(e.sep,"map-value-ind")&&(e.key&&(e.value=e.key),delete e.key,Mo(e.value)?e.value.end?ss(e.value.end,e.sep):e.value.end=e.sep:ss(e.start,e.sep),delete e.sep)}var Ri=class{constructor(e){this.atNewLine=!0,this.atScalar=!1,this.indent=0,this.offset=0,this.onKeyLine=!1,this.stack=[],this.source="",this.type="",this.lexer=new pf.Lexer,this.onNewLine=e}*parse(e,t=!1){this.onNewLine&&this.offset===0&&this.onNewLine(0);for(let i of this.lexer.lex(e,t))yield*this.next(i);t||(yield*this.end())}*next(e){if(this.source=e,hf.env.LOG_TOKENS&&console.log("|",Po.prettyToken(e)),this.atScalar){this.atScalar=!1,yield*this.step(),this.offset+=e.length;return}let t=Po.tokenType(e);if(t)if(t==="scalar")this.atNewLine=!1,this.atScalar=!0,this.type="scalar";else{switch(this.type=t,yield*this.step(),t){case"newline":this.atNewLine=!0,this.indent=0,this.onNewLine&&this.onNewLine(this.offset+e.length);break;case"space":this.atNewLine&&e[0]===" "&&(this.indent+=e.length);break;case"explicit-key-ind":case"map-value-ind":case"seq-item-ind":this.atNewLine&&(this.indent+=e.length);break;case"doc-mode":case"flow-error-end":return;default:this.atNewLine=!1}this.offset+=e.length}else{let i=`Not a YAML token: ${e}`;yield*this.pop({type:"error",offset:this.offset,message:i,source:e}),this.offset+=e.length}}*end(){for(;this.stack.length>0;)yield*this.pop()}get sourceToken(){return{type:this.type,offset:this.offset,indent:this.indent,source:this.source}}*step(){let e=this.peek(1);if(this.type==="doc-end"&&e?.type!=="doc-end"){for(;this.stack.length>0;)yield*this.pop();this.stack.push({type:"doc-end",offset:this.offset,source:this.source});return}if(!e)return yield*this.stream();switch(e.type){case"document":return yield*this.document(e);case"alias":case"scalar":case"single-quoted-scalar":case"double-quoted-scalar":return yield*this.scalar(e);case"block-scalar":return yield*this.blockScalar(e);case"block-map":return yield*this.blockMap(e);case"block-seq":return yield*this.blockSequence(e);case"flow-collection":return yield*this.flowCollection(e);case"doc-end":return yield*this.documentEnd(e)}yield*this.pop()}peek(e){return this.stack[this.stack.length-e]}*pop(e){let t=e??this.stack.pop();if(!t)yield{type:"error",offset:this.offset,source:"",message:"Tried to pop an empty stack"};else if(this.stack.length===0)yield t;else{let i=this.peek(1);switch(t.type==="block-scalar"?t.indent="indent"in i?i.indent:0:t.type==="flow-collection"&&i.type==="document"&&(t.indent=0),t.type==="flow-collection"&&Lo(t),i.type){case"document":i.value=t;break;case"block-scalar":i.props.push(t);break;case"block-map":{let n=i.items[i.items.length-1];if(n.value){i.items.push({start:[],key:t,sep:[]}),this.onKeyLine=!0;return}else if(n.sep)n.value=t;else{Object.assign(n,{key:t,sep:[]}),this.onKeyLine=!n.explicitKey;return}break}case"block-seq":{let n=i.items[i.items.length-1];n.value?i.items.push({start:[],value:t}):n.value=t;break}case"flow-collection":{let n=i.items[i.items.length-1];!n||n.value?i.items.push({start:[],key:t,sep:[]}):n.sep?n.value=t:Object.assign(n,{key:t,sep:[]});return}default:yield*this.pop(),yield*this.pop(t)}if((i.type==="document"||i.type==="block-map"||i.type==="block-seq")&&(t.type==="block-map"||t.type==="block-seq")){let n=t.items[t.items.length-1];n&&!n.sep&&!n.value&&n.start.length>0&&Io(n.start)===-1&&(t.indent===0||n.start.every(r=>r.type!=="comment"||r.indent<t.indent))&&(i.type==="document"?i.end=n.start:i.items.push({start:n.start}),t.items.splice(-1,1))}}}*stream(){switch(this.type){case"directive-line":yield{type:"directive",offset:this.offset,source:this.source};return;case"byte-order-mark":case"space":case"comment":case"newline":yield this.sourceToken;return;case"doc-mode":case"doc-start":{let e={type:"document",offset:this.offset,start:[]};this.type==="doc-start"&&e.start.push(this.sourceToken),this.stack.push(e);return}}yield{type:"error",offset:this.offset,message:`Unexpected ${this.type} token in YAML stream`,source:this.source}}*document(e){if(e.value)return yield*this.lineEnd(e);switch(this.type){case"doc-start":{Io(e.start)!==-1?(yield*this.pop(),yield*this.step()):e.start.push(this.sourceToken);return}case"anchor":case"tag":case"space":case"comment":case"newline":e.start.push(this.sourceToken);return}let t=this.startBlockValue(e);t?this.stack.push(t):yield{type:"error",offset:this.offset,message:`Unexpected ${this.type} token in YAML document`,source:this.source}}*scalar(e){if(this.type==="map-value-ind"){let t=ts(this.peek(2)),i=ve(t),n;e.end?(n=e.end,n.push(this.sourceToken),delete e.end):n=[this.sourceToken];let r={type:"block-map",offset:e.offset,indent:e.indent,items:[{start:i,key:e,sep:n}]};this.onKeyLine=!0,this.stack[this.stack.length-1]=r}else yield*this.lineEnd(e)}*blockScalar(e){switch(this.type){case"space":case"comment":case"newline":e.props.push(this.sourceToken);return;case"scalar":if(e.source=this.source,this.atNewLine=!0,this.indent=0,this.onNewLine){let t=this.source.indexOf(`
-`)+1;for(;t!==0;)this.onNewLine(this.offset+t),t=this.source.indexOf(`
-`,t)+1}yield*this.pop();break;default:yield*this.pop(),yield*this.step()}}*blockMap(e){let t=e.items[e.items.length-1];switch(this.type){case"newline":if(this.onKeyLine=!1,t.value){let i="end"in t.value?t.value.end:void 0;(Array.isArray(i)?i[i.length-1]:void 0)?.type==="comment"?i?.push(this.sourceToken):e.items.push({start:[this.sourceToken]})}else t.sep?t.sep.push(this.sourceToken):t.start.push(this.sourceToken);return;case"space":case"comment":if(t.value)e.items.push({start:[this.sourceToken]});else if(t.sep)t.sep.push(this.sourceToken);else{if(this.atIndentedComment(t.start,e.indent)){let n=e.items[e.items.length-2]?.value?.end;if(Array.isArray(n)){ss(n,t.start),n.push(this.sourceToken),e.items.pop();return}}t.start.push(this.sourceToken)}return}if(this.indent>=e.indent){let i=!this.onKeyLine&&this.indent===e.indent,n=i&&(t.sep||t.explicitKey)&&this.type!=="seq-item-ind",r=[];if(n&&t.sep&&!t.value){let o=[];for(let a=0;a<t.sep.length;++a){let l=t.sep[a];switch(l.type){case"newline":o.push(a);break;case"space":break;case"comment":l.indent>e.indent&&(o.length=0);break;default:o.length=0}}o.length>=2&&(r=t.sep.splice(o[1]))}switch(this.type){case"anchor":case"tag":n||t.value?(r.push(this.sourceToken),e.items.push({start:r}),this.onKeyLine=!0):t.sep?t.sep.push(this.sourceToken):t.start.push(this.sourceToken);return;case"explicit-key-ind":!t.sep&&!t.explicitKey?(t.start.push(this.sourceToken),t.explicitKey=!0):n||t.value?(r.push(this.sourceToken),e.items.push({start:r,explicitKey:!0})):this.stack.push({type:"block-map",offset:this.offset,indent:this.indent,items:[{start:[this.sourceToken],explicitKey:!0}]}),this.onKeyLine=!0;return;case"map-value-ind":if(t.explicitKey)if(t.sep)if(t.value)e.items.push({start:[],key:null,sep:[this.sourceToken]});else if(te(t.sep,"map-value-ind"))this.stack.push({type:"block-map",offset:this.offset,indent:this.indent,items:[{start:r,key:null,sep:[this.sourceToken]}]});else if(Mo(t.key)&&!te(t.sep,"newline")){let o=ve(t.start),a=t.key,l=t.sep;l.push(this.sourceToken),delete t.key,delete t.sep,this.stack.push({type:"block-map",offset:this.offset,indent:this.indent,items:[{start:o,key:a,sep:l}]})}else r.length>0?t.sep=t.sep.concat(r,this.sourceToken):t.sep.push(this.sourceToken);else if(te(t.start,"newline"))Object.assign(t,{key:null,sep:[this.sourceToken]});else{let o=ve(t.start);this.stack.push({type:"block-map",offset:this.offset,indent:this.indent,items:[{start:o,key:null,sep:[this.sourceToken]}]})}else t.sep?t.value||n?e.items.push({start:r,key:null,sep:[this.sourceToken]}):te(t.sep,"map-value-ind")?this.stack.push({type:"block-map",offset:this.offset,indent:this.indent,items:[{start:[],key:null,sep:[this.sourceToken]}]}):t.sep.push(this.sourceToken):Object.assign(t,{key:null,sep:[this.sourceToken]});this.onKeyLine=!0;return;case"alias":case"scalar":case"single-quoted-scalar":case"double-quoted-scalar":{let o=this.flowScalar(this.type);n||t.value?(e.items.push({start:r,key:o,sep:[]}),this.onKeyLine=!0):t.sep?this.stack.push(o):(Object.assign(t,{key:o,sep:[]}),this.onKeyLine=!0);return}default:{let o=this.startBlockValue(e);if(o){if(o.type==="block-seq"){if(!t.explicitKey&&t.sep&&!te(t.sep,"newline")){yield*this.pop({type:"error",offset:this.offset,message:"Unexpected block-seq-ind on same line with key",source:this.source});return}}else i&&e.items.push({start:r});this.stack.push(o);return}}}}yield*this.pop(),yield*this.step()}*blockSequence(e){let t=e.items[e.items.length-1];switch(this.type){case"newline":if(t.value){let i="end"in t.value?t.value.end:void 0;(Array.isArray(i)?i[i.length-1]:void 0)?.type==="comment"?i?.push(this.sourceToken):e.items.push({start:[this.sourceToken]})}else t.start.push(this.sourceToken);return;case"space":case"comment":if(t.value)e.items.push({start:[this.sourceToken]});else{if(this.atIndentedComment(t.start,e.indent)){let n=e.items[e.items.length-2]?.value?.end;if(Array.isArray(n)){ss(n,t.start),n.push(this.sourceToken),e.items.pop();return}}t.start.push(this.sourceToken)}return;case"anchor":case"tag":if(t.value||this.indent<=e.indent)break;t.start.push(this.sourceToken);return;case"seq-item-ind":if(this.indent!==e.indent)break;t.value||te(t.start,"seq-item-ind")?e.items.push({start:[this.sourceToken]}):t.start.push(this.sourceToken);return}if(this.indent>e.indent){let i=this.startBlockValue(e);if(i){this.stack.push(i);return}}yield*this.pop(),yield*this.step()}*flowCollection(e){let t=e.items[e.items.length-1];if(this.type==="flow-error-end"){let i;do yield*this.pop(),i=this.peek(1);while(i?.type==="flow-collection")}else if(e.end.length===0){switch(this.type){case"comma":case"explicit-key-ind":!t||t.sep?e.items.push({start:[this.sourceToken]}):t.start.push(this.sourceToken);return;case"map-value-ind":!t||t.value?e.items.push({start:[],key:null,sep:[this.sourceToken]}):t.sep?t.sep.push(this.sourceToken):Object.assign(t,{key:null,sep:[this.sourceToken]});return;case"space":case"comment":case"newline":case"anchor":case"tag":!t||t.value?e.items.push({start:[this.sourceToken]}):t.sep?t.sep.push(this.sourceToken):t.start.push(this.sourceToken);return;case"alias":case"scalar":case"single-quoted-scalar":case"double-quoted-scalar":{let n=this.flowScalar(this.type);!t||t.value?e.items.push({start:[],key:n,sep:[]}):t.sep?this.stack.push(n):Object.assign(t,{key:n,sep:[]});return}case"flow-map-end":case"flow-seq-end":e.end.push(this.sourceToken);return}let i=this.startBlockValue(e);i?this.stack.push(i):(yield*this.pop(),yield*this.step())}else{let i=this.peek(2);if(i.type==="block-map"&&(this.type==="map-value-ind"&&i.indent===e.indent||this.type==="newline"&&!i.items[i.items.length-1].sep))yield*this.pop(),yield*this.step();else if(this.type==="map-value-ind"&&i.type!=="flow-collection"){let n=ts(i),r=ve(n);Lo(e);let o=e.end.splice(1,e.end.length);o.push(this.sourceToken);let a={type:"block-map",offset:e.offset,indent:e.indent,items:[{start:r,key:e,sep:o}]};this.onKeyLine=!0,this.stack[this.stack.length-1]=a}else yield*this.lineEnd(e)}}flowScalar(e){if(this.onNewLine){let t=this.source.indexOf(`
-`)+1;for(;t!==0;)this.onNewLine(this.offset+t),t=this.source.indexOf(`
-`,t)+1}return{type:e,offset:this.offset,indent:this.indent,source:this.source}}startBlockValue(e){switch(this.type){case"alias":case"scalar":case"single-quoted-scalar":case"double-quoted-scalar":return this.flowScalar(this.type);case"block-scalar-header":return{type:"block-scalar",offset:this.offset,indent:this.indent,props:[this.sourceToken],source:""};case"flow-map-start":case"flow-seq-start":return{type:"flow-collection",offset:this.offset,indent:this.indent,start:this.sourceToken,items:[],end:[]};case"seq-item-ind":return{type:"block-seq",offset:this.offset,indent:this.indent,items:[{start:[this.sourceToken]}]};case"explicit-key-ind":{this.onKeyLine=!0;let t=ts(e),i=ve(t);return i.push(this.sourceToken),{type:"block-map",offset:this.offset,indent:this.indent,items:[{start:i,explicitKey:!0}]}}case"map-value-ind":{this.onKeyLine=!0;let t=ts(e),i=ve(t);return{type:"block-map",offset:this.offset,indent:this.indent,items:[{start:i,key:null,sep:[this.sourceToken]}]}}}return null}atIndentedComment(e,t){return this.type!=="comment"||this.indent<=t?!1:e.every(i=>i.type==="newline"||i.type==="space")}*documentEnd(e){this.type!=="doc-mode"&&(e.end?e.end.push(this.sourceToken):e.end=[this.sourceToken],this.type==="newline"&&(yield*this.pop()))}*lineEnd(e){switch(this.type){case"comma":case"doc-start":case"doc-end":case"flow-seq-end":case"flow-map-end":case"map-value-ind":yield*this.pop(),yield*this.step();break;case"newline":this.onKeyLine=!1;default:e.end?e.end.push(this.sourceToken):e.end=[this.sourceToken],this.type==="newline"&&(yield*this.pop())}}};$o.Parser=Ri});var Ko=g(Ze=>{"use strict";var _o=Ci(),mf=Ve(),ze=Ge(),gf=Ts(),yf=T(),bf=Ki(),Do=Fi();function jo(s){let e=s.prettyErrors!==!1;return{lineCounter:s.lineCounter||e&&new bf.LineCounter||null,prettyErrors:e}}function Sf(s,e={}){let{lineCounter:t,prettyErrors:i}=jo(e),n=new Do.Parser(t?.addNewLine),r=new _o.Composer(e),o=Array.from(r.compose(n.parse(s)));if(i&&t)for(let a of o)a.errors.forEach(ze.prettifyError(s,t)),a.warnings.forEach(ze.prettifyError(s,t));return o.length>0?o:Object.assign([],{empty:!0},r.streamInfo())}function Bo(s,e={}){let{lineCounter:t,prettyErrors:i}=jo(e),n=new Do.Parser(t?.addNewLine),r=new _o.Composer(e),o=null;for(let a of r.compose(n.parse(s),!0,s.length))if(!o)o=a;else if(o.options.logLevel!=="silent"){o.errors.push(new ze.YAMLParseError(a.range.slice(0,2),"MULTIPLE_DOCS","Source contains multiple documents; please use YAML.parseAllDocuments()"));break}return i&&t&&(o.errors.forEach(ze.prettifyError(s,t)),o.warnings.forEach(ze.prettifyError(s,t))),o}function wf(s,e,t){let i;typeof e=="function"?i=e:t===void 0&&e&&typeof e=="object"&&(t=e);let n=Bo(s,t);if(!n)return null;if(n.warnings.forEach(r=>gf.warn(n.options.logLevel,r)),n.errors.length>0){if(n.options.logLevel!=="silent")throw n.errors[0];n.errors=[]}return n.toJS(Object.assign({reviver:i},t))}function vf(s,e,t){let i=null;if(typeof e=="function"||Array.isArray(e)?i=e:t===void 0&&e&&(t=e),typeof t=="string"&&(t=t.length),typeof t=="number"){let n=Math.round(t);t=n<1?void 0:n>8?{indent:8}:{indent:n}}if(s===void 0){let{keepUndefined:n}=t??e??{};if(!n)return}return yf.isDocument(s)&&!i?s.toString(t):new mf.Document(s,i,t).toString(t)}Ze.parse=wf;Ze.parseAllDocuments=Sf;Ze.parseDocument=Bo;Ze.stringify=vf});var Fo=g(C=>{"use strict";var kf=Ci(),Nf=Ve(),Af=ai(),Ui=Ge(),Tf=Ee(),se=T(),qf=X(),Cf=O(),Ef=Z(),Of=ee(),Pf=Zt(),If=ji(),Lf=Ki(),Mf=Fi(),is=Ko(),Ro=Ae();C.Composer=kf.Composer;C.Document=Nf.Document;C.Schema=Af.Schema;C.YAMLError=Ui.YAMLError;C.YAMLParseError=Ui.YAMLParseError;C.YAMLWarning=Ui.YAMLWarning;C.Alias=Tf.Alias;C.isAlias=se.isAlias;C.isCollection=se.isCollection;C.isDocument=se.isDocument;C.isMap=se.isMap;C.isNode=se.isNode;C.isPair=se.isPair;C.isScalar=se.isScalar;C.isSeq=se.isSeq;C.Pair=qf.Pair;C.Scalar=Cf.Scalar;C.YAMLMap=Ef.YAMLMap;C.YAMLSeq=Of.YAMLSeq;C.CST=Pf;C.Lexer=If.Lexer;C.LineCounter=Lf.LineCounter;C.Parser=Mf.Parser;C.parse=is.parse;C.parseAllDocuments=is.parseAllDocuments;C.parseDocument=is.parseDocument;C.stringify=is.stringify;C.visit=Ro.visit;C.visitAsync=Ro.visitAsync});var Uf={};zo(Uf,{activate:()=>Rf,deactivate:()=>Ff});module.exports=Zo(Uf);var ie=ke(require("vscode"));var M=class extends Error{constructor(t,i,n,r){super(t);this.status=i;this.detail=n;this.currentRevision=r;this.name="ControllerError"}status;detail;currentRevision},it=class{constructor(e="http://127.0.0.1:8787",t=15e3,i=globalThis.fetch){this.baseUrl=e;this.timeoutMs=t;this.fetchImpl=i}baseUrl;timeoutMs;fetchImpl;async getSkills(){let e=await this.request("/skills",{method:"GET"});return sa(e)}async setSkill(e,t,i){let n=await this.request(`/skills/${encodeURIComponent(e)}`,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({enabled:t,expected_revision:i})});return ia(n)}async request(e,t){let i=new AbortController,n=setTimeout(()=>i.abort(),this.timeoutMs);try{let r=await this.fetchImpl(`${this.baseUrl}${e}`,{...t,headers:{Accept:"application/json",...t.headers},signal:i.signal}),o=await ea(r);if(!r.ok){let a=nt(o)?o.detail:void 0,l=nt(a)?a.current_revision:void 0,c=typeof l=="number"?l:void 0;throw new M(ta(r.status,a),r.status,a,c)}return o}catch(r){if(r instanceof M)throw r;let o=r instanceof Error?r.message:String(r);throw new M(`SkillPanel controller request failed: ${o}`)}finally{clearTimeout(n)}}};async function ea(s){let e=await s.text();if(!e)throw new M(`Controller returned an empty HTTP ${s.status} response`);try{return JSON.parse(e)}catch{throw new M(`Controller returned invalid JSON with HTTP ${s.status}`)}}function ta(s,e){return typeof e=="string"?`Controller returned HTTP ${s}: ${e}`:nt(e)&&typeof e.message=="string"?`Controller returned HTTP ${s}: ${e.message}`:`Controller returned HTTP ${s}`}function sa(s){let e=Ne(s,"catalog"),t=ls(e.revision,"catalog.revision"),i=rt(e.skills,"catalog.skills").map(na),n=rt(e.reconciliations??[],"catalog.reconciliations").map(Hi);return{revision:t,skills:i,reconciliations:n,pids:Qi(e.pids)}}function ia(s){let e=Ne(s,"toggle result"),t=e.hermes_refresh;if(t!==void 0&&t!=="next-turn")throw new M("Controller returned an invalid hermes_refresh value");return{ok:st(e.ok,"toggle.ok"),changed:st(e.changed,"toggle.changed"),name:Y(e.name,"toggle.name"),enabled:st(e.enabled,"toggle.enabled"),revision:ls(e.revision,"toggle.revision"),reconciliations:rt(e.reconciliations??[],"toggle.reconciliations").map(Hi),opencode_skills:rt(e.opencode_skills,"toggle.opencode_skills").map(i=>Y(i,"toggle.opencode_skills[]")),pids:Qi(e.pids),latency_ms:ra(e.latency_ms,"toggle.latency_ms"),hermes_refresh:t}}function na(s){let e=Ne(s,"skill");return{name:Y(e.name,"skill.name"),description:Y(e.description,"skill.description"),enabled:st(e.enabled,"skill.enabled"),location:Y(e.location,"skill.location")}}function Hi(s){let e=Ne(s,"reconciliation");return{name:Y(e.name,"reconciliation.name"),policy:Y(e.policy,"reconciliation.policy"),action:Y(e.action,"reconciliation.action"),disabled_location:Wi(e.disabled_location,"reconciliation.disabled_location"),quarantine_location:Wi(e.quarantine_location,"reconciliation.quarantine_location")}}function Qi(s){let e=Ne(s,"pids");return{opencode:as(e.opencode,"pids.opencode"),hermes:as(e.hermes,"pids.hermes"),controller:as(e.controller,"pids.controller")}}function Ne(s,e){if(!nt(s))throw new M(`Controller returned an invalid ${e}`);return s}function nt(s){return typeof s=="object"&&s!==null&&!Array.isArray(s)}function rt(s,e){if(!Array.isArray(s))throw new M(`Controller returned an invalid ${e}`);return s}function Y(s,e){if(typeof s!="string")throw new M(`Controller returned an invalid ${e}`);return s}function Wi(s,e){return s===void 0?void 0:Y(s,e)}function st(s,e){if(typeof s!="boolean")throw new M(`Controller returned an invalid ${e}`);return s}function ls(s,e){if(typeof s!="number"||!Number.isInteger(s))throw new M(`Controller returned an invalid ${e}`);return s}function as(s,e){return s===null?null:ls(s,e)}function ra(s,e){if(typeof s!="number"||!Number.isFinite(s))throw new M(`Controller returned an invalid ${e}`);return s}var Vo=ke(require("node:path")),U=ke(require("vscode"));var Uo=ke(Fo()),$f=/^[a-z0-9]+(?:-[a-z0-9]+)*$/;function Yo(s,e){let t=/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(s);if(!t)return;let i;try{i=(0,Uo.parse)(t[1])}catch{return}if(!_f(i))return;let{name:n,description:r}=i;if(!(typeof n!="string"||!$f.test(n)||n!==e||typeof r!="string"||r.length<1||r.length>1024))return{name:n,description:r}}function _f(s){return typeof s=="object"&&s!==null&&!Array.isArray(s)}var Df=[[".opencode","skills"],[".agents","skills"],[".claude","skills"]],ns=class{constructor(e=U.workspace.fs){this.fileSystem=e}fileSystem;async scan(){let e=new Map;for(let t of U.workspace.workspaceFolders??[]){let i=await this.findGitRoot(t.uri);for(let n of jf(t.uri,i))for(let r of Df)await this.scanRoot(U.Uri.joinPath(n,...r),e)}return[...e.values()].map(t=>({...t,sourcePaths:[...t.sourcePaths].sort()})).sort((t,i)=>t.name.localeCompare(i.name))}async findGitRoot(e){let t=e;for(;;){if(await this.exists(U.Uri.joinPath(t,".git")))return t;let i=Jo(t);if(i.path===t.path)return e;t=i}}async scanRoot(e,t){let i;try{i=await this.fileSystem.readDirectory(e)}catch{return}for(let[n,r]of i){if(n.startsWith(".")||(r&U.FileType.SymbolicLink)!==0||(r&U.FileType.Directory)===0)continue;let o=U.Uri.joinPath(e,n,"SKILL.md"),a;try{a=await this.fileSystem.readFile(o)}catch{continue}let l=Yo(new TextDecoder().decode(a),n);if(!l)continue;let c=o.fsPath,h=t.get(l.name);h?h.sourcePaths.includes(c)||h.sourcePaths.push(c):t.set(l.name,{...l,sourcePaths:[c]})}}async exists(e){try{return await this.fileSystem.stat(e),!0}catch{return!1}}};function Jo(s){return s.with({path:Vo.posix.dirname(s.path)})}function jf(s,e){let t=[],i=s;for(;;){if(t.push(i),i.path===e.path)return t;let n=Jo(i);if(n.path===i.path)return t;i=n}}var rs=class{constructor(e,t,i){this.controller=e;this.projectSource=t;this.notifications=i}controller;projectSource;notifications;catalog;projectSkills=[];pendingName;refreshing=!1;connectionError;listeners=new Set;refreshPromise;onDidChange(e){return this.listeners.add(e),{dispose:()=>this.listeners.delete(e)}}async refresh(){if(!this.pendingName){if(this.refreshPromise)return this.refreshPromise;this.refreshPromise=this.performRefresh();try{await this.refreshPromise}finally{this.refreshPromise=void 0}}}async performRefresh(){this.refreshing=!0,this.emit();try{await this.loadAuthoritativeState()}catch(e){this.connectionError=Yi(e),this.notifications.error(`\u65E0\u6CD5\u5237\u65B0 Skills\uFF1A${this.connectionError}`)}finally{this.refreshing=!1,this.emit()}}async toggle(e){if(this.pendingName||this.refreshing||this.connectionError||!this.catalog)return;let t=this.catalog.skills.find(i=>i.name===e);if(t){this.pendingName=e,this.emit();try{await this.controller.setSkill(e,!t.enabled,this.catalog.revision)}catch(i){this.notifyToggleFailure(i)}finally{try{await this.loadAuthoritativeState()}catch(i){this.connectionError=Yi(i),this.notifications.error(`\u65E0\u6CD5\u8BFB\u53D6\u5207\u6362\u540E\u7684\u771F\u5B9E\u72B6\u6001\uFF1A${this.connectionError}`)}this.pendingName=void 0,this.emit()}}}async loadAuthoritativeState(){let[e,t]=await Promise.all([this.controller.getSkills(),this.projectSource.scan()]);this.catalog=e,this.projectSkills=t,this.connectionError=void 0}notifyToggleFailure(e){if(e instanceof M&&e.status===409){let n=e.currentRevision;this.notifications.warning(n===void 0?"Skill \u72B6\u6001\u5DF2\u88AB\u5176\u4ED6\u5BA2\u6237\u7AEF\u4FEE\u6539\uFF0C\u5217\u8868\u5DF2\u5237\u65B0\uFF1B\u8BF7\u786E\u8BA4\u540E\u91CD\u65B0\u70B9\u51FB\u3002":`Skill \u72B6\u6001\u5DF2\u66F4\u65B0\u5230 revision ${n}\uFF0C\u5217\u8868\u5DF2\u5237\u65B0\uFF1B\u8BF7\u786E\u8BA4\u540E\u91CD\u65B0\u70B9\u51FB\u3002`);return}let t=e instanceof M?e.status:void 0,i=t===503||t===507?"\u5207\u6362\u5931\u8D25\uFF0C\u63A7\u5236\u5668\u5DF2\u6267\u884C\u56DE\u6EDA":"\u5207\u6362\u5931\u8D25";this.notifications.error(`${i}\uFF1A${Yi(e)}`)}emit(){for(let e of this.listeners)e()}};function Yi(s){return s instanceof Error?s.message:String(s)}var q=ke(require("vscode"));function Vi(s,e){if(!s)return[];let t=new Map(s.skills.map(n=>[n.name,n])),i=[];for(let n of e){let r=t.get(n.name);r&&i.push({id:`scope:${n.name}`,name:n.name,summary:r.enabled?"\u5168\u5C40\u4E0E\u9879\u76EE Skill \u540C\u540D\uFF0COpenCode \u8981\u6C42\u540D\u79F0\u552F\u4E00":"\u5168\u5C40\u7248\u672C\u5DF2\u7981\u7528\uFF0C\u5F53\u524D\u9879\u76EE\u7684\u540C\u540D Skill \u4ECD\u7136\u542F\u7528",sourcePaths:[r.location,...n.sourcePaths]})}for(let n of s.reconciliations){let r=n.quarantine_location??n.disabled_location;i.push({id:`reconciliation:${n.name}:${r??n.action}`,name:n.name,summary:n.policy==="disabled-wins"?"\u68C0\u6D4B\u5230\u91CD\u590D\u5B89\u88C5\uFF1B\u7981\u7528\u7248\u672C\u4F18\u5148\uFF0C\u65B0\u542F\u7528\u526F\u672C\u5DF2\u9694\u79BB":`\u63A7\u5236\u5668\u5DF2\u6267\u884C ${n.action}`,sourcePaths:[n.disabled_location,n.quarantine_location].filter(o=>typeof o=="string")})}return i.sort((n,r)=>n.name===r.name?n.id.localeCompare(r.id):n.name.localeCompare(r.name))}var os=class{constructor(e){this.model=e}model;changed=new q.EventEmitter;onDidChangeTreeData=this.changed.event;refresh(){this.changed.fire(void 0)}getTreeItem(e){switch(e.kind){case"group":return this.groupItem(e);case"global":return this.globalItem(e.skill);case"project":return this.projectItem(e.skill);case"conflict":return this.conflictItem(e.conflict);case"empty":return this.emptyItem();case"error":return this.errorItem()}}getChildren(e){if(!e)return this.rootNodes();if(e.kind!=="group")return[];let t=this.model.catalog;switch(e.group){case"enabled":return(t?.skills??[]).filter(i=>i.enabled).sort(Ji).map(i=>({kind:"global",skill:i}));case"disabled":return(t?.skills??[]).filter(i=>!i.enabled).sort(Ji).map(i=>({kind:"global",skill:i}));case"project":return[...this.model.projectSkills].sort(Ji).map(i=>({kind:"project",skill:i}));case"conflict":return Vi(this.model.catalog,this.model.projectSkills).map(i=>({kind:"conflict",conflict:i}))}}rootNodes(){let e=[],t=this.model.catalog;(this.model.connectionError||!t)&&e.push({kind:"error"}),t?.skills.length===0&&!this.model.connectionError?e.push({kind:"empty"}):t?.skills.length&&e.push({kind:"group",group:"enabled",count:t.skills.filter(n=>n.enabled).length},{kind:"group",group:"disabled",count:t.skills.filter(n=>!n.enabled).length}),this.model.projectSkills.length>0&&e.push({kind:"group",group:"project",count:this.model.projectSkills.length});let i=Vi(t,this.model.projectSkills);return i.length>0&&e.push({kind:"group",group:"conflict",count:i.length}),e}groupItem(e){let t={enabled:"\u5DF2\u542F\u7528",disabled:"\u5DF2\u7981\u7528",project:"\u9879\u76EE\u7EA7",conflict:"\u51B2\u7A81"},i=new q.TreeItem(t[e.group],q.TreeItemCollapsibleState.Expanded);return i.id=`group:${e.group}`,i.description=String(e.count),i.contextValue=`skillPanel.group.${e.group}`,i}globalItem(e){let t=this.model.pendingName===e.name,i=new q.TreeItem(e.name,q.TreeItemCollapsibleState.None);return i.id=`global:${e.name}`,i.description=t?"\u5207\u6362\u4E2D\u2026":void 0,i.contextValue=t?"skillPanel.global.pending":"skillPanel.global",i.iconPath=t?new q.ThemeIcon("loading~spin"):e.enabled?new q.ThemeIcon("circle-filled",new q.ThemeColor("charts.green")):new q.ThemeIcon("circle-outline",new q.ThemeColor("disabledForeground")),i.tooltip=Bf(e),i.accessibilityInformation={role:"button",label:t?`${e.name}\uFF0C\u6B63\u5728\u5207\u6362`:`${e.name}\uFF0C${e.enabled?"\u5DF2\u542F\u7528\uFF0C\u70B9\u51FB\u7981\u7528":"\u5DF2\u7981\u7528\uFF0C\u70B9\u51FB\u542F\u7528"}`},!this.model.pendingName&&!this.model.refreshing&&!this.model.connectionError&&(i.command={command:"skillPanel.toggleSkill",title:e.enabled?"\u7981\u7528 Skill":"\u542F\u7528 Skill",arguments:[e.name]}),i}projectItem(e){let t=new q.TreeItem(e.name,q.TreeItemCollapsibleState.None);return t.id=`project:${e.name}`,t.contextValue="skillPanel.project",t.iconPath=new q.ThemeIcon("circle-filled",new q.ThemeColor("charts.blue")),t.tooltip=Kf(e),t.accessibilityInformation={role:"treeitem",label:`${e.name}\uFF0C\u9879\u76EE\u7EA7\uFF0C\u59CB\u7EC8\u542F\u7528`},t}conflictItem(e){let t=new q.TreeItem(e.name,q.TreeItemCollapsibleState.None);return t.id=`conflict:${e.id}`,t.description=e.summary,t.contextValue="skillPanel.conflict",t.iconPath=new q.ThemeIcon("warning",new q.ThemeColor("problemsWarningIcon.foreground")),t.tooltip=et([e.name,e.summary,...e.sourcePaths]),t}emptyItem(){let e=new q.TreeItem("\u672A\u53D1\u73B0\u5168\u5C40 Skills",q.TreeItemCollapsibleState.None);return e.id="status:empty",e.description="\u70B9\u51FB\u5237\u65B0",e.iconPath=new q.ThemeIcon("info"),e.tooltip=et(["\u672A\u53D1\u73B0\u5168\u5C40 Skills","\u542F\u7528\u76EE\u5F55\uFF1A/root/.config/opencode/skills","\u7981\u7528\u76EE\u5F55\uFF1A/root/.config/opencode/skills-disabled"]),e.command={command:"skillPanel.refresh",title:"\u5237\u65B0 Skills"},e}errorItem(){let e=new q.TreeItem("\u65E0\u6CD5\u8FDE\u63A5 SkillPanel \u63A7\u5236\u5668",q.TreeItemCollapsibleState.None);return e.id="status:error",e.description="\u70B9\u51FB\u91CD\u8BD5",e.iconPath=new q.ThemeIcon("error",new q.ThemeColor("problemsErrorIcon.foreground")),e.tooltip=et([this.model.connectionError??"\u5C1A\u672A\u8BFB\u53D6\u63A7\u5236\u5668\u72B6\u6001","\u63A7\u5236\u5668\u5730\u5740\uFF1Ahttp://127.0.0.1:8787"]),e.command={command:"skillPanel.refresh",title:"\u5237\u65B0 Skills"},e}};function xo(s){return"\u5F00\u5173\u6210\u529F\u540E\uFF0C\u4ECE\u4E0B\u4E00\u8F6E\u5BF9\u8BDD\u5F00\u59CB\u751F\u6548"}function Bf(s){return et([s.name,s.description||"\u65E0\u63CF\u8FF0",`\u72B6\u6001\uFF1A${s.enabled?"\u5DF2\u542F\u7528":"\u5DF2\u7981\u7528"}`,`\u6765\u6E90\uFF1A${s.location}`])}function Kf(s){return et([s.name,s.description,"\u72B6\u6001\uFF1A\u9879\u76EE\u7EA7\uFF0C\u59CB\u7EC8\u542F\u7528",...s.sourcePaths.map(e=>`\u6765\u6E90\uFF1A${e}`)])}function et(s){let e=new q.MarkdownString;return e.isTrusted=!1,e.supportHtml=!1,s.forEach((t,i)=>{i>0&&e.appendMarkdown(`
+// node_modules/yaml/dist/doc/applyReviver.js
+var require_applyReviver = __commonJS({
+  "node_modules/yaml/dist/doc/applyReviver.js"(exports2) {
+    "use strict";
+    function applyReviver(reviver, obj, key, val) {
+      if (val && typeof val === "object") {
+        if (Array.isArray(val)) {
+          for (let i = 0, len = val.length; i < len; ++i) {
+            const v0 = val[i];
+            const v1 = applyReviver(reviver, val, String(i), v0);
+            if (v1 === void 0)
+              delete val[i];
+            else if (v1 !== v0)
+              val[i] = v1;
+          }
+        } else if (val instanceof Map) {
+          for (const k of Array.from(val.keys())) {
+            const v0 = val.get(k);
+            const v1 = applyReviver(reviver, val, k, v0);
+            if (v1 === void 0)
+              val.delete(k);
+            else if (v1 !== v0)
+              val.set(k, v1);
+          }
+        } else if (val instanceof Set) {
+          for (const v0 of Array.from(val)) {
+            const v1 = applyReviver(reviver, val, v0, v0);
+            if (v1 === void 0)
+              val.delete(v0);
+            else if (v1 !== v0) {
+              val.delete(v0);
+              val.add(v1);
+            }
+          }
+        } else {
+          for (const [k, v0] of Object.entries(val)) {
+            const v1 = applyReviver(reviver, val, k, v0);
+            if (v1 === void 0)
+              delete val[k];
+            else if (v1 !== v0)
+              val[k] = v1;
+          }
+        }
+      }
+      return reviver.call(obj, key, val);
+    }
+    exports2.applyReviver = applyReviver;
+  }
+});
 
-`),e.appendText(t)}),e}function Ji(s,e){return s.name.localeCompare(e.name)}function Rf(s){let e=process.env.SKILLPANEL_CONTROLLER_URL??"http://127.0.0.1:8787",t=new rs(new it(e),new ns,{warning:o=>{ie.window.showWarningMessage(o)},error:o=>{ie.window.showErrorMessage(o)}}),i=new os(t),n=ie.window.createTreeView("skillPanel.skills",{treeDataProvider:i,showCollapseAll:!1}),r=()=>{i.refresh(),n.message=xo(t),ie.commands.executeCommand("setContext","skillPanel.hasGlobalSkills",(t.catalog?.skills.length??0)>0)};return s.subscriptions.push(n,t.onDidChange(r),ie.commands.registerCommand("skillPanel.refresh",()=>t.refresh()),ie.commands.registerCommand("skillPanel.toggleSkill",o=>typeof o=="string"?t.toggle(o):void 0)),r(),t.refresh(),{model:t,provider:i,refresh:()=>t.refresh()}}function Ff(){}0&&(module.exports={activate,deactivate});
+// node_modules/yaml/dist/nodes/toJS.js
+var require_toJS = __commonJS({
+  "node_modules/yaml/dist/nodes/toJS.js"(exports2) {
+    "use strict";
+    var identity = require_identity();
+    function toJS(value, arg, ctx) {
+      if (Array.isArray(value))
+        return value.map((v, i) => toJS(v, String(i), ctx));
+      if (value && typeof value.toJSON === "function") {
+        if (!ctx || !identity.hasAnchor(value))
+          return value.toJSON(arg, ctx);
+        const data = { aliasCount: 0, count: 1, res: void 0 };
+        ctx.anchors.set(value, data);
+        ctx.onCreate = (res2) => {
+          data.res = res2;
+          delete ctx.onCreate;
+        };
+        const res = value.toJSON(arg, ctx);
+        if (ctx.onCreate)
+          ctx.onCreate(res);
+        return res;
+      }
+      if (typeof value === "bigint" && !ctx?.keep)
+        return Number(value);
+      return value;
+    }
+    exports2.toJS = toJS;
+  }
+});
+
+// node_modules/yaml/dist/nodes/Node.js
+var require_Node = __commonJS({
+  "node_modules/yaml/dist/nodes/Node.js"(exports2) {
+    "use strict";
+    var applyReviver = require_applyReviver();
+    var identity = require_identity();
+    var toJS = require_toJS();
+    var NodeBase = class {
+      constructor(type) {
+        Object.defineProperty(this, identity.NODE_TYPE, { value: type });
+      }
+      /** Create a copy of this node.  */
+      clone() {
+        const copy = Object.create(Object.getPrototypeOf(this), Object.getOwnPropertyDescriptors(this));
+        if (this.range)
+          copy.range = this.range.slice();
+        return copy;
+      }
+      /** A plain JavaScript representation of this node. */
+      toJS(doc, { mapAsMap, maxAliasCount, onAnchor, reviver } = {}) {
+        if (!identity.isDocument(doc))
+          throw new TypeError("A document argument is required");
+        const ctx = {
+          anchors: /* @__PURE__ */ new Map(),
+          doc,
+          keep: true,
+          mapAsMap: mapAsMap === true,
+          mapKeyWarned: false,
+          maxAliasCount: typeof maxAliasCount === "number" ? maxAliasCount : 100
+        };
+        const res = toJS.toJS(this, "", ctx);
+        if (typeof onAnchor === "function")
+          for (const { count, res: res2 } of ctx.anchors.values())
+            onAnchor(res2, count);
+        return typeof reviver === "function" ? applyReviver.applyReviver(reviver, { "": res }, "", res) : res;
+      }
+    };
+    exports2.NodeBase = NodeBase;
+  }
+});
+
+// node_modules/yaml/dist/nodes/Alias.js
+var require_Alias = __commonJS({
+  "node_modules/yaml/dist/nodes/Alias.js"(exports2) {
+    "use strict";
+    var anchors = require_anchors();
+    var visit = require_visit();
+    var identity = require_identity();
+    var Node = require_Node();
+    var toJS = require_toJS();
+    var Alias = class extends Node.NodeBase {
+      constructor(source) {
+        super(identity.ALIAS);
+        this.source = source;
+        Object.defineProperty(this, "tag", {
+          set() {
+            throw new Error("Alias nodes cannot have tags");
+          }
+        });
+      }
+      /**
+       * Resolve the value of this alias within `doc`, finding the last
+       * instance of the `source` anchor before this node.
+       */
+      resolve(doc, ctx) {
+        if (ctx?.maxAliasCount === 0)
+          throw new ReferenceError("Alias resolution is disabled");
+        let nodes;
+        if (ctx?.aliasResolveCache) {
+          nodes = ctx.aliasResolveCache;
+        } else {
+          nodes = [];
+          visit.visit(doc, {
+            Node: (_key, node) => {
+              if (identity.isAlias(node) || identity.hasAnchor(node))
+                nodes.push(node);
+            }
+          });
+          if (ctx)
+            ctx.aliasResolveCache = nodes;
+        }
+        let found = void 0;
+        for (const node of nodes) {
+          if (node === this)
+            break;
+          if (node.anchor === this.source)
+            found = node;
+        }
+        return found;
+      }
+      toJSON(_arg, ctx) {
+        if (!ctx)
+          return { source: this.source };
+        const { anchors: anchors2, doc, maxAliasCount } = ctx;
+        const source = this.resolve(doc, ctx);
+        if (!source) {
+          const msg = `Unresolved alias (the anchor must be set before the alias): ${this.source}`;
+          throw new ReferenceError(msg);
+        }
+        let data = anchors2.get(source);
+        if (!data) {
+          toJS.toJS(source, null, ctx);
+          data = anchors2.get(source);
+        }
+        if (data?.res === void 0) {
+          const msg = "This should not happen: Alias anchor was not resolved?";
+          throw new ReferenceError(msg);
+        }
+        if (maxAliasCount >= 0) {
+          data.count += 1;
+          if (data.aliasCount === 0)
+            data.aliasCount = getAliasCount(doc, source, anchors2);
+          if (data.count * data.aliasCount > maxAliasCount) {
+            const msg = "Excessive alias count indicates a resource exhaustion attack";
+            throw new ReferenceError(msg);
+          }
+        }
+        return data.res;
+      }
+      toString(ctx, _onComment, _onChompKeep) {
+        const src = `*${this.source}`;
+        if (ctx) {
+          anchors.anchorIsValid(this.source);
+          if (ctx.options.verifyAliasOrder && !ctx.anchors.has(this.source)) {
+            const msg = `Unresolved alias (the anchor must be set before the alias): ${this.source}`;
+            throw new Error(msg);
+          }
+          if (ctx.implicitKey)
+            return `${src} `;
+        }
+        return src;
+      }
+    };
+    function getAliasCount(doc, node, anchors2) {
+      if (identity.isAlias(node)) {
+        const source = node.resolve(doc);
+        const anchor = anchors2 && source && anchors2.get(source);
+        return anchor ? anchor.count * anchor.aliasCount : 0;
+      } else if (identity.isCollection(node)) {
+        let count = 0;
+        for (const item of node.items) {
+          const c = getAliasCount(doc, item, anchors2);
+          if (c > count)
+            count = c;
+        }
+        return count;
+      } else if (identity.isPair(node)) {
+        const kc = getAliasCount(doc, node.key, anchors2);
+        const vc = getAliasCount(doc, node.value, anchors2);
+        return Math.max(kc, vc);
+      }
+      return 1;
+    }
+    exports2.Alias = Alias;
+  }
+});
+
+// node_modules/yaml/dist/nodes/Scalar.js
+var require_Scalar = __commonJS({
+  "node_modules/yaml/dist/nodes/Scalar.js"(exports2) {
+    "use strict";
+    var identity = require_identity();
+    var Node = require_Node();
+    var toJS = require_toJS();
+    var isScalarValue = (value) => !value || typeof value !== "function" && typeof value !== "object";
+    var Scalar = class extends Node.NodeBase {
+      constructor(value) {
+        super(identity.SCALAR);
+        this.value = value;
+      }
+      toJSON(arg, ctx) {
+        return ctx?.keep ? this.value : toJS.toJS(this.value, arg, ctx);
+      }
+      toString() {
+        return String(this.value);
+      }
+    };
+    Scalar.BLOCK_FOLDED = "BLOCK_FOLDED";
+    Scalar.BLOCK_LITERAL = "BLOCK_LITERAL";
+    Scalar.PLAIN = "PLAIN";
+    Scalar.QUOTE_DOUBLE = "QUOTE_DOUBLE";
+    Scalar.QUOTE_SINGLE = "QUOTE_SINGLE";
+    exports2.Scalar = Scalar;
+    exports2.isScalarValue = isScalarValue;
+  }
+});
+
+// node_modules/yaml/dist/doc/createNode.js
+var require_createNode = __commonJS({
+  "node_modules/yaml/dist/doc/createNode.js"(exports2) {
+    "use strict";
+    var Alias = require_Alias();
+    var identity = require_identity();
+    var Scalar = require_Scalar();
+    var defaultTagPrefix = "tag:yaml.org,2002:";
+    function findTagObject(value, tagName, tags) {
+      if (tagName) {
+        const match = tags.filter((t) => t.tag === tagName);
+        const tagObj = match.find((t) => !t.format) ?? match[0];
+        if (!tagObj)
+          throw new Error(`Tag ${tagName} not found`);
+        return tagObj;
+      }
+      return tags.find((t) => t.identify?.(value) && !t.format);
+    }
+    function createNode(value, tagName, ctx) {
+      if (identity.isDocument(value))
+        value = value.contents;
+      if (identity.isNode(value))
+        return value;
+      if (identity.isPair(value)) {
+        const map = ctx.schema[identity.MAP].createNode?.(ctx.schema, null, ctx);
+        map.items.push(value);
+        return map;
+      }
+      if (value instanceof String || value instanceof Number || value instanceof Boolean || typeof BigInt !== "undefined" && value instanceof BigInt) {
+        value = value.valueOf();
+      }
+      const { aliasDuplicateObjects, onAnchor, onTagObj, schema, sourceObjects } = ctx;
+      let ref = void 0;
+      if (aliasDuplicateObjects && value && typeof value === "object") {
+        ref = sourceObjects.get(value);
+        if (ref) {
+          ref.anchor ?? (ref.anchor = onAnchor(value));
+          return new Alias.Alias(ref.anchor);
+        } else {
+          ref = { anchor: null, node: null };
+          sourceObjects.set(value, ref);
+        }
+      }
+      if (tagName?.startsWith("!!"))
+        tagName = defaultTagPrefix + tagName.slice(2);
+      let tagObj = findTagObject(value, tagName, schema.tags);
+      if (!tagObj) {
+        if (value && typeof value.toJSON === "function") {
+          value = value.toJSON();
+        }
+        if (!value || typeof value !== "object") {
+          const node2 = new Scalar.Scalar(value);
+          if (ref)
+            ref.node = node2;
+          return node2;
+        }
+        tagObj = value instanceof Map ? schema[identity.MAP] : Symbol.iterator in Object(value) ? schema[identity.SEQ] : schema[identity.MAP];
+      }
+      if (onTagObj) {
+        onTagObj(tagObj);
+        delete ctx.onTagObj;
+      }
+      const node = tagObj?.createNode ? tagObj.createNode(ctx.schema, value, ctx) : typeof tagObj?.nodeClass?.from === "function" ? tagObj.nodeClass.from(ctx.schema, value, ctx) : new Scalar.Scalar(value);
+      if (tagName)
+        node.tag = tagName;
+      else if (!tagObj.default)
+        node.tag = tagObj.tag;
+      if (ref)
+        ref.node = node;
+      return node;
+    }
+    exports2.createNode = createNode;
+  }
+});
+
+// node_modules/yaml/dist/nodes/Collection.js
+var require_Collection = __commonJS({
+  "node_modules/yaml/dist/nodes/Collection.js"(exports2) {
+    "use strict";
+    var createNode = require_createNode();
+    var identity = require_identity();
+    var Node = require_Node();
+    function collectionFromPath(schema, path2, value) {
+      let v = value;
+      for (let i = path2.length - 1; i >= 0; --i) {
+        const k = path2[i];
+        if (typeof k === "number" && Number.isInteger(k) && k >= 0) {
+          const a = [];
+          a[k] = v;
+          v = a;
+        } else {
+          v = /* @__PURE__ */ new Map([[k, v]]);
+        }
+      }
+      return createNode.createNode(v, void 0, {
+        aliasDuplicateObjects: false,
+        keepUndefined: false,
+        onAnchor: () => {
+          throw new Error("This should not happen, please report a bug.");
+        },
+        schema,
+        sourceObjects: /* @__PURE__ */ new Map()
+      });
+    }
+    var isEmptyPath = (path2) => path2 == null || typeof path2 === "object" && !!path2[Symbol.iterator]().next().done;
+    var Collection = class extends Node.NodeBase {
+      constructor(type, schema) {
+        super(type);
+        Object.defineProperty(this, "schema", {
+          value: schema,
+          configurable: true,
+          enumerable: false,
+          writable: true
+        });
+      }
+      /**
+       * Create a copy of this collection.
+       *
+       * @param schema - If defined, overwrites the original's schema
+       */
+      clone(schema) {
+        const copy = Object.create(Object.getPrototypeOf(this), Object.getOwnPropertyDescriptors(this));
+        if (schema)
+          copy.schema = schema;
+        copy.items = copy.items.map((it) => identity.isNode(it) || identity.isPair(it) ? it.clone(schema) : it);
+        if (this.range)
+          copy.range = this.range.slice();
+        return copy;
+      }
+      /**
+       * Adds a value to the collection. For `!!map` and `!!omap` the value must
+       * be a Pair instance or a `{ key, value }` object, which may not have a key
+       * that already exists in the map.
+       */
+      addIn(path2, value) {
+        if (isEmptyPath(path2))
+          this.add(value);
+        else {
+          const [key, ...rest] = path2;
+          const node = this.get(key, true);
+          if (identity.isCollection(node))
+            node.addIn(rest, value);
+          else if (node === void 0 && this.schema)
+            this.set(key, collectionFromPath(this.schema, rest, value));
+          else
+            throw new Error(`Expected YAML collection at ${key}. Remaining path: ${rest}`);
+        }
+      }
+      /**
+       * Removes a value from the collection.
+       * @returns `true` if the item was found and removed.
+       */
+      deleteIn(path2) {
+        const [key, ...rest] = path2;
+        if (rest.length === 0)
+          return this.delete(key);
+        const node = this.get(key, true);
+        if (identity.isCollection(node))
+          return node.deleteIn(rest);
+        else
+          throw new Error(`Expected YAML collection at ${key}. Remaining path: ${rest}`);
+      }
+      /**
+       * Returns item at `key`, or `undefined` if not found. By default unwraps
+       * scalar values from their surrounding node; to disable set `keepScalar` to
+       * `true` (collections are always returned intact).
+       */
+      getIn(path2, keepScalar) {
+        const [key, ...rest] = path2;
+        const node = this.get(key, true);
+        if (rest.length === 0)
+          return !keepScalar && identity.isScalar(node) ? node.value : node;
+        else
+          return identity.isCollection(node) ? node.getIn(rest, keepScalar) : void 0;
+      }
+      hasAllNullValues(allowScalar) {
+        return this.items.every((node) => {
+          if (!identity.isPair(node))
+            return false;
+          const n = node.value;
+          return n == null || allowScalar && identity.isScalar(n) && n.value == null && !n.commentBefore && !n.comment && !n.tag;
+        });
+      }
+      /**
+       * Checks if the collection includes a value with the key `key`.
+       */
+      hasIn(path2) {
+        const [key, ...rest] = path2;
+        if (rest.length === 0)
+          return this.has(key);
+        const node = this.get(key, true);
+        return identity.isCollection(node) ? node.hasIn(rest) : false;
+      }
+      /**
+       * Sets a value in this collection. For `!!set`, `value` needs to be a
+       * boolean to add/remove the item from the set.
+       */
+      setIn(path2, value) {
+        const [key, ...rest] = path2;
+        if (rest.length === 0) {
+          this.set(key, value);
+        } else {
+          const node = this.get(key, true);
+          if (identity.isCollection(node))
+            node.setIn(rest, value);
+          else if (node === void 0 && this.schema)
+            this.set(key, collectionFromPath(this.schema, rest, value));
+          else
+            throw new Error(`Expected YAML collection at ${key}. Remaining path: ${rest}`);
+        }
+      }
+    };
+    exports2.Collection = Collection;
+    exports2.collectionFromPath = collectionFromPath;
+    exports2.isEmptyPath = isEmptyPath;
+  }
+});
+
+// node_modules/yaml/dist/stringify/stringifyComment.js
+var require_stringifyComment = __commonJS({
+  "node_modules/yaml/dist/stringify/stringifyComment.js"(exports2) {
+    "use strict";
+    var stringifyComment = (str) => str.replace(/^(?!$)(?: $)?/gm, "#");
+    function indentComment(comment, indent) {
+      if (/^\n+$/.test(comment))
+        return comment.substring(1);
+      return indent ? comment.replace(/^(?! *$)/gm, indent) : comment;
+    }
+    var lineComment = (str, indent, comment) => str.endsWith("\n") ? indentComment(comment, indent) : comment.includes("\n") ? "\n" + indentComment(comment, indent) : (str.endsWith(" ") ? "" : " ") + comment;
+    exports2.indentComment = indentComment;
+    exports2.lineComment = lineComment;
+    exports2.stringifyComment = stringifyComment;
+  }
+});
+
+// node_modules/yaml/dist/stringify/foldFlowLines.js
+var require_foldFlowLines = __commonJS({
+  "node_modules/yaml/dist/stringify/foldFlowLines.js"(exports2) {
+    "use strict";
+    var FOLD_FLOW = "flow";
+    var FOLD_BLOCK = "block";
+    var FOLD_QUOTED = "quoted";
+    function foldFlowLines(text, indent, mode = "flow", { indentAtStart, lineWidth = 80, minContentWidth = 20, onFold, onOverflow } = {}) {
+      if (!lineWidth || lineWidth < 0)
+        return text;
+      if (lineWidth < minContentWidth)
+        minContentWidth = 0;
+      const endStep = Math.max(1 + minContentWidth, 1 + lineWidth - indent.length);
+      if (text.length <= endStep)
+        return text;
+      const folds = [];
+      const escapedFolds = {};
+      let end = lineWidth - indent.length;
+      if (typeof indentAtStart === "number") {
+        if (indentAtStart > lineWidth - Math.max(2, minContentWidth))
+          folds.push(0);
+        else
+          end = lineWidth - indentAtStart;
+      }
+      let split = void 0;
+      let prev = void 0;
+      let overflow = false;
+      let i = -1;
+      let escStart = -1;
+      let escEnd = -1;
+      if (mode === FOLD_BLOCK) {
+        i = consumeMoreIndentedLines(text, i, indent.length);
+        if (i !== -1)
+          end = i + endStep;
+      }
+      for (let ch; ch = text[i += 1]; ) {
+        if (mode === FOLD_QUOTED && ch === "\\") {
+          escStart = i;
+          switch (text[i + 1]) {
+            case "x":
+              i += 3;
+              break;
+            case "u":
+              i += 5;
+              break;
+            case "U":
+              i += 9;
+              break;
+            default:
+              i += 1;
+          }
+          escEnd = i;
+        }
+        if (ch === "\n") {
+          if (mode === FOLD_BLOCK)
+            i = consumeMoreIndentedLines(text, i, indent.length);
+          end = i + indent.length + endStep;
+          split = void 0;
+        } else {
+          if (ch === " " && prev && prev !== " " && prev !== "\n" && prev !== "	") {
+            const next = text[i + 1];
+            if (next && next !== " " && next !== "\n" && next !== "	")
+              split = i;
+          }
+          if (i >= end) {
+            if (split) {
+              folds.push(split);
+              end = split + endStep;
+              split = void 0;
+            } else if (mode === FOLD_QUOTED) {
+              while (prev === " " || prev === "	") {
+                prev = ch;
+                ch = text[i += 1];
+                overflow = true;
+              }
+              const j = i > escEnd + 1 ? i - 2 : escStart - 1;
+              if (escapedFolds[j])
+                return text;
+              folds.push(j);
+              escapedFolds[j] = true;
+              end = j + endStep;
+              split = void 0;
+            } else {
+              overflow = true;
+            }
+          }
+        }
+        prev = ch;
+      }
+      if (overflow && onOverflow)
+        onOverflow();
+      if (folds.length === 0)
+        return text;
+      if (onFold)
+        onFold();
+      let res = text.slice(0, folds[0]);
+      for (let i2 = 0; i2 < folds.length; ++i2) {
+        const fold = folds[i2];
+        const end2 = folds[i2 + 1] || text.length;
+        if (fold === 0)
+          res = `
+${indent}${text.slice(0, end2)}`;
+        else {
+          if (mode === FOLD_QUOTED && escapedFolds[fold])
+            res += `${text[fold]}\\`;
+          res += `
+${indent}${text.slice(fold + 1, end2)}`;
+        }
+      }
+      return res;
+    }
+    function consumeMoreIndentedLines(text, i, indent) {
+      let end = i;
+      let start = i + 1;
+      let ch = text[start];
+      while (ch === " " || ch === "	") {
+        if (i < start + indent) {
+          ch = text[++i];
+        } else {
+          do {
+            ch = text[++i];
+          } while (ch && ch !== "\n");
+          end = i;
+          start = i + 1;
+          ch = text[start];
+        }
+      }
+      return end;
+    }
+    exports2.FOLD_BLOCK = FOLD_BLOCK;
+    exports2.FOLD_FLOW = FOLD_FLOW;
+    exports2.FOLD_QUOTED = FOLD_QUOTED;
+    exports2.foldFlowLines = foldFlowLines;
+  }
+});
+
+// node_modules/yaml/dist/stringify/stringifyString.js
+var require_stringifyString = __commonJS({
+  "node_modules/yaml/dist/stringify/stringifyString.js"(exports2) {
+    "use strict";
+    var Scalar = require_Scalar();
+    var foldFlowLines = require_foldFlowLines();
+    var getFoldOptions = (ctx, isBlock) => ({
+      indentAtStart: isBlock ? ctx.indent.length : ctx.indentAtStart,
+      lineWidth: ctx.options.lineWidth,
+      minContentWidth: ctx.options.minContentWidth
+    });
+    var containsDocumentMarker = (str) => /^(%|---|\.\.\.)/m.test(str);
+    function lineLengthOverLimit(str, lineWidth, indentLength) {
+      if (!lineWidth || lineWidth < 0)
+        return false;
+      const limit = lineWidth - indentLength;
+      const strLen = str.length;
+      if (strLen <= limit)
+        return false;
+      for (let i = 0, start = 0; i < strLen; ++i) {
+        if (str[i] === "\n") {
+          if (i - start > limit)
+            return true;
+          start = i + 1;
+          if (strLen - start <= limit)
+            return false;
+        }
+      }
+      return true;
+    }
+    function doubleQuotedString(value, ctx) {
+      const json = JSON.stringify(value);
+      if (ctx.options.doubleQuotedAsJSON)
+        return json;
+      const { implicitKey } = ctx;
+      const minMultiLineLength = ctx.options.doubleQuotedMinMultiLineLength;
+      const indent = ctx.indent || (containsDocumentMarker(value) ? "  " : "");
+      let str = "";
+      let start = 0;
+      for (let i = 0, ch = json[i]; ch; ch = json[++i]) {
+        if (ch === " " && json[i + 1] === "\\" && json[i + 2] === "n") {
+          str += json.slice(start, i) + "\\ ";
+          i += 1;
+          start = i;
+          ch = "\\";
+        }
+        if (ch === "\\")
+          switch (json[i + 1]) {
+            case "u":
+              {
+                str += json.slice(start, i);
+                const code = json.substr(i + 2, 4);
+                switch (code) {
+                  case "0000":
+                    str += "\\0";
+                    break;
+                  case "0007":
+                    str += "\\a";
+                    break;
+                  case "000b":
+                    str += "\\v";
+                    break;
+                  case "001b":
+                    str += "\\e";
+                    break;
+                  case "0085":
+                    str += "\\N";
+                    break;
+                  case "00a0":
+                    str += "\\_";
+                    break;
+                  case "2028":
+                    str += "\\L";
+                    break;
+                  case "2029":
+                    str += "\\P";
+                    break;
+                  default:
+                    if (code.substr(0, 2) === "00")
+                      str += "\\x" + code.substr(2);
+                    else
+                      str += json.substr(i, 6);
+                }
+                i += 5;
+                start = i + 1;
+              }
+              break;
+            case "n":
+              if (implicitKey || json[i + 2] === '"' || json.length < minMultiLineLength) {
+                i += 1;
+              } else {
+                str += json.slice(start, i) + "\n\n";
+                while (json[i + 2] === "\\" && json[i + 3] === "n" && json[i + 4] !== '"') {
+                  str += "\n";
+                  i += 2;
+                }
+                str += indent;
+                if (json[i + 2] === " ")
+                  str += "\\";
+                i += 1;
+                start = i + 1;
+              }
+              break;
+            default:
+              i += 1;
+          }
+      }
+      str = start ? str + json.slice(start) : json;
+      return implicitKey ? str : foldFlowLines.foldFlowLines(str, indent, foldFlowLines.FOLD_QUOTED, getFoldOptions(ctx, false));
+    }
+    function singleQuotedString(value, ctx) {
+      if (ctx.options.singleQuote === false || ctx.implicitKey && value.includes("\n") || /[ \t]\n|\n[ \t]/.test(value))
+        return doubleQuotedString(value, ctx);
+      const indent = ctx.indent || (containsDocumentMarker(value) ? "  " : "");
+      const res = "'" + value.replace(/'/g, "''").replace(/\n+/g, `$&
+${indent}`) + "'";
+      return ctx.implicitKey ? res : foldFlowLines.foldFlowLines(res, indent, foldFlowLines.FOLD_FLOW, getFoldOptions(ctx, false));
+    }
+    function quotedString(value, ctx) {
+      const { singleQuote } = ctx.options;
+      let qs;
+      if (singleQuote === false)
+        qs = doubleQuotedString;
+      else {
+        const hasDouble = value.includes('"');
+        const hasSingle = value.includes("'");
+        if (hasDouble && !hasSingle)
+          qs = singleQuotedString;
+        else if (hasSingle && !hasDouble)
+          qs = doubleQuotedString;
+        else
+          qs = singleQuote ? singleQuotedString : doubleQuotedString;
+      }
+      return qs(value, ctx);
+    }
+    var blockEndNewlines;
+    try {
+      blockEndNewlines = new RegExp("(^|(?<!\n))\n+(?!\n|$)", "g");
+    } catch {
+      blockEndNewlines = /\n+(?!\n|$)/g;
+    }
+    function blockString({ comment, type, value }, ctx, onComment, onChompKeep) {
+      const { blockQuote, commentString, lineWidth } = ctx.options;
+      if (!blockQuote || /\n[\t ]+$/.test(value)) {
+        return quotedString(value, ctx);
+      }
+      const indent = ctx.indent || (ctx.forceBlockIndent || containsDocumentMarker(value) ? "  " : "");
+      const literal = blockQuote === "literal" ? true : blockQuote === "folded" || type === Scalar.Scalar.BLOCK_FOLDED ? false : type === Scalar.Scalar.BLOCK_LITERAL ? true : !lineLengthOverLimit(value, lineWidth, indent.length);
+      if (!value)
+        return literal ? "|\n" : ">\n";
+      let chomp;
+      let endStart;
+      for (endStart = value.length; endStart > 0; --endStart) {
+        const ch = value[endStart - 1];
+        if (ch !== "\n" && ch !== "	" && ch !== " ")
+          break;
+      }
+      let end = value.substring(endStart);
+      const endNlPos = end.indexOf("\n");
+      if (endNlPos === -1) {
+        chomp = "-";
+      } else if (value === end || endNlPos !== end.length - 1) {
+        chomp = "+";
+        if (onChompKeep)
+          onChompKeep();
+      } else {
+        chomp = "";
+      }
+      if (end) {
+        value = value.slice(0, -end.length);
+        if (end[end.length - 1] === "\n")
+          end = end.slice(0, -1);
+        end = end.replace(blockEndNewlines, `$&${indent}`);
+      }
+      let startWithSpace = false;
+      let startEnd;
+      let startNlPos = -1;
+      for (startEnd = 0; startEnd < value.length; ++startEnd) {
+        const ch = value[startEnd];
+        if (ch === " ")
+          startWithSpace = true;
+        else if (ch === "\n")
+          startNlPos = startEnd;
+        else
+          break;
+      }
+      let start = value.substring(0, startNlPos < startEnd ? startNlPos + 1 : startEnd);
+      if (start) {
+        value = value.substring(start.length);
+        start = start.replace(/\n+/g, `$&${indent}`);
+      }
+      const indentSize = indent ? "2" : "1";
+      let header = (startWithSpace ? indentSize : "") + chomp;
+      if (comment) {
+        header += " " + commentString(comment.replace(/ ?[\r\n]+/g, " "));
+        if (onComment)
+          onComment();
+      }
+      if (!literal) {
+        const foldedValue = value.replace(/\n+/g, "\n$&").replace(/(?:^|\n)([\t ].*)(?:([\n\t ]*)\n(?![\n\t ]))?/g, "$1$2").replace(/\n+/g, `$&${indent}`);
+        let literalFallback = false;
+        const foldOptions = getFoldOptions(ctx, true);
+        if (blockQuote !== "folded" && type !== Scalar.Scalar.BLOCK_FOLDED) {
+          foldOptions.onOverflow = () => {
+            literalFallback = true;
+          };
+        }
+        const body = foldFlowLines.foldFlowLines(`${start}${foldedValue}${end}`, indent, foldFlowLines.FOLD_BLOCK, foldOptions);
+        if (!literalFallback)
+          return `>${header}
+${indent}${body}`;
+      }
+      value = value.replace(/\n+/g, `$&${indent}`);
+      return `|${header}
+${indent}${start}${value}${end}`;
+    }
+    function plainString(item, ctx, onComment, onChompKeep) {
+      const { type, value } = item;
+      const { actualString, implicitKey, indent, indentStep, inFlow } = ctx;
+      if (implicitKey && value.includes("\n") || inFlow && /[[\]{},]/.test(value)) {
+        return quotedString(value, ctx);
+      }
+      if (/^[\n\t ,[\]{}#&*!|>'"%@`]|^[?-]$|^[?-][ \t]|[\n:][ \t]|[ \t]\n|[\n\t ]#|[\n\t :]$/.test(value)) {
+        return implicitKey || inFlow || !value.includes("\n") ? quotedString(value, ctx) : blockString(item, ctx, onComment, onChompKeep);
+      }
+      if (!implicitKey && !inFlow && type !== Scalar.Scalar.PLAIN && value.includes("\n")) {
+        return blockString(item, ctx, onComment, onChompKeep);
+      }
+      if (containsDocumentMarker(value)) {
+        if (indent === "") {
+          ctx.forceBlockIndent = true;
+          return blockString(item, ctx, onComment, onChompKeep);
+        } else if (implicitKey && indent === indentStep) {
+          return quotedString(value, ctx);
+        }
+      }
+      const str = value.replace(/\n+/g, `$&
+${indent}`);
+      if (actualString) {
+        const test = (tag) => tag.default && tag.tag !== "tag:yaml.org,2002:str" && tag.test?.test(str);
+        const { compat, tags } = ctx.doc.schema;
+        if (tags.some(test) || compat?.some(test))
+          return quotedString(value, ctx);
+      }
+      return implicitKey ? str : foldFlowLines.foldFlowLines(str, indent, foldFlowLines.FOLD_FLOW, getFoldOptions(ctx, false));
+    }
+    function stringifyString(item, ctx, onComment, onChompKeep) {
+      const { implicitKey, inFlow } = ctx;
+      const ss = typeof item.value === "string" ? item : Object.assign({}, item, { value: String(item.value) });
+      let { type } = item;
+      if (type !== Scalar.Scalar.QUOTE_DOUBLE) {
+        if (/[\x00-\x08\x0b-\x1f\x7f-\x9f\u{D800}-\u{DFFF}]/u.test(ss.value))
+          type = Scalar.Scalar.QUOTE_DOUBLE;
+      }
+      const _stringify = (_type) => {
+        switch (_type) {
+          case Scalar.Scalar.BLOCK_FOLDED:
+          case Scalar.Scalar.BLOCK_LITERAL:
+            return implicitKey || inFlow ? quotedString(ss.value, ctx) : blockString(ss, ctx, onComment, onChompKeep);
+          case Scalar.Scalar.QUOTE_DOUBLE:
+            return doubleQuotedString(ss.value, ctx);
+          case Scalar.Scalar.QUOTE_SINGLE:
+            return singleQuotedString(ss.value, ctx);
+          case Scalar.Scalar.PLAIN:
+            return plainString(ss, ctx, onComment, onChompKeep);
+          default:
+            return null;
+        }
+      };
+      let res = _stringify(type);
+      if (res === null) {
+        const { defaultKeyType, defaultStringType } = ctx.options;
+        const t = implicitKey && defaultKeyType || defaultStringType;
+        res = _stringify(t);
+        if (res === null)
+          throw new Error(`Unsupported default string type ${t}`);
+      }
+      return res;
+    }
+    exports2.stringifyString = stringifyString;
+  }
+});
+
+// node_modules/yaml/dist/stringify/stringify.js
+var require_stringify = __commonJS({
+  "node_modules/yaml/dist/stringify/stringify.js"(exports2) {
+    "use strict";
+    var anchors = require_anchors();
+    var identity = require_identity();
+    var stringifyComment = require_stringifyComment();
+    var stringifyString = require_stringifyString();
+    function createStringifyContext(doc, options) {
+      const opt = Object.assign({
+        blockQuote: true,
+        commentString: stringifyComment.stringifyComment,
+        defaultKeyType: null,
+        defaultStringType: "PLAIN",
+        directives: null,
+        doubleQuotedAsJSON: false,
+        doubleQuotedMinMultiLineLength: 40,
+        falseStr: "false",
+        flowCollectionPadding: true,
+        indentSeq: true,
+        lineWidth: 80,
+        minContentWidth: 20,
+        nullStr: "null",
+        simpleKeys: false,
+        singleQuote: null,
+        trailingComma: false,
+        trueStr: "true",
+        verifyAliasOrder: true
+      }, doc.schema.toStringOptions, options);
+      let inFlow;
+      switch (opt.collectionStyle) {
+        case "block":
+          inFlow = false;
+          break;
+        case "flow":
+          inFlow = true;
+          break;
+        default:
+          inFlow = null;
+      }
+      return {
+        anchors: /* @__PURE__ */ new Set(),
+        doc,
+        flowCollectionPadding: opt.flowCollectionPadding ? " " : "",
+        indent: "",
+        indentStep: typeof opt.indent === "number" ? " ".repeat(opt.indent) : "  ",
+        inFlow,
+        options: opt
+      };
+    }
+    function getTagObject(tags, item) {
+      if (item.tag) {
+        const match = tags.filter((t) => t.tag === item.tag);
+        if (match.length > 0)
+          return match.find((t) => t.format === item.format) ?? match[0];
+      }
+      let tagObj = void 0;
+      let obj;
+      if (identity.isScalar(item)) {
+        obj = item.value;
+        let match = tags.filter((t) => t.identify?.(obj));
+        if (match.length > 1) {
+          const testMatch = match.filter((t) => t.test);
+          if (testMatch.length > 0)
+            match = testMatch;
+        }
+        tagObj = match.find((t) => t.format === item.format) ?? match.find((t) => !t.format);
+      } else {
+        obj = item;
+        tagObj = tags.find((t) => t.nodeClass && obj instanceof t.nodeClass);
+      }
+      if (!tagObj) {
+        const name = obj?.constructor?.name ?? (obj === null ? "null" : typeof obj);
+        throw new Error(`Tag not resolved for ${name} value`);
+      }
+      return tagObj;
+    }
+    function stringifyProps(node, tagObj, { anchors: anchors$1, doc }) {
+      if (!doc.directives)
+        return "";
+      const props = [];
+      const anchor = (identity.isScalar(node) || identity.isCollection(node)) && node.anchor;
+      if (anchor && anchors.anchorIsValid(anchor)) {
+        anchors$1.add(anchor);
+        props.push(`&${anchor}`);
+      }
+      const tag = node.tag ?? (tagObj.default ? null : tagObj.tag);
+      if (tag)
+        props.push(doc.directives.tagString(tag));
+      return props.join(" ");
+    }
+    function stringify(item, ctx, onComment, onChompKeep) {
+      if (identity.isPair(item))
+        return item.toString(ctx, onComment, onChompKeep);
+      if (identity.isAlias(item)) {
+        if (ctx.doc.directives)
+          return item.toString(ctx);
+        if (ctx.resolvedAliases?.has(item)) {
+          throw new TypeError(`Cannot stringify circular structure without alias nodes`);
+        } else {
+          if (ctx.resolvedAliases)
+            ctx.resolvedAliases.add(item);
+          else
+            ctx.resolvedAliases = /* @__PURE__ */ new Set([item]);
+          item = item.resolve(ctx.doc);
+        }
+      }
+      let tagObj = void 0;
+      const node = identity.isNode(item) ? item : ctx.doc.createNode(item, { onTagObj: (o) => tagObj = o });
+      tagObj ?? (tagObj = getTagObject(ctx.doc.schema.tags, node));
+      const props = stringifyProps(node, tagObj, ctx);
+      if (props.length > 0)
+        ctx.indentAtStart = (ctx.indentAtStart ?? 0) + props.length + 1;
+      const str = typeof tagObj.stringify === "function" ? tagObj.stringify(node, ctx, onComment, onChompKeep) : identity.isScalar(node) ? stringifyString.stringifyString(node, ctx, onComment, onChompKeep) : node.toString(ctx, onComment, onChompKeep);
+      if (!props)
+        return str;
+      return identity.isScalar(node) || str[0] === "{" || str[0] === "[" ? `${props} ${str}` : `${props}
+${ctx.indent}${str}`;
+    }
+    exports2.createStringifyContext = createStringifyContext;
+    exports2.stringify = stringify;
+  }
+});
+
+// node_modules/yaml/dist/stringify/stringifyPair.js
+var require_stringifyPair = __commonJS({
+  "node_modules/yaml/dist/stringify/stringifyPair.js"(exports2) {
+    "use strict";
+    var identity = require_identity();
+    var Scalar = require_Scalar();
+    var stringify = require_stringify();
+    var stringifyComment = require_stringifyComment();
+    function stringifyPair({ key, value }, ctx, onComment, onChompKeep) {
+      const { allNullValues, doc, indent, indentStep, options: { commentString, indentSeq, simpleKeys } } = ctx;
+      let keyComment = identity.isNode(key) && key.comment || null;
+      if (simpleKeys) {
+        if (keyComment) {
+          throw new Error("With simple keys, key nodes cannot have comments");
+        }
+        if (identity.isCollection(key) || !identity.isNode(key) && typeof key === "object") {
+          const msg = "With simple keys, collection cannot be used as a key value";
+          throw new Error(msg);
+        }
+      }
+      let explicitKey = !simpleKeys && (!key || keyComment && value == null && !ctx.inFlow || identity.isCollection(key) || (identity.isScalar(key) ? key.type === Scalar.Scalar.BLOCK_FOLDED || key.type === Scalar.Scalar.BLOCK_LITERAL : typeof key === "object"));
+      ctx = Object.assign({}, ctx, {
+        allNullValues: false,
+        implicitKey: !explicitKey && (simpleKeys || !allNullValues),
+        indent: indent + indentStep
+      });
+      let keyCommentDone = false;
+      let chompKeep = false;
+      let str = stringify.stringify(key, ctx, () => keyCommentDone = true, () => chompKeep = true);
+      if (!explicitKey && !ctx.inFlow && str.length > 1024) {
+        if (simpleKeys)
+          throw new Error("With simple keys, single line scalar must not span more than 1024 characters");
+        explicitKey = true;
+      }
+      if (ctx.inFlow) {
+        if (allNullValues || value == null) {
+          if (keyCommentDone && onComment)
+            onComment();
+          return str === "" ? "?" : explicitKey ? `? ${str}` : str;
+        }
+      } else if (allNullValues && !simpleKeys || value == null && explicitKey) {
+        str = `? ${str}`;
+        if (keyComment && !keyCommentDone) {
+          str += stringifyComment.lineComment(str, ctx.indent, commentString(keyComment));
+        } else if (chompKeep && onChompKeep)
+          onChompKeep();
+        return str;
+      }
+      if (keyCommentDone)
+        keyComment = null;
+      if (explicitKey) {
+        if (keyComment)
+          str += stringifyComment.lineComment(str, ctx.indent, commentString(keyComment));
+        str = `? ${str}
+${indent}:`;
+      } else {
+        str = `${str}:`;
+        if (keyComment)
+          str += stringifyComment.lineComment(str, ctx.indent, commentString(keyComment));
+      }
+      let vsb, vcb, valueComment;
+      if (identity.isNode(value)) {
+        vsb = !!value.spaceBefore;
+        vcb = value.commentBefore;
+        valueComment = value.comment;
+      } else {
+        vsb = false;
+        vcb = null;
+        valueComment = null;
+        if (value && typeof value === "object")
+          value = doc.createNode(value);
+      }
+      ctx.implicitKey = false;
+      if (!explicitKey && !keyComment && identity.isScalar(value))
+        ctx.indentAtStart = str.length + 1;
+      chompKeep = false;
+      if (!indentSeq && indentStep.length >= 2 && !ctx.inFlow && !explicitKey && identity.isSeq(value) && !value.flow && !value.tag && !value.anchor) {
+        ctx.indent = ctx.indent.substring(2);
+      }
+      let valueCommentDone = false;
+      const valueStr = stringify.stringify(value, ctx, () => valueCommentDone = true, () => chompKeep = true);
+      let ws = " ";
+      if (keyComment || vsb || vcb) {
+        ws = vsb ? "\n" : "";
+        if (vcb) {
+          const cs = commentString(vcb);
+          ws += `
+${stringifyComment.indentComment(cs, ctx.indent)}`;
+        }
+        if (valueStr === "" && !ctx.inFlow) {
+          if (ws === "\n" && valueComment)
+            ws = "\n\n";
+        } else {
+          ws += `
+${ctx.indent}`;
+        }
+      } else if (!explicitKey && identity.isCollection(value)) {
+        const vs0 = valueStr[0];
+        const nl0 = valueStr.indexOf("\n");
+        const hasNewline = nl0 !== -1;
+        const flow = ctx.inFlow ?? value.flow ?? value.items.length === 0;
+        if (hasNewline || !flow) {
+          let hasPropsLine = false;
+          if (hasNewline && (vs0 === "&" || vs0 === "!")) {
+            let sp0 = valueStr.indexOf(" ");
+            if (vs0 === "&" && sp0 !== -1 && sp0 < nl0 && valueStr[sp0 + 1] === "!") {
+              sp0 = valueStr.indexOf(" ", sp0 + 1);
+            }
+            if (sp0 === -1 || nl0 < sp0)
+              hasPropsLine = true;
+          }
+          if (!hasPropsLine)
+            ws = `
+${ctx.indent}`;
+        }
+      } else if (valueStr === "" || valueStr[0] === "\n") {
+        ws = "";
+      }
+      str += ws + valueStr;
+      if (ctx.inFlow) {
+        if (valueCommentDone && onComment)
+          onComment();
+      } else if (valueComment && !valueCommentDone) {
+        str += stringifyComment.lineComment(str, ctx.indent, commentString(valueComment));
+      } else if (chompKeep && onChompKeep) {
+        onChompKeep();
+      }
+      return str;
+    }
+    exports2.stringifyPair = stringifyPair;
+  }
+});
+
+// node_modules/yaml/dist/log.js
+var require_log = __commonJS({
+  "node_modules/yaml/dist/log.js"(exports2) {
+    "use strict";
+    var node_process = require("process");
+    function debug(logLevel, ...messages) {
+      if (logLevel === "debug")
+        console.log(...messages);
+    }
+    function warn(logLevel, warning) {
+      if (logLevel === "debug" || logLevel === "warn") {
+        if (typeof node_process.emitWarning === "function")
+          node_process.emitWarning(warning);
+        else
+          console.warn(warning);
+      }
+    }
+    exports2.debug = debug;
+    exports2.warn = warn;
+  }
+});
+
+// node_modules/yaml/dist/schema/yaml-1.1/merge.js
+var require_merge = __commonJS({
+  "node_modules/yaml/dist/schema/yaml-1.1/merge.js"(exports2) {
+    "use strict";
+    var identity = require_identity();
+    var Scalar = require_Scalar();
+    var MERGE_KEY = "<<";
+    var merge = {
+      identify: (value) => value === MERGE_KEY || typeof value === "symbol" && value.description === MERGE_KEY,
+      default: "key",
+      tag: "tag:yaml.org,2002:merge",
+      test: /^<<$/,
+      resolve: () => Object.assign(new Scalar.Scalar(Symbol(MERGE_KEY)), {
+        addToJSMap: addMergeToJSMap
+      }),
+      stringify: () => MERGE_KEY
+    };
+    var isMergeKey = (ctx, key) => (merge.identify(key) || identity.isScalar(key) && (!key.type || key.type === Scalar.Scalar.PLAIN) && merge.identify(key.value)) && ctx?.doc.schema.tags.some((tag) => tag.tag === merge.tag && tag.default);
+    function addMergeToJSMap(ctx, map, value) {
+      const source = resolveAliasValue(ctx, value);
+      if (identity.isSeq(source))
+        for (const it of source.items)
+          mergeValue(ctx, map, it);
+      else if (Array.isArray(source))
+        for (const it of source)
+          mergeValue(ctx, map, it);
+      else
+        mergeValue(ctx, map, source);
+    }
+    function mergeValue(ctx, map, value) {
+      const source = resolveAliasValue(ctx, value);
+      if (!identity.isMap(source))
+        throw new Error("Merge sources must be maps or map aliases");
+      const srcMap = source.toJSON(null, ctx, Map);
+      for (const [key, value2] of srcMap) {
+        if (map instanceof Map) {
+          if (!map.has(key))
+            map.set(key, value2);
+        } else if (map instanceof Set) {
+          map.add(key);
+        } else if (!Object.prototype.hasOwnProperty.call(map, key)) {
+          Object.defineProperty(map, key, {
+            value: value2,
+            writable: true,
+            enumerable: true,
+            configurable: true
+          });
+        }
+      }
+      return map;
+    }
+    function resolveAliasValue(ctx, value) {
+      return ctx && identity.isAlias(value) ? value.resolve(ctx.doc, ctx) : value;
+    }
+    exports2.addMergeToJSMap = addMergeToJSMap;
+    exports2.isMergeKey = isMergeKey;
+    exports2.merge = merge;
+  }
+});
+
+// node_modules/yaml/dist/nodes/addPairToJSMap.js
+var require_addPairToJSMap = __commonJS({
+  "node_modules/yaml/dist/nodes/addPairToJSMap.js"(exports2) {
+    "use strict";
+    var log = require_log();
+    var merge = require_merge();
+    var stringify = require_stringify();
+    var identity = require_identity();
+    var toJS = require_toJS();
+    function addPairToJSMap(ctx, map, { key, value }) {
+      if (identity.isNode(key) && key.addToJSMap)
+        key.addToJSMap(ctx, map, value);
+      else if (merge.isMergeKey(ctx, key))
+        merge.addMergeToJSMap(ctx, map, value);
+      else {
+        const jsKey = toJS.toJS(key, "", ctx);
+        if (map instanceof Map) {
+          map.set(jsKey, toJS.toJS(value, jsKey, ctx));
+        } else if (map instanceof Set) {
+          map.add(jsKey);
+        } else {
+          const stringKey = stringifyKey(key, jsKey, ctx);
+          const jsValue = toJS.toJS(value, stringKey, ctx);
+          if (stringKey in map)
+            Object.defineProperty(map, stringKey, {
+              value: jsValue,
+              writable: true,
+              enumerable: true,
+              configurable: true
+            });
+          else
+            map[stringKey] = jsValue;
+        }
+      }
+      return map;
+    }
+    function stringifyKey(key, jsKey, ctx) {
+      if (jsKey === null)
+        return "";
+      if (typeof jsKey !== "object")
+        return String(jsKey);
+      if (identity.isNode(key) && ctx?.doc) {
+        const strCtx = stringify.createStringifyContext(ctx.doc, {});
+        strCtx.anchors = /* @__PURE__ */ new Set();
+        for (const node of ctx.anchors.keys())
+          strCtx.anchors.add(node.anchor);
+        strCtx.inFlow = true;
+        strCtx.inStringifyKey = true;
+        const strKey = key.toString(strCtx);
+        if (!ctx.mapKeyWarned) {
+          let jsonStr = JSON.stringify(strKey);
+          if (jsonStr.length > 40)
+            jsonStr = jsonStr.substring(0, 36) + '..."';
+          log.warn(ctx.doc.options.logLevel, `Keys with collection values will be stringified due to JS Object restrictions: ${jsonStr}. Set mapAsMap: true to use object keys.`);
+          ctx.mapKeyWarned = true;
+        }
+        return strKey;
+      }
+      return JSON.stringify(jsKey);
+    }
+    exports2.addPairToJSMap = addPairToJSMap;
+  }
+});
+
+// node_modules/yaml/dist/nodes/Pair.js
+var require_Pair = __commonJS({
+  "node_modules/yaml/dist/nodes/Pair.js"(exports2) {
+    "use strict";
+    var createNode = require_createNode();
+    var stringifyPair = require_stringifyPair();
+    var addPairToJSMap = require_addPairToJSMap();
+    var identity = require_identity();
+    function createPair(key, value, ctx) {
+      const k = createNode.createNode(key, void 0, ctx);
+      const v = createNode.createNode(value, void 0, ctx);
+      return new Pair(k, v);
+    }
+    var Pair = class _Pair {
+      constructor(key, value = null) {
+        Object.defineProperty(this, identity.NODE_TYPE, { value: identity.PAIR });
+        this.key = key;
+        this.value = value;
+      }
+      clone(schema) {
+        let { key, value } = this;
+        if (identity.isNode(key))
+          key = key.clone(schema);
+        if (identity.isNode(value))
+          value = value.clone(schema);
+        return new _Pair(key, value);
+      }
+      toJSON(_, ctx) {
+        const pair = ctx?.mapAsMap ? /* @__PURE__ */ new Map() : {};
+        return addPairToJSMap.addPairToJSMap(ctx, pair, this);
+      }
+      toString(ctx, onComment, onChompKeep) {
+        return ctx?.doc ? stringifyPair.stringifyPair(this, ctx, onComment, onChompKeep) : JSON.stringify(this);
+      }
+    };
+    exports2.Pair = Pair;
+    exports2.createPair = createPair;
+  }
+});
+
+// node_modules/yaml/dist/stringify/stringifyCollection.js
+var require_stringifyCollection = __commonJS({
+  "node_modules/yaml/dist/stringify/stringifyCollection.js"(exports2) {
+    "use strict";
+    var identity = require_identity();
+    var stringify = require_stringify();
+    var stringifyComment = require_stringifyComment();
+    function stringifyCollection(collection, ctx, options) {
+      const flow = ctx.inFlow ?? collection.flow;
+      const stringify2 = flow ? stringifyFlowCollection : stringifyBlockCollection;
+      return stringify2(collection, ctx, options);
+    }
+    function stringifyBlockCollection({ comment, items }, ctx, { blockItemPrefix, flowChars, itemIndent, onChompKeep, onComment }) {
+      const { indent, options: { commentString } } = ctx;
+      const itemCtx = Object.assign({}, ctx, { indent: itemIndent, type: null });
+      let chompKeep = false;
+      const lines = [];
+      for (let i = 0; i < items.length; ++i) {
+        const item = items[i];
+        let comment2 = null;
+        if (identity.isNode(item)) {
+          if (!chompKeep && item.spaceBefore)
+            lines.push("");
+          addCommentBefore(ctx, lines, item.commentBefore, chompKeep);
+          if (item.comment)
+            comment2 = item.comment;
+        } else if (identity.isPair(item)) {
+          const ik = identity.isNode(item.key) ? item.key : null;
+          if (ik) {
+            if (!chompKeep && ik.spaceBefore)
+              lines.push("");
+            addCommentBefore(ctx, lines, ik.commentBefore, chompKeep);
+          }
+        }
+        chompKeep = false;
+        let str2 = stringify.stringify(item, itemCtx, () => comment2 = null, () => chompKeep = true);
+        if (comment2)
+          str2 += stringifyComment.lineComment(str2, itemIndent, commentString(comment2));
+        if (chompKeep && comment2)
+          chompKeep = false;
+        lines.push(blockItemPrefix + str2);
+      }
+      let str;
+      if (lines.length === 0) {
+        str = flowChars.start + flowChars.end;
+      } else {
+        str = lines[0];
+        for (let i = 1; i < lines.length; ++i) {
+          const line = lines[i];
+          str += line ? `
+${indent}${line}` : "\n";
+        }
+      }
+      if (comment) {
+        str += "\n" + stringifyComment.indentComment(commentString(comment), indent);
+        if (onComment)
+          onComment();
+      } else if (chompKeep && onChompKeep)
+        onChompKeep();
+      return str;
+    }
+    function stringifyFlowCollection({ items }, ctx, { flowChars, itemIndent }) {
+      const { indent, indentStep, flowCollectionPadding: fcPadding, options: { commentString } } = ctx;
+      itemIndent += indentStep;
+      const itemCtx = Object.assign({}, ctx, {
+        indent: itemIndent,
+        inFlow: true,
+        type: null
+      });
+      let reqNewline = false;
+      let linesAtValue = 0;
+      const lines = [];
+      for (let i = 0; i < items.length; ++i) {
+        const item = items[i];
+        let comment = null;
+        if (identity.isNode(item)) {
+          if (item.spaceBefore)
+            lines.push("");
+          addCommentBefore(ctx, lines, item.commentBefore, false);
+          if (item.comment)
+            comment = item.comment;
+        } else if (identity.isPair(item)) {
+          const ik = identity.isNode(item.key) ? item.key : null;
+          if (ik) {
+            if (ik.spaceBefore)
+              lines.push("");
+            addCommentBefore(ctx, lines, ik.commentBefore, false);
+            if (ik.comment)
+              reqNewline = true;
+          }
+          const iv = identity.isNode(item.value) ? item.value : null;
+          if (iv) {
+            if (iv.comment)
+              comment = iv.comment;
+            if (iv.commentBefore)
+              reqNewline = true;
+          } else if (item.value == null && ik?.comment) {
+            comment = ik.comment;
+          }
+        }
+        if (comment)
+          reqNewline = true;
+        let str = stringify.stringify(item, itemCtx, () => comment = null);
+        reqNewline || (reqNewline = lines.length > linesAtValue || str.includes("\n"));
+        if (i < items.length - 1) {
+          str += ",";
+        } else if (ctx.options.trailingComma) {
+          if (ctx.options.lineWidth > 0) {
+            reqNewline || (reqNewline = lines.reduce((sum, line) => sum + line.length + 2, 2) + (str.length + 2) > ctx.options.lineWidth);
+          }
+          if (reqNewline) {
+            str += ",";
+          }
+        }
+        if (comment)
+          str += stringifyComment.lineComment(str, itemIndent, commentString(comment));
+        lines.push(str);
+        linesAtValue = lines.length;
+      }
+      const { start, end } = flowChars;
+      if (lines.length === 0) {
+        return start + end;
+      } else {
+        if (!reqNewline) {
+          const len = lines.reduce((sum, line) => sum + line.length + 2, 2);
+          reqNewline = ctx.options.lineWidth > 0 && len > ctx.options.lineWidth;
+        }
+        if (reqNewline) {
+          let str = start;
+          for (const line of lines)
+            str += line ? `
+${indentStep}${indent}${line}` : "\n";
+          return `${str}
+${indent}${end}`;
+        } else {
+          return `${start}${fcPadding}${lines.join(" ")}${fcPadding}${end}`;
+        }
+      }
+    }
+    function addCommentBefore({ indent, options: { commentString } }, lines, comment, chompKeep) {
+      if (comment && chompKeep)
+        comment = comment.replace(/^\n+/, "");
+      if (comment) {
+        const ic = stringifyComment.indentComment(commentString(comment), indent);
+        lines.push(ic.trimStart());
+      }
+    }
+    exports2.stringifyCollection = stringifyCollection;
+  }
+});
+
+// node_modules/yaml/dist/nodes/YAMLMap.js
+var require_YAMLMap = __commonJS({
+  "node_modules/yaml/dist/nodes/YAMLMap.js"(exports2) {
+    "use strict";
+    var stringifyCollection = require_stringifyCollection();
+    var addPairToJSMap = require_addPairToJSMap();
+    var Collection = require_Collection();
+    var identity = require_identity();
+    var Pair = require_Pair();
+    var Scalar = require_Scalar();
+    function findPair(items, key) {
+      const k = identity.isScalar(key) ? key.value : key;
+      for (const it of items) {
+        if (identity.isPair(it)) {
+          if (it.key === key || it.key === k)
+            return it;
+          if (identity.isScalar(it.key) && it.key.value === k)
+            return it;
+        }
+      }
+      return void 0;
+    }
+    var YAMLMap = class extends Collection.Collection {
+      static get tagName() {
+        return "tag:yaml.org,2002:map";
+      }
+      constructor(schema) {
+        super(identity.MAP, schema);
+        this.items = [];
+      }
+      /**
+       * A generic collection parsing method that can be extended
+       * to other node classes that inherit from YAMLMap
+       */
+      static from(schema, obj, ctx) {
+        const { keepUndefined, replacer } = ctx;
+        const map = new this(schema);
+        const add = (key, value) => {
+          if (typeof replacer === "function")
+            value = replacer.call(obj, key, value);
+          else if (Array.isArray(replacer) && !replacer.includes(key))
+            return;
+          if (value !== void 0 || keepUndefined)
+            map.items.push(Pair.createPair(key, value, ctx));
+        };
+        if (obj instanceof Map) {
+          for (const [key, value] of obj)
+            add(key, value);
+        } else if (obj && typeof obj === "object") {
+          for (const key of Object.keys(obj))
+            add(key, obj[key]);
+        }
+        if (typeof schema.sortMapEntries === "function") {
+          map.items.sort(schema.sortMapEntries);
+        }
+        return map;
+      }
+      /**
+       * Adds a value to the collection.
+       *
+       * @param overwrite - If not set `true`, using a key that is already in the
+       *   collection will throw. Otherwise, overwrites the previous value.
+       */
+      add(pair, overwrite) {
+        let _pair;
+        if (identity.isPair(pair))
+          _pair = pair;
+        else if (!pair || typeof pair !== "object" || !("key" in pair)) {
+          _pair = new Pair.Pair(pair, pair?.value);
+        } else
+          _pair = new Pair.Pair(pair.key, pair.value);
+        const prev = findPair(this.items, _pair.key);
+        const sortEntries = this.schema?.sortMapEntries;
+        if (prev) {
+          if (!overwrite)
+            throw new Error(`Key ${_pair.key} already set`);
+          if (identity.isScalar(prev.value) && Scalar.isScalarValue(_pair.value))
+            prev.value.value = _pair.value;
+          else
+            prev.value = _pair.value;
+        } else if (sortEntries) {
+          const i = this.items.findIndex((item) => sortEntries(_pair, item) < 0);
+          if (i === -1)
+            this.items.push(_pair);
+          else
+            this.items.splice(i, 0, _pair);
+        } else {
+          this.items.push(_pair);
+        }
+      }
+      delete(key) {
+        const it = findPair(this.items, key);
+        if (!it)
+          return false;
+        const del = this.items.splice(this.items.indexOf(it), 1);
+        return del.length > 0;
+      }
+      get(key, keepScalar) {
+        const it = findPair(this.items, key);
+        const node = it?.value;
+        return (!keepScalar && identity.isScalar(node) ? node.value : node) ?? void 0;
+      }
+      has(key) {
+        return !!findPair(this.items, key);
+      }
+      set(key, value) {
+        this.add(new Pair.Pair(key, value), true);
+      }
+      /**
+       * @param ctx - Conversion context, originally set in Document#toJS()
+       * @param {Class} Type - If set, forces the returned collection type
+       * @returns Instance of Type, Map, or Object
+       */
+      toJSON(_, ctx, Type) {
+        const map = Type ? new Type() : ctx?.mapAsMap ? /* @__PURE__ */ new Map() : {};
+        if (ctx?.onCreate)
+          ctx.onCreate(map);
+        for (const item of this.items)
+          addPairToJSMap.addPairToJSMap(ctx, map, item);
+        return map;
+      }
+      toString(ctx, onComment, onChompKeep) {
+        if (!ctx)
+          return JSON.stringify(this);
+        for (const item of this.items) {
+          if (!identity.isPair(item))
+            throw new Error(`Map items must all be pairs; found ${JSON.stringify(item)} instead`);
+        }
+        if (!ctx.allNullValues && this.hasAllNullValues(false))
+          ctx = Object.assign({}, ctx, { allNullValues: true });
+        return stringifyCollection.stringifyCollection(this, ctx, {
+          blockItemPrefix: "",
+          flowChars: { start: "{", end: "}" },
+          itemIndent: ctx.indent || "",
+          onChompKeep,
+          onComment
+        });
+      }
+    };
+    exports2.YAMLMap = YAMLMap;
+    exports2.findPair = findPair;
+  }
+});
+
+// node_modules/yaml/dist/schema/common/map.js
+var require_map = __commonJS({
+  "node_modules/yaml/dist/schema/common/map.js"(exports2) {
+    "use strict";
+    var identity = require_identity();
+    var YAMLMap = require_YAMLMap();
+    var map = {
+      collection: "map",
+      default: true,
+      nodeClass: YAMLMap.YAMLMap,
+      tag: "tag:yaml.org,2002:map",
+      resolve(map2, onError) {
+        if (!identity.isMap(map2))
+          onError("Expected a mapping for this tag");
+        return map2;
+      },
+      createNode: (schema, obj, ctx) => YAMLMap.YAMLMap.from(schema, obj, ctx)
+    };
+    exports2.map = map;
+  }
+});
+
+// node_modules/yaml/dist/nodes/YAMLSeq.js
+var require_YAMLSeq = __commonJS({
+  "node_modules/yaml/dist/nodes/YAMLSeq.js"(exports2) {
+    "use strict";
+    var createNode = require_createNode();
+    var stringifyCollection = require_stringifyCollection();
+    var Collection = require_Collection();
+    var identity = require_identity();
+    var Scalar = require_Scalar();
+    var toJS = require_toJS();
+    var YAMLSeq = class extends Collection.Collection {
+      static get tagName() {
+        return "tag:yaml.org,2002:seq";
+      }
+      constructor(schema) {
+        super(identity.SEQ, schema);
+        this.items = [];
+      }
+      add(value) {
+        this.items.push(value);
+      }
+      /**
+       * Removes a value from the collection.
+       *
+       * `key` must contain a representation of an integer for this to succeed.
+       * It may be wrapped in a `Scalar`.
+       *
+       * @returns `true` if the item was found and removed.
+       */
+      delete(key) {
+        const idx = asItemIndex(key);
+        if (typeof idx !== "number")
+          return false;
+        const del = this.items.splice(idx, 1);
+        return del.length > 0;
+      }
+      get(key, keepScalar) {
+        const idx = asItemIndex(key);
+        if (typeof idx !== "number")
+          return void 0;
+        const it = this.items[idx];
+        return !keepScalar && identity.isScalar(it) ? it.value : it;
+      }
+      /**
+       * Checks if the collection includes a value with the key `key`.
+       *
+       * `key` must contain a representation of an integer for this to succeed.
+       * It may be wrapped in a `Scalar`.
+       */
+      has(key) {
+        const idx = asItemIndex(key);
+        return typeof idx === "number" && idx < this.items.length;
+      }
+      /**
+       * Sets a value in this collection. For `!!set`, `value` needs to be a
+       * boolean to add/remove the item from the set.
+       *
+       * If `key` does not contain a representation of an integer, this will throw.
+       * It may be wrapped in a `Scalar`.
+       */
+      set(key, value) {
+        const idx = asItemIndex(key);
+        if (typeof idx !== "number")
+          throw new Error(`Expected a valid index, not ${key}.`);
+        const prev = this.items[idx];
+        if (identity.isScalar(prev) && Scalar.isScalarValue(value))
+          prev.value = value;
+        else
+          this.items[idx] = value;
+      }
+      toJSON(_, ctx) {
+        const seq = [];
+        if (ctx?.onCreate)
+          ctx.onCreate(seq);
+        let i = 0;
+        for (const item of this.items)
+          seq.push(toJS.toJS(item, String(i++), ctx));
+        return seq;
+      }
+      toString(ctx, onComment, onChompKeep) {
+        if (!ctx)
+          return JSON.stringify(this);
+        return stringifyCollection.stringifyCollection(this, ctx, {
+          blockItemPrefix: "- ",
+          flowChars: { start: "[", end: "]" },
+          itemIndent: (ctx.indent || "") + "  ",
+          onChompKeep,
+          onComment
+        });
+      }
+      static from(schema, obj, ctx) {
+        const { replacer } = ctx;
+        const seq = new this(schema);
+        if (obj && Symbol.iterator in Object(obj)) {
+          let i = 0;
+          for (let it of obj) {
+            if (typeof replacer === "function") {
+              const key = obj instanceof Set ? it : String(i++);
+              it = replacer.call(obj, key, it);
+            }
+            seq.items.push(createNode.createNode(it, void 0, ctx));
+          }
+        }
+        return seq;
+      }
+    };
+    function asItemIndex(key) {
+      let idx = identity.isScalar(key) ? key.value : key;
+      if (idx && typeof idx === "string")
+        idx = Number(idx);
+      return typeof idx === "number" && Number.isInteger(idx) && idx >= 0 ? idx : null;
+    }
+    exports2.YAMLSeq = YAMLSeq;
+  }
+});
+
+// node_modules/yaml/dist/schema/common/seq.js
+var require_seq = __commonJS({
+  "node_modules/yaml/dist/schema/common/seq.js"(exports2) {
+    "use strict";
+    var identity = require_identity();
+    var YAMLSeq = require_YAMLSeq();
+    var seq = {
+      collection: "seq",
+      default: true,
+      nodeClass: YAMLSeq.YAMLSeq,
+      tag: "tag:yaml.org,2002:seq",
+      resolve(seq2, onError) {
+        if (!identity.isSeq(seq2))
+          onError("Expected a sequence for this tag");
+        return seq2;
+      },
+      createNode: (schema, obj, ctx) => YAMLSeq.YAMLSeq.from(schema, obj, ctx)
+    };
+    exports2.seq = seq;
+  }
+});
+
+// node_modules/yaml/dist/schema/common/string.js
+var require_string = __commonJS({
+  "node_modules/yaml/dist/schema/common/string.js"(exports2) {
+    "use strict";
+    var stringifyString = require_stringifyString();
+    var string = {
+      identify: (value) => typeof value === "string",
+      default: true,
+      tag: "tag:yaml.org,2002:str",
+      resolve: (str) => str,
+      stringify(item, ctx, onComment, onChompKeep) {
+        ctx = Object.assign({ actualString: true }, ctx);
+        return stringifyString.stringifyString(item, ctx, onComment, onChompKeep);
+      }
+    };
+    exports2.string = string;
+  }
+});
+
+// node_modules/yaml/dist/schema/common/null.js
+var require_null = __commonJS({
+  "node_modules/yaml/dist/schema/common/null.js"(exports2) {
+    "use strict";
+    var Scalar = require_Scalar();
+    var nullTag = {
+      identify: (value) => value == null,
+      createNode: () => new Scalar.Scalar(null),
+      default: true,
+      tag: "tag:yaml.org,2002:null",
+      test: /^(?:~|[Nn]ull|NULL)?$/,
+      resolve: () => new Scalar.Scalar(null),
+      stringify: ({ source }, ctx) => typeof source === "string" && nullTag.test.test(source) ? source : ctx.options.nullStr
+    };
+    exports2.nullTag = nullTag;
+  }
+});
+
+// node_modules/yaml/dist/schema/core/bool.js
+var require_bool = __commonJS({
+  "node_modules/yaml/dist/schema/core/bool.js"(exports2) {
+    "use strict";
+    var Scalar = require_Scalar();
+    var boolTag = {
+      identify: (value) => typeof value === "boolean",
+      default: true,
+      tag: "tag:yaml.org,2002:bool",
+      test: /^(?:[Tt]rue|TRUE|[Ff]alse|FALSE)$/,
+      resolve: (str) => new Scalar.Scalar(str[0] === "t" || str[0] === "T"),
+      stringify({ source, value }, ctx) {
+        if (source && boolTag.test.test(source)) {
+          const sv = source[0] === "t" || source[0] === "T";
+          if (value === sv)
+            return source;
+        }
+        return value ? ctx.options.trueStr : ctx.options.falseStr;
+      }
+    };
+    exports2.boolTag = boolTag;
+  }
+});
+
+// node_modules/yaml/dist/stringify/stringifyNumber.js
+var require_stringifyNumber = __commonJS({
+  "node_modules/yaml/dist/stringify/stringifyNumber.js"(exports2) {
+    "use strict";
+    function stringifyNumber({ format, minFractionDigits, tag, value }) {
+      if (typeof value === "bigint")
+        return String(value);
+      const num = typeof value === "number" ? value : Number(value);
+      if (!isFinite(num))
+        return isNaN(num) ? ".nan" : num < 0 ? "-.inf" : ".inf";
+      let n = Object.is(value, -0) ? "-0" : JSON.stringify(value);
+      if (!format && minFractionDigits && (!tag || tag === "tag:yaml.org,2002:float") && /^-?\d/.test(n) && !n.includes("e")) {
+        let i = n.indexOf(".");
+        if (i < 0) {
+          i = n.length;
+          n += ".";
+        }
+        let d = minFractionDigits - (n.length - i - 1);
+        while (d-- > 0)
+          n += "0";
+      }
+      return n;
+    }
+    exports2.stringifyNumber = stringifyNumber;
+  }
+});
+
+// node_modules/yaml/dist/schema/core/float.js
+var require_float = __commonJS({
+  "node_modules/yaml/dist/schema/core/float.js"(exports2) {
+    "use strict";
+    var Scalar = require_Scalar();
+    var stringifyNumber = require_stringifyNumber();
+    var floatNaN = {
+      identify: (value) => typeof value === "number",
+      default: true,
+      tag: "tag:yaml.org,2002:float",
+      test: /^(?:[-+]?\.(?:inf|Inf|INF)|\.nan|\.NaN|\.NAN)$/,
+      resolve: (str) => str.slice(-3).toLowerCase() === "nan" ? NaN : str[0] === "-" ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY,
+      stringify: stringifyNumber.stringifyNumber
+    };
+    var floatExp = {
+      identify: (value) => typeof value === "number",
+      default: true,
+      tag: "tag:yaml.org,2002:float",
+      format: "EXP",
+      test: /^[-+]?(?:\.[0-9]+|[0-9]+(?:\.[0-9]*)?)[eE][-+]?[0-9]+$/,
+      resolve: (str) => parseFloat(str),
+      stringify(node) {
+        const num = Number(node.value);
+        return isFinite(num) ? num.toExponential() : stringifyNumber.stringifyNumber(node);
+      }
+    };
+    var float = {
+      identify: (value) => typeof value === "number",
+      default: true,
+      tag: "tag:yaml.org,2002:float",
+      test: /^[-+]?(?:\.[0-9]+|[0-9]+\.[0-9]*)$/,
+      resolve(str) {
+        const node = new Scalar.Scalar(parseFloat(str));
+        const dot = str.indexOf(".");
+        if (dot !== -1 && str[str.length - 1] === "0")
+          node.minFractionDigits = str.length - dot - 1;
+        return node;
+      },
+      stringify: stringifyNumber.stringifyNumber
+    };
+    exports2.float = float;
+    exports2.floatExp = floatExp;
+    exports2.floatNaN = floatNaN;
+  }
+});
+
+// node_modules/yaml/dist/schema/core/int.js
+var require_int = __commonJS({
+  "node_modules/yaml/dist/schema/core/int.js"(exports2) {
+    "use strict";
+    var stringifyNumber = require_stringifyNumber();
+    var intIdentify = (value) => typeof value === "bigint" || Number.isInteger(value);
+    var intResolve = (str, offset, radix, { intAsBigInt }) => intAsBigInt ? BigInt(str) : parseInt(str.substring(offset), radix);
+    function intStringify(node, radix, prefix) {
+      const { value } = node;
+      if (intIdentify(value) && value >= 0)
+        return prefix + value.toString(radix);
+      return stringifyNumber.stringifyNumber(node);
+    }
+    var intOct = {
+      identify: (value) => intIdentify(value) && value >= 0,
+      default: true,
+      tag: "tag:yaml.org,2002:int",
+      format: "OCT",
+      test: /^0o[0-7]+$/,
+      resolve: (str, _onError, opt) => intResolve(str, 2, 8, opt),
+      stringify: (node) => intStringify(node, 8, "0o")
+    };
+    var int = {
+      identify: intIdentify,
+      default: true,
+      tag: "tag:yaml.org,2002:int",
+      test: /^[-+]?[0-9]+$/,
+      resolve: (str, _onError, opt) => intResolve(str, 0, 10, opt),
+      stringify: stringifyNumber.stringifyNumber
+    };
+    var intHex = {
+      identify: (value) => intIdentify(value) && value >= 0,
+      default: true,
+      tag: "tag:yaml.org,2002:int",
+      format: "HEX",
+      test: /^0x[0-9a-fA-F]+$/,
+      resolve: (str, _onError, opt) => intResolve(str, 2, 16, opt),
+      stringify: (node) => intStringify(node, 16, "0x")
+    };
+    exports2.int = int;
+    exports2.intHex = intHex;
+    exports2.intOct = intOct;
+  }
+});
+
+// node_modules/yaml/dist/schema/core/schema.js
+var require_schema = __commonJS({
+  "node_modules/yaml/dist/schema/core/schema.js"(exports2) {
+    "use strict";
+    var map = require_map();
+    var _null = require_null();
+    var seq = require_seq();
+    var string = require_string();
+    var bool = require_bool();
+    var float = require_float();
+    var int = require_int();
+    var schema = [
+      map.map,
+      seq.seq,
+      string.string,
+      _null.nullTag,
+      bool.boolTag,
+      int.intOct,
+      int.int,
+      int.intHex,
+      float.floatNaN,
+      float.floatExp,
+      float.float
+    ];
+    exports2.schema = schema;
+  }
+});
+
+// node_modules/yaml/dist/schema/json/schema.js
+var require_schema2 = __commonJS({
+  "node_modules/yaml/dist/schema/json/schema.js"(exports2) {
+    "use strict";
+    var Scalar = require_Scalar();
+    var map = require_map();
+    var seq = require_seq();
+    function intIdentify(value) {
+      return typeof value === "bigint" || Number.isInteger(value);
+    }
+    var stringifyJSON = ({ value }) => JSON.stringify(value);
+    var jsonScalars = [
+      {
+        identify: (value) => typeof value === "string",
+        default: true,
+        tag: "tag:yaml.org,2002:str",
+        resolve: (str) => str,
+        stringify: stringifyJSON
+      },
+      {
+        identify: (value) => value == null,
+        createNode: () => new Scalar.Scalar(null),
+        default: true,
+        tag: "tag:yaml.org,2002:null",
+        test: /^null$/,
+        resolve: () => null,
+        stringify: stringifyJSON
+      },
+      {
+        identify: (value) => typeof value === "boolean",
+        default: true,
+        tag: "tag:yaml.org,2002:bool",
+        test: /^true$|^false$/,
+        resolve: (str) => str === "true",
+        stringify: stringifyJSON
+      },
+      {
+        identify: intIdentify,
+        default: true,
+        tag: "tag:yaml.org,2002:int",
+        test: /^-?(?:0|[1-9][0-9]*)$/,
+        resolve: (str, _onError, { intAsBigInt }) => intAsBigInt ? BigInt(str) : parseInt(str, 10),
+        stringify: ({ value }) => intIdentify(value) ? value.toString() : JSON.stringify(value)
+      },
+      {
+        identify: (value) => typeof value === "number",
+        default: true,
+        tag: "tag:yaml.org,2002:float",
+        test: /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]*)?(?:[eE][-+]?[0-9]+)?$/,
+        resolve: (str) => parseFloat(str),
+        stringify: stringifyJSON
+      }
+    ];
+    var jsonError = {
+      default: true,
+      tag: "",
+      test: /^/,
+      resolve(str, onError) {
+        onError(`Unresolved plain scalar ${JSON.stringify(str)}`);
+        return str;
+      }
+    };
+    var schema = [map.map, seq.seq].concat(jsonScalars, jsonError);
+    exports2.schema = schema;
+  }
+});
+
+// node_modules/yaml/dist/schema/yaml-1.1/binary.js
+var require_binary = __commonJS({
+  "node_modules/yaml/dist/schema/yaml-1.1/binary.js"(exports2) {
+    "use strict";
+    var node_buffer = require("buffer");
+    var Scalar = require_Scalar();
+    var stringifyString = require_stringifyString();
+    var binary = {
+      identify: (value) => value instanceof Uint8Array,
+      // Buffer inherits from Uint8Array
+      default: false,
+      tag: "tag:yaml.org,2002:binary",
+      /**
+       * Returns a Buffer in node and an Uint8Array in browsers
+       *
+       * To use the resulting buffer as an image, you'll want to do something like:
+       *
+       *   const blob = new Blob([buffer], { type: 'image/jpeg' })
+       *   document.querySelector('#photo').src = URL.createObjectURL(blob)
+       */
+      resolve(src, onError) {
+        if (typeof node_buffer.Buffer === "function") {
+          return node_buffer.Buffer.from(src, "base64");
+        } else if (typeof atob === "function") {
+          const str = atob(src.replace(/[\n\r]/g, ""));
+          const buffer = new Uint8Array(str.length);
+          for (let i = 0; i < str.length; ++i)
+            buffer[i] = str.charCodeAt(i);
+          return buffer;
+        } else {
+          onError("This environment does not support reading binary tags; either Buffer or atob is required");
+          return src;
+        }
+      },
+      stringify({ comment, type, value }, ctx, onComment, onChompKeep) {
+        if (!value)
+          return "";
+        const buf = value;
+        let str;
+        if (typeof node_buffer.Buffer === "function") {
+          str = buf instanceof node_buffer.Buffer ? buf.toString("base64") : node_buffer.Buffer.from(buf.buffer).toString("base64");
+        } else if (typeof btoa === "function") {
+          let s = "";
+          for (let i = 0; i < buf.length; ++i)
+            s += String.fromCharCode(buf[i]);
+          str = btoa(s);
+        } else {
+          throw new Error("This environment does not support writing binary tags; either Buffer or btoa is required");
+        }
+        type ?? (type = Scalar.Scalar.BLOCK_LITERAL);
+        if (type !== Scalar.Scalar.QUOTE_DOUBLE) {
+          const lineWidth = Math.max(ctx.options.lineWidth - ctx.indent.length, ctx.options.minContentWidth);
+          const n = Math.ceil(str.length / lineWidth);
+          const lines = new Array(n);
+          for (let i = 0, o = 0; i < n; ++i, o += lineWidth) {
+            lines[i] = str.substr(o, lineWidth);
+          }
+          str = lines.join(type === Scalar.Scalar.BLOCK_LITERAL ? "\n" : " ");
+        }
+        return stringifyString.stringifyString({ comment, type, value: str }, ctx, onComment, onChompKeep);
+      }
+    };
+    exports2.binary = binary;
+  }
+});
+
+// node_modules/yaml/dist/schema/yaml-1.1/pairs.js
+var require_pairs = __commonJS({
+  "node_modules/yaml/dist/schema/yaml-1.1/pairs.js"(exports2) {
+    "use strict";
+    var identity = require_identity();
+    var Pair = require_Pair();
+    var Scalar = require_Scalar();
+    var YAMLSeq = require_YAMLSeq();
+    function resolvePairs(seq, onError) {
+      if (identity.isSeq(seq)) {
+        for (let i = 0; i < seq.items.length; ++i) {
+          let item = seq.items[i];
+          if (identity.isPair(item))
+            continue;
+          else if (identity.isMap(item)) {
+            if (item.items.length > 1)
+              onError("Each pair must have its own sequence indicator");
+            const pair = item.items[0] || new Pair.Pair(new Scalar.Scalar(null));
+            if (item.commentBefore)
+              pair.key.commentBefore = pair.key.commentBefore ? `${item.commentBefore}
+${pair.key.commentBefore}` : item.commentBefore;
+            if (item.comment) {
+              const cn = pair.value ?? pair.key;
+              cn.comment = cn.comment ? `${item.comment}
+${cn.comment}` : item.comment;
+            }
+            item = pair;
+          }
+          seq.items[i] = identity.isPair(item) ? item : new Pair.Pair(item);
+        }
+      } else
+        onError("Expected a sequence for this tag");
+      return seq;
+    }
+    function createPairs(schema, iterable, ctx) {
+      const { replacer } = ctx;
+      const pairs2 = new YAMLSeq.YAMLSeq(schema);
+      pairs2.tag = "tag:yaml.org,2002:pairs";
+      let i = 0;
+      if (iterable && Symbol.iterator in Object(iterable))
+        for (let it of iterable) {
+          if (typeof replacer === "function")
+            it = replacer.call(iterable, String(i++), it);
+          let key, value;
+          if (Array.isArray(it)) {
+            if (it.length === 2) {
+              key = it[0];
+              value = it[1];
+            } else
+              throw new TypeError(`Expected [key, value] tuple: ${it}`);
+          } else if (it && it instanceof Object) {
+            const keys = Object.keys(it);
+            if (keys.length === 1) {
+              key = keys[0];
+              value = it[key];
+            } else {
+              throw new TypeError(`Expected tuple with one key, not ${keys.length} keys`);
+            }
+          } else {
+            key = it;
+          }
+          pairs2.items.push(Pair.createPair(key, value, ctx));
+        }
+      return pairs2;
+    }
+    var pairs = {
+      collection: "seq",
+      default: false,
+      tag: "tag:yaml.org,2002:pairs",
+      resolve: resolvePairs,
+      createNode: createPairs
+    };
+    exports2.createPairs = createPairs;
+    exports2.pairs = pairs;
+    exports2.resolvePairs = resolvePairs;
+  }
+});
+
+// node_modules/yaml/dist/schema/yaml-1.1/omap.js
+var require_omap = __commonJS({
+  "node_modules/yaml/dist/schema/yaml-1.1/omap.js"(exports2) {
+    "use strict";
+    var identity = require_identity();
+    var toJS = require_toJS();
+    var YAMLMap = require_YAMLMap();
+    var YAMLSeq = require_YAMLSeq();
+    var pairs = require_pairs();
+    var YAMLOMap = class _YAMLOMap extends YAMLSeq.YAMLSeq {
+      constructor() {
+        super();
+        this.add = YAMLMap.YAMLMap.prototype.add.bind(this);
+        this.delete = YAMLMap.YAMLMap.prototype.delete.bind(this);
+        this.get = YAMLMap.YAMLMap.prototype.get.bind(this);
+        this.has = YAMLMap.YAMLMap.prototype.has.bind(this);
+        this.set = YAMLMap.YAMLMap.prototype.set.bind(this);
+        this.tag = _YAMLOMap.tag;
+      }
+      /**
+       * If `ctx` is given, the return type is actually `Map<unknown, unknown>`,
+       * but TypeScript won't allow widening the signature of a child method.
+       */
+      toJSON(_, ctx) {
+        if (!ctx)
+          return super.toJSON(_);
+        const map = /* @__PURE__ */ new Map();
+        if (ctx?.onCreate)
+          ctx.onCreate(map);
+        for (const pair of this.items) {
+          let key, value;
+          if (identity.isPair(pair)) {
+            key = toJS.toJS(pair.key, "", ctx);
+            value = toJS.toJS(pair.value, key, ctx);
+          } else {
+            key = toJS.toJS(pair, "", ctx);
+          }
+          if (map.has(key))
+            throw new Error("Ordered maps must not include duplicate keys");
+          map.set(key, value);
+        }
+        return map;
+      }
+      static from(schema, iterable, ctx) {
+        const pairs$1 = pairs.createPairs(schema, iterable, ctx);
+        const omap2 = new this();
+        omap2.items = pairs$1.items;
+        return omap2;
+      }
+    };
+    YAMLOMap.tag = "tag:yaml.org,2002:omap";
+    var omap = {
+      collection: "seq",
+      identify: (value) => value instanceof Map,
+      nodeClass: YAMLOMap,
+      default: false,
+      tag: "tag:yaml.org,2002:omap",
+      resolve(seq, onError) {
+        const pairs$1 = pairs.resolvePairs(seq, onError);
+        const seenKeys = [];
+        for (const { key } of pairs$1.items) {
+          if (identity.isScalar(key)) {
+            if (seenKeys.includes(key.value)) {
+              onError(`Ordered maps must not include duplicate keys: ${key.value}`);
+            } else {
+              seenKeys.push(key.value);
+            }
+          }
+        }
+        return Object.assign(new YAMLOMap(), pairs$1);
+      },
+      createNode: (schema, iterable, ctx) => YAMLOMap.from(schema, iterable, ctx)
+    };
+    exports2.YAMLOMap = YAMLOMap;
+    exports2.omap = omap;
+  }
+});
+
+// node_modules/yaml/dist/schema/yaml-1.1/bool.js
+var require_bool2 = __commonJS({
+  "node_modules/yaml/dist/schema/yaml-1.1/bool.js"(exports2) {
+    "use strict";
+    var Scalar = require_Scalar();
+    function boolStringify({ value, source }, ctx) {
+      const boolObj = value ? trueTag : falseTag;
+      if (source && boolObj.test.test(source))
+        return source;
+      return value ? ctx.options.trueStr : ctx.options.falseStr;
+    }
+    var trueTag = {
+      identify: (value) => value === true,
+      default: true,
+      tag: "tag:yaml.org,2002:bool",
+      test: /^(?:Y|y|[Yy]es|YES|[Tt]rue|TRUE|[Oo]n|ON)$/,
+      resolve: () => new Scalar.Scalar(true),
+      stringify: boolStringify
+    };
+    var falseTag = {
+      identify: (value) => value === false,
+      default: true,
+      tag: "tag:yaml.org,2002:bool",
+      test: /^(?:N|n|[Nn]o|NO|[Ff]alse|FALSE|[Oo]ff|OFF)$/,
+      resolve: () => new Scalar.Scalar(false),
+      stringify: boolStringify
+    };
+    exports2.falseTag = falseTag;
+    exports2.trueTag = trueTag;
+  }
+});
+
+// node_modules/yaml/dist/schema/yaml-1.1/float.js
+var require_float2 = __commonJS({
+  "node_modules/yaml/dist/schema/yaml-1.1/float.js"(exports2) {
+    "use strict";
+    var Scalar = require_Scalar();
+    var stringifyNumber = require_stringifyNumber();
+    var floatNaN = {
+      identify: (value) => typeof value === "number",
+      default: true,
+      tag: "tag:yaml.org,2002:float",
+      test: /^(?:[-+]?\.(?:inf|Inf|INF)|\.nan|\.NaN|\.NAN)$/,
+      resolve: (str) => str.slice(-3).toLowerCase() === "nan" ? NaN : str[0] === "-" ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY,
+      stringify: stringifyNumber.stringifyNumber
+    };
+    var floatExp = {
+      identify: (value) => typeof value === "number",
+      default: true,
+      tag: "tag:yaml.org,2002:float",
+      format: "EXP",
+      test: /^[-+]?(?:[0-9][0-9_]*)?(?:\.[0-9_]*)?[eE][-+]?[0-9]+$/,
+      resolve: (str) => parseFloat(str.replace(/_/g, "")),
+      stringify(node) {
+        const num = Number(node.value);
+        return isFinite(num) ? num.toExponential() : stringifyNumber.stringifyNumber(node);
+      }
+    };
+    var float = {
+      identify: (value) => typeof value === "number",
+      default: true,
+      tag: "tag:yaml.org,2002:float",
+      test: /^[-+]?(?:[0-9][0-9_]*)?\.[0-9_]*$/,
+      resolve(str) {
+        const node = new Scalar.Scalar(parseFloat(str.replace(/_/g, "")));
+        const dot = str.indexOf(".");
+        if (dot !== -1) {
+          const f = str.substring(dot + 1).replace(/_/g, "");
+          if (f[f.length - 1] === "0")
+            node.minFractionDigits = f.length;
+        }
+        return node;
+      },
+      stringify: stringifyNumber.stringifyNumber
+    };
+    exports2.float = float;
+    exports2.floatExp = floatExp;
+    exports2.floatNaN = floatNaN;
+  }
+});
+
+// node_modules/yaml/dist/schema/yaml-1.1/int.js
+var require_int2 = __commonJS({
+  "node_modules/yaml/dist/schema/yaml-1.1/int.js"(exports2) {
+    "use strict";
+    var stringifyNumber = require_stringifyNumber();
+    var intIdentify = (value) => typeof value === "bigint" || Number.isInteger(value);
+    function intResolve(str, offset, radix, { intAsBigInt }) {
+      const sign = str[0];
+      if (sign === "-" || sign === "+")
+        offset += 1;
+      str = str.substring(offset).replace(/_/g, "");
+      if (intAsBigInt) {
+        switch (radix) {
+          case 2:
+            str = `0b${str}`;
+            break;
+          case 8:
+            str = `0o${str}`;
+            break;
+          case 16:
+            str = `0x${str}`;
+            break;
+        }
+        const n2 = BigInt(str);
+        return sign === "-" ? BigInt(-1) * n2 : n2;
+      }
+      const n = parseInt(str, radix);
+      return sign === "-" ? -1 * n : n;
+    }
+    function intStringify(node, radix, prefix) {
+      const { value } = node;
+      if (intIdentify(value)) {
+        const str = value.toString(radix);
+        return value < 0 ? "-" + prefix + str.substr(1) : prefix + str;
+      }
+      return stringifyNumber.stringifyNumber(node);
+    }
+    var intBin = {
+      identify: intIdentify,
+      default: true,
+      tag: "tag:yaml.org,2002:int",
+      format: "BIN",
+      test: /^[-+]?0b[0-1_]+$/,
+      resolve: (str, _onError, opt) => intResolve(str, 2, 2, opt),
+      stringify: (node) => intStringify(node, 2, "0b")
+    };
+    var intOct = {
+      identify: intIdentify,
+      default: true,
+      tag: "tag:yaml.org,2002:int",
+      format: "OCT",
+      test: /^[-+]?0[0-7_]+$/,
+      resolve: (str, _onError, opt) => intResolve(str, 1, 8, opt),
+      stringify: (node) => intStringify(node, 8, "0")
+    };
+    var int = {
+      identify: intIdentify,
+      default: true,
+      tag: "tag:yaml.org,2002:int",
+      test: /^[-+]?[0-9][0-9_]*$/,
+      resolve: (str, _onError, opt) => intResolve(str, 0, 10, opt),
+      stringify: stringifyNumber.stringifyNumber
+    };
+    var intHex = {
+      identify: intIdentify,
+      default: true,
+      tag: "tag:yaml.org,2002:int",
+      format: "HEX",
+      test: /^[-+]?0x[0-9a-fA-F_]+$/,
+      resolve: (str, _onError, opt) => intResolve(str, 2, 16, opt),
+      stringify: (node) => intStringify(node, 16, "0x")
+    };
+    exports2.int = int;
+    exports2.intBin = intBin;
+    exports2.intHex = intHex;
+    exports2.intOct = intOct;
+  }
+});
+
+// node_modules/yaml/dist/schema/yaml-1.1/set.js
+var require_set = __commonJS({
+  "node_modules/yaml/dist/schema/yaml-1.1/set.js"(exports2) {
+    "use strict";
+    var identity = require_identity();
+    var Pair = require_Pair();
+    var YAMLMap = require_YAMLMap();
+    var YAMLSet = class _YAMLSet extends YAMLMap.YAMLMap {
+      constructor(schema) {
+        super(schema);
+        this.tag = _YAMLSet.tag;
+      }
+      add(key) {
+        let pair;
+        if (identity.isPair(key))
+          pair = key;
+        else if (key && typeof key === "object" && "key" in key && "value" in key && key.value === null)
+          pair = new Pair.Pair(key.key, null);
+        else
+          pair = new Pair.Pair(key, null);
+        const prev = YAMLMap.findPair(this.items, pair.key);
+        if (!prev)
+          this.items.push(pair);
+      }
+      /**
+       * If `keepPair` is `true`, returns the Pair matching `key`.
+       * Otherwise, returns the value of that Pair's key.
+       */
+      get(key, keepPair) {
+        const pair = YAMLMap.findPair(this.items, key);
+        return !keepPair && identity.isPair(pair) ? identity.isScalar(pair.key) ? pair.key.value : pair.key : pair;
+      }
+      set(key, value) {
+        if (typeof value !== "boolean")
+          throw new Error(`Expected boolean value for set(key, value) in a YAML set, not ${typeof value}`);
+        const prev = YAMLMap.findPair(this.items, key);
+        if (prev && !value) {
+          this.items.splice(this.items.indexOf(prev), 1);
+        } else if (!prev && value) {
+          this.items.push(new Pair.Pair(key));
+        }
+      }
+      toJSON(_, ctx) {
+        return super.toJSON(_, ctx, Set);
+      }
+      toString(ctx, onComment, onChompKeep) {
+        if (!ctx)
+          return JSON.stringify(this);
+        if (this.hasAllNullValues(true))
+          return super.toString(Object.assign({}, ctx, { allNullValues: true }), onComment, onChompKeep);
+        else
+          throw new Error("Set items must all have null values");
+      }
+      static from(schema, iterable, ctx) {
+        const { replacer } = ctx;
+        const set2 = new this(schema);
+        if (iterable && Symbol.iterator in Object(iterable))
+          for (let value of iterable) {
+            if (typeof replacer === "function")
+              value = replacer.call(iterable, value, value);
+            set2.items.push(Pair.createPair(value, null, ctx));
+          }
+        return set2;
+      }
+    };
+    YAMLSet.tag = "tag:yaml.org,2002:set";
+    var set = {
+      collection: "map",
+      identify: (value) => value instanceof Set,
+      nodeClass: YAMLSet,
+      default: false,
+      tag: "tag:yaml.org,2002:set",
+      createNode: (schema, iterable, ctx) => YAMLSet.from(schema, iterable, ctx),
+      resolve(map, onError) {
+        if (identity.isMap(map)) {
+          if (map.hasAllNullValues(true))
+            return Object.assign(new YAMLSet(), map);
+          else
+            onError("Set items must all have null values");
+        } else
+          onError("Expected a mapping for this tag");
+        return map;
+      }
+    };
+    exports2.YAMLSet = YAMLSet;
+    exports2.set = set;
+  }
+});
+
+// node_modules/yaml/dist/schema/yaml-1.1/timestamp.js
+var require_timestamp = __commonJS({
+  "node_modules/yaml/dist/schema/yaml-1.1/timestamp.js"(exports2) {
+    "use strict";
+    var stringifyNumber = require_stringifyNumber();
+    function parseSexagesimal(str, asBigInt) {
+      const sign = str[0];
+      const parts = sign === "-" || sign === "+" ? str.substring(1) : str;
+      const num = (n) => asBigInt ? BigInt(n) : Number(n);
+      const res = parts.replace(/_/g, "").split(":").reduce((res2, p) => res2 * num(60) + num(p), num(0));
+      return sign === "-" ? num(-1) * res : res;
+    }
+    function stringifySexagesimal(node) {
+      let { value } = node;
+      let num = (n) => n;
+      if (typeof value === "bigint")
+        num = (n) => BigInt(n);
+      else if (isNaN(value) || !isFinite(value))
+        return stringifyNumber.stringifyNumber(node);
+      let sign = "";
+      if (value < 0) {
+        sign = "-";
+        value *= num(-1);
+      }
+      const _60 = num(60);
+      const parts = [value % _60];
+      if (value < 60) {
+        parts.unshift(0);
+      } else {
+        value = (value - parts[0]) / _60;
+        parts.unshift(value % _60);
+        if (value >= 60) {
+          value = (value - parts[0]) / _60;
+          parts.unshift(value);
+        }
+      }
+      return sign + parts.map((n) => String(n).padStart(2, "0")).join(":").replace(/000000\d*$/, "");
+    }
+    var intTime = {
+      identify: (value) => typeof value === "bigint" || Number.isInteger(value),
+      default: true,
+      tag: "tag:yaml.org,2002:int",
+      format: "TIME",
+      test: /^[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+$/,
+      resolve: (str, _onError, { intAsBigInt }) => parseSexagesimal(str, intAsBigInt),
+      stringify: stringifySexagesimal
+    };
+    var floatTime = {
+      identify: (value) => typeof value === "number",
+      default: true,
+      tag: "tag:yaml.org,2002:float",
+      format: "TIME",
+      test: /^[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\.[0-9_]*$/,
+      resolve: (str) => parseSexagesimal(str, false),
+      stringify: stringifySexagesimal
+    };
+    var timestamp = {
+      identify: (value) => value instanceof Date,
+      default: true,
+      tag: "tag:yaml.org,2002:timestamp",
+      // If the time zone is omitted, the timestamp is assumed to be specified in UTC. The time part
+      // may be omitted altogether, resulting in a date format. In such a case, the time part is
+      // assumed to be 00:00:00Z (start of day, UTC).
+      test: RegExp("^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})(?:(?:t|T|[ \\t]+)([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2}(\\.[0-9]+)?)(?:[ \\t]*(Z|[-+][012]?[0-9](?::[0-9]{2})?))?)?$"),
+      resolve(str) {
+        const match = str.match(timestamp.test);
+        if (!match)
+          throw new Error("!!timestamp expects a date, starting with yyyy-mm-dd");
+        const [, year, month, day, hour, minute, second] = match.map(Number);
+        const millisec = match[7] ? Number((match[7] + "00").substr(1, 3)) : 0;
+        let date = Date.UTC(year, month - 1, day, hour || 0, minute || 0, second || 0, millisec);
+        const tz = match[8];
+        if (tz && tz !== "Z") {
+          let d = parseSexagesimal(tz, false);
+          if (Math.abs(d) < 30)
+            d *= 60;
+          date -= 6e4 * d;
+        }
+        return new Date(date);
+      },
+      stringify: ({ value }) => value?.toISOString().replace(/(T00:00:00)?\.000Z$/, "") ?? ""
+    };
+    exports2.floatTime = floatTime;
+    exports2.intTime = intTime;
+    exports2.timestamp = timestamp;
+  }
+});
+
+// node_modules/yaml/dist/schema/yaml-1.1/schema.js
+var require_schema3 = __commonJS({
+  "node_modules/yaml/dist/schema/yaml-1.1/schema.js"(exports2) {
+    "use strict";
+    var map = require_map();
+    var _null = require_null();
+    var seq = require_seq();
+    var string = require_string();
+    var binary = require_binary();
+    var bool = require_bool2();
+    var float = require_float2();
+    var int = require_int2();
+    var merge = require_merge();
+    var omap = require_omap();
+    var pairs = require_pairs();
+    var set = require_set();
+    var timestamp = require_timestamp();
+    var schema = [
+      map.map,
+      seq.seq,
+      string.string,
+      _null.nullTag,
+      bool.trueTag,
+      bool.falseTag,
+      int.intBin,
+      int.intOct,
+      int.int,
+      int.intHex,
+      float.floatNaN,
+      float.floatExp,
+      float.float,
+      binary.binary,
+      merge.merge,
+      omap.omap,
+      pairs.pairs,
+      set.set,
+      timestamp.intTime,
+      timestamp.floatTime,
+      timestamp.timestamp
+    ];
+    exports2.schema = schema;
+  }
+});
+
+// node_modules/yaml/dist/schema/tags.js
+var require_tags = __commonJS({
+  "node_modules/yaml/dist/schema/tags.js"(exports2) {
+    "use strict";
+    var map = require_map();
+    var _null = require_null();
+    var seq = require_seq();
+    var string = require_string();
+    var bool = require_bool();
+    var float = require_float();
+    var int = require_int();
+    var schema = require_schema();
+    var schema$1 = require_schema2();
+    var binary = require_binary();
+    var merge = require_merge();
+    var omap = require_omap();
+    var pairs = require_pairs();
+    var schema$2 = require_schema3();
+    var set = require_set();
+    var timestamp = require_timestamp();
+    var schemas = /* @__PURE__ */ new Map([
+      ["core", schema.schema],
+      ["failsafe", [map.map, seq.seq, string.string]],
+      ["json", schema$1.schema],
+      ["yaml11", schema$2.schema],
+      ["yaml-1.1", schema$2.schema]
+    ]);
+    var tagsByName = {
+      binary: binary.binary,
+      bool: bool.boolTag,
+      float: float.float,
+      floatExp: float.floatExp,
+      floatNaN: float.floatNaN,
+      floatTime: timestamp.floatTime,
+      int: int.int,
+      intHex: int.intHex,
+      intOct: int.intOct,
+      intTime: timestamp.intTime,
+      map: map.map,
+      merge: merge.merge,
+      null: _null.nullTag,
+      omap: omap.omap,
+      pairs: pairs.pairs,
+      seq: seq.seq,
+      set: set.set,
+      timestamp: timestamp.timestamp
+    };
+    var coreKnownTags = {
+      "tag:yaml.org,2002:binary": binary.binary,
+      "tag:yaml.org,2002:merge": merge.merge,
+      "tag:yaml.org,2002:omap": omap.omap,
+      "tag:yaml.org,2002:pairs": pairs.pairs,
+      "tag:yaml.org,2002:set": set.set,
+      "tag:yaml.org,2002:timestamp": timestamp.timestamp
+    };
+    function getTags(customTags, schemaName, addMergeTag) {
+      const schemaTags = schemas.get(schemaName);
+      if (schemaTags && !customTags) {
+        return addMergeTag && !schemaTags.includes(merge.merge) ? schemaTags.concat(merge.merge) : schemaTags.slice();
+      }
+      let tags = schemaTags;
+      if (!tags) {
+        if (Array.isArray(customTags))
+          tags = [];
+        else {
+          const keys = Array.from(schemas.keys()).filter((key) => key !== "yaml11").map((key) => JSON.stringify(key)).join(", ");
+          throw new Error(`Unknown schema "${schemaName}"; use one of ${keys} or define customTags array`);
+        }
+      }
+      if (Array.isArray(customTags)) {
+        for (const tag of customTags)
+          tags = tags.concat(tag);
+      } else if (typeof customTags === "function") {
+        tags = customTags(tags.slice());
+      }
+      if (addMergeTag)
+        tags = tags.concat(merge.merge);
+      return tags.reduce((tags2, tag) => {
+        const tagObj = typeof tag === "string" ? tagsByName[tag] : tag;
+        if (!tagObj) {
+          const tagName = JSON.stringify(tag);
+          const keys = Object.keys(tagsByName).map((key) => JSON.stringify(key)).join(", ");
+          throw new Error(`Unknown custom tag ${tagName}; use one of ${keys}`);
+        }
+        if (!tags2.includes(tagObj))
+          tags2.push(tagObj);
+        return tags2;
+      }, []);
+    }
+    exports2.coreKnownTags = coreKnownTags;
+    exports2.getTags = getTags;
+  }
+});
+
+// node_modules/yaml/dist/schema/Schema.js
+var require_Schema = __commonJS({
+  "node_modules/yaml/dist/schema/Schema.js"(exports2) {
+    "use strict";
+    var identity = require_identity();
+    var map = require_map();
+    var seq = require_seq();
+    var string = require_string();
+    var tags = require_tags();
+    var sortMapEntriesByKey = (a, b) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0;
+    var Schema = class _Schema {
+      constructor({ compat, customTags, merge, resolveKnownTags, schema, sortMapEntries, toStringDefaults }) {
+        this.compat = Array.isArray(compat) ? tags.getTags(compat, "compat") : compat ? tags.getTags(null, compat) : null;
+        this.name = typeof schema === "string" && schema || "core";
+        this.knownTags = resolveKnownTags ? tags.coreKnownTags : {};
+        this.tags = tags.getTags(customTags, this.name, merge);
+        this.toStringOptions = toStringDefaults ?? null;
+        Object.defineProperty(this, identity.MAP, { value: map.map });
+        Object.defineProperty(this, identity.SCALAR, { value: string.string });
+        Object.defineProperty(this, identity.SEQ, { value: seq.seq });
+        this.sortMapEntries = typeof sortMapEntries === "function" ? sortMapEntries : sortMapEntries === true ? sortMapEntriesByKey : null;
+      }
+      clone() {
+        const copy = Object.create(_Schema.prototype, Object.getOwnPropertyDescriptors(this));
+        copy.tags = this.tags.slice();
+        return copy;
+      }
+    };
+    exports2.Schema = Schema;
+  }
+});
+
+// node_modules/yaml/dist/stringify/stringifyDocument.js
+var require_stringifyDocument = __commonJS({
+  "node_modules/yaml/dist/stringify/stringifyDocument.js"(exports2) {
+    "use strict";
+    var identity = require_identity();
+    var stringify = require_stringify();
+    var stringifyComment = require_stringifyComment();
+    function stringifyDocument(doc, options) {
+      const lines = [];
+      let hasDirectives = options.directives === true;
+      if (options.directives !== false && doc.directives) {
+        const dir = doc.directives.toString(doc);
+        if (dir) {
+          lines.push(dir);
+          hasDirectives = true;
+        } else if (doc.directives.docStart)
+          hasDirectives = true;
+      }
+      if (hasDirectives)
+        lines.push("---");
+      const ctx = stringify.createStringifyContext(doc, options);
+      const { commentString } = ctx.options;
+      if (doc.commentBefore) {
+        if (lines.length !== 1)
+          lines.unshift("");
+        const cs = commentString(doc.commentBefore);
+        lines.unshift(stringifyComment.indentComment(cs, ""));
+      }
+      let chompKeep = false;
+      let contentComment = null;
+      if (doc.contents) {
+        if (identity.isNode(doc.contents)) {
+          if (doc.contents.spaceBefore && hasDirectives)
+            lines.push("");
+          if (doc.contents.commentBefore) {
+            const cs = commentString(doc.contents.commentBefore);
+            lines.push(stringifyComment.indentComment(cs, ""));
+          }
+          ctx.forceBlockIndent = !!doc.comment;
+          contentComment = doc.contents.comment;
+        }
+        const onChompKeep = contentComment ? void 0 : () => chompKeep = true;
+        let body = stringify.stringify(doc.contents, ctx, () => contentComment = null, onChompKeep);
+        if (contentComment)
+          body += stringifyComment.lineComment(body, "", commentString(contentComment));
+        if ((body[0] === "|" || body[0] === ">") && lines[lines.length - 1] === "---") {
+          lines[lines.length - 1] = `--- ${body}`;
+        } else
+          lines.push(body);
+      } else {
+        lines.push(stringify.stringify(doc.contents, ctx));
+      }
+      if (doc.directives?.docEnd) {
+        if (doc.comment) {
+          const cs = commentString(doc.comment);
+          if (cs.includes("\n")) {
+            lines.push("...");
+            lines.push(stringifyComment.indentComment(cs, ""));
+          } else {
+            lines.push(`... ${cs}`);
+          }
+        } else {
+          lines.push("...");
+        }
+      } else {
+        let dc = doc.comment;
+        if (dc && chompKeep)
+          dc = dc.replace(/^\n+/, "");
+        if (dc) {
+          if ((!chompKeep || contentComment) && lines[lines.length - 1] !== "")
+            lines.push("");
+          lines.push(stringifyComment.indentComment(commentString(dc), ""));
+        }
+      }
+      return lines.join("\n") + "\n";
+    }
+    exports2.stringifyDocument = stringifyDocument;
+  }
+});
+
+// node_modules/yaml/dist/doc/Document.js
+var require_Document = __commonJS({
+  "node_modules/yaml/dist/doc/Document.js"(exports2) {
+    "use strict";
+    var Alias = require_Alias();
+    var Collection = require_Collection();
+    var identity = require_identity();
+    var Pair = require_Pair();
+    var toJS = require_toJS();
+    var Schema = require_Schema();
+    var stringifyDocument = require_stringifyDocument();
+    var anchors = require_anchors();
+    var applyReviver = require_applyReviver();
+    var createNode = require_createNode();
+    var directives = require_directives();
+    var Document = class _Document {
+      constructor(value, replacer, options) {
+        this.commentBefore = null;
+        this.comment = null;
+        this.errors = [];
+        this.warnings = [];
+        Object.defineProperty(this, identity.NODE_TYPE, { value: identity.DOC });
+        let _replacer = null;
+        if (typeof replacer === "function" || Array.isArray(replacer)) {
+          _replacer = replacer;
+        } else if (options === void 0 && replacer) {
+          options = replacer;
+          replacer = void 0;
+        }
+        const opt = Object.assign({
+          intAsBigInt: false,
+          keepSourceTokens: false,
+          logLevel: "warn",
+          prettyErrors: true,
+          strict: true,
+          stringKeys: false,
+          uniqueKeys: true,
+          version: "1.2"
+        }, options);
+        this.options = opt;
+        let { version } = opt;
+        if (options?._directives) {
+          this.directives = options._directives.atDocument();
+          if (this.directives.yaml.explicit)
+            version = this.directives.yaml.version;
+        } else
+          this.directives = new directives.Directives({ version });
+        this.setSchema(version, options);
+        this.contents = value === void 0 ? null : this.createNode(value, _replacer, options);
+      }
+      /**
+       * Create a deep copy of this Document and its contents.
+       *
+       * Custom Node values that inherit from `Object` still refer to their original instances.
+       */
+      clone() {
+        const copy = Object.create(_Document.prototype, {
+          [identity.NODE_TYPE]: { value: identity.DOC }
+        });
+        copy.commentBefore = this.commentBefore;
+        copy.comment = this.comment;
+        copy.errors = this.errors.slice();
+        copy.warnings = this.warnings.slice();
+        copy.options = Object.assign({}, this.options);
+        if (this.directives)
+          copy.directives = this.directives.clone();
+        copy.schema = this.schema.clone();
+        copy.contents = identity.isNode(this.contents) ? this.contents.clone(copy.schema) : this.contents;
+        if (this.range)
+          copy.range = this.range.slice();
+        return copy;
+      }
+      /** Adds a value to the document. */
+      add(value) {
+        if (assertCollection(this.contents))
+          this.contents.add(value);
+      }
+      /** Adds a value to the document. */
+      addIn(path2, value) {
+        if (assertCollection(this.contents))
+          this.contents.addIn(path2, value);
+      }
+      /**
+       * Create a new `Alias` node, ensuring that the target `node` has the required anchor.
+       *
+       * If `node` already has an anchor, `name` is ignored.
+       * Otherwise, the `node.anchor` value will be set to `name`,
+       * or if an anchor with that name is already present in the document,
+       * `name` will be used as a prefix for a new unique anchor.
+       * If `name` is undefined, the generated anchor will use 'a' as a prefix.
+       */
+      createAlias(node, name) {
+        if (!node.anchor) {
+          const prev = anchors.anchorNames(this);
+          node.anchor = // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+          !name || prev.has(name) ? anchors.findNewAnchor(name || "a", prev) : name;
+        }
+        return new Alias.Alias(node.anchor);
+      }
+      createNode(value, replacer, options) {
+        let _replacer = void 0;
+        if (typeof replacer === "function") {
+          value = replacer.call({ "": value }, "", value);
+          _replacer = replacer;
+        } else if (Array.isArray(replacer)) {
+          const keyToStr = (v) => typeof v === "number" || v instanceof String || v instanceof Number;
+          const asStr = replacer.filter(keyToStr).map(String);
+          if (asStr.length > 0)
+            replacer = replacer.concat(asStr);
+          _replacer = replacer;
+        } else if (options === void 0 && replacer) {
+          options = replacer;
+          replacer = void 0;
+        }
+        const { aliasDuplicateObjects, anchorPrefix, flow, keepUndefined, onTagObj, tag } = options ?? {};
+        const { onAnchor, setAnchors, sourceObjects } = anchors.createNodeAnchors(
+          this,
+          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+          anchorPrefix || "a"
+        );
+        const ctx = {
+          aliasDuplicateObjects: aliasDuplicateObjects ?? true,
+          keepUndefined: keepUndefined ?? false,
+          onAnchor,
+          onTagObj,
+          replacer: _replacer,
+          schema: this.schema,
+          sourceObjects
+        };
+        const node = createNode.createNode(value, tag, ctx);
+        if (flow && identity.isCollection(node))
+          node.flow = true;
+        setAnchors();
+        return node;
+      }
+      /**
+       * Convert a key and a value into a `Pair` using the current schema,
+       * recursively wrapping all values as `Scalar` or `Collection` nodes.
+       */
+      createPair(key, value, options = {}) {
+        const k = this.createNode(key, null, options);
+        const v = this.createNode(value, null, options);
+        return new Pair.Pair(k, v);
+      }
+      /**
+       * Removes a value from the document.
+       * @returns `true` if the item was found and removed.
+       */
+      delete(key) {
+        return assertCollection(this.contents) ? this.contents.delete(key) : false;
+      }
+      /**
+       * Removes a value from the document.
+       * @returns `true` if the item was found and removed.
+       */
+      deleteIn(path2) {
+        if (Collection.isEmptyPath(path2)) {
+          if (this.contents == null)
+            return false;
+          this.contents = null;
+          return true;
+        }
+        return assertCollection(this.contents) ? this.contents.deleteIn(path2) : false;
+      }
+      /**
+       * Returns item at `key`, or `undefined` if not found. By default unwraps
+       * scalar values from their surrounding node; to disable set `keepScalar` to
+       * `true` (collections are always returned intact).
+       */
+      get(key, keepScalar) {
+        return identity.isCollection(this.contents) ? this.contents.get(key, keepScalar) : void 0;
+      }
+      /**
+       * Returns item at `path`, or `undefined` if not found. By default unwraps
+       * scalar values from their surrounding node; to disable set `keepScalar` to
+       * `true` (collections are always returned intact).
+       */
+      getIn(path2, keepScalar) {
+        if (Collection.isEmptyPath(path2))
+          return !keepScalar && identity.isScalar(this.contents) ? this.contents.value : this.contents;
+        return identity.isCollection(this.contents) ? this.contents.getIn(path2, keepScalar) : void 0;
+      }
+      /**
+       * Checks if the document includes a value with the key `key`.
+       */
+      has(key) {
+        return identity.isCollection(this.contents) ? this.contents.has(key) : false;
+      }
+      /**
+       * Checks if the document includes a value at `path`.
+       */
+      hasIn(path2) {
+        if (Collection.isEmptyPath(path2))
+          return this.contents !== void 0;
+        return identity.isCollection(this.contents) ? this.contents.hasIn(path2) : false;
+      }
+      /**
+       * Sets a value in this document. For `!!set`, `value` needs to be a
+       * boolean to add/remove the item from the set.
+       */
+      set(key, value) {
+        if (this.contents == null) {
+          this.contents = Collection.collectionFromPath(this.schema, [key], value);
+        } else if (assertCollection(this.contents)) {
+          this.contents.set(key, value);
+        }
+      }
+      /**
+       * Sets a value in this document. For `!!set`, `value` needs to be a
+       * boolean to add/remove the item from the set.
+       */
+      setIn(path2, value) {
+        if (Collection.isEmptyPath(path2)) {
+          this.contents = value;
+        } else if (this.contents == null) {
+          this.contents = Collection.collectionFromPath(this.schema, Array.from(path2), value);
+        } else if (assertCollection(this.contents)) {
+          this.contents.setIn(path2, value);
+        }
+      }
+      /**
+       * Change the YAML version and schema used by the document.
+       * A `null` version disables support for directives, explicit tags, anchors, and aliases.
+       * It also requires the `schema` option to be given as a `Schema` instance value.
+       *
+       * Overrides all previously set schema options.
+       */
+      setSchema(version, options = {}) {
+        if (typeof version === "number")
+          version = String(version);
+        let opt;
+        switch (version) {
+          case "1.1":
+            if (this.directives)
+              this.directives.yaml.version = "1.1";
+            else
+              this.directives = new directives.Directives({ version: "1.1" });
+            opt = { resolveKnownTags: false, schema: "yaml-1.1" };
+            break;
+          case "1.2":
+          case "next":
+            if (this.directives)
+              this.directives.yaml.version = version;
+            else
+              this.directives = new directives.Directives({ version });
+            opt = { resolveKnownTags: true, schema: "core" };
+            break;
+          case null:
+            if (this.directives)
+              delete this.directives;
+            opt = null;
+            break;
+          default: {
+            const sv = JSON.stringify(version);
+            throw new Error(`Expected '1.1', '1.2' or null as first argument, but found: ${sv}`);
+          }
+        }
+        if (options.schema instanceof Object)
+          this.schema = options.schema;
+        else if (opt)
+          this.schema = new Schema.Schema(Object.assign(opt, options));
+        else
+          throw new Error(`With a null YAML version, the { schema: Schema } option is required`);
+      }
+      // json & jsonArg are only used from toJSON()
+      toJS({ json, jsonArg, mapAsMap, maxAliasCount, onAnchor, reviver } = {}) {
+        const ctx = {
+          anchors: /* @__PURE__ */ new Map(),
+          doc: this,
+          keep: !json,
+          mapAsMap: mapAsMap === true,
+          mapKeyWarned: false,
+          maxAliasCount: typeof maxAliasCount === "number" ? maxAliasCount : 100
+        };
+        const res = toJS.toJS(this.contents, jsonArg ?? "", ctx);
+        if (typeof onAnchor === "function")
+          for (const { count, res: res2 } of ctx.anchors.values())
+            onAnchor(res2, count);
+        return typeof reviver === "function" ? applyReviver.applyReviver(reviver, { "": res }, "", res) : res;
+      }
+      /**
+       * A JSON representation of the document `contents`.
+       *
+       * @param jsonArg Used by `JSON.stringify` to indicate the array index or
+       *   property name.
+       */
+      toJSON(jsonArg, onAnchor) {
+        return this.toJS({ json: true, jsonArg, mapAsMap: false, onAnchor });
+      }
+      /** A YAML representation of the document. */
+      toString(options = {}) {
+        if (this.errors.length > 0)
+          throw new Error("Document with errors cannot be stringified");
+        if ("indent" in options && (!Number.isInteger(options.indent) || Number(options.indent) <= 0)) {
+          const s = JSON.stringify(options.indent);
+          throw new Error(`"indent" option must be a positive integer, not ${s}`);
+        }
+        return stringifyDocument.stringifyDocument(this, options);
+      }
+    };
+    function assertCollection(contents) {
+      if (identity.isCollection(contents))
+        return true;
+      throw new Error("Expected a YAML collection as document contents");
+    }
+    exports2.Document = Document;
+  }
+});
+
+// node_modules/yaml/dist/errors.js
+var require_errors = __commonJS({
+  "node_modules/yaml/dist/errors.js"(exports2) {
+    "use strict";
+    var YAMLError = class extends Error {
+      constructor(name, pos, code, message) {
+        super();
+        this.name = name;
+        this.code = code;
+        this.message = message;
+        this.pos = pos;
+      }
+    };
+    var YAMLParseError = class extends YAMLError {
+      constructor(pos, code, message) {
+        super("YAMLParseError", pos, code, message);
+      }
+    };
+    var YAMLWarning = class extends YAMLError {
+      constructor(pos, code, message) {
+        super("YAMLWarning", pos, code, message);
+      }
+    };
+    var prettifyError = (src, lc) => (error) => {
+      if (error.pos[0] === -1)
+        return;
+      error.linePos = error.pos.map((pos) => lc.linePos(pos));
+      const { line, col } = error.linePos[0];
+      error.message += ` at line ${line}, column ${col}`;
+      let ci = col - 1;
+      let lineStr = src.substring(lc.lineStarts[line - 1], lc.lineStarts[line]).replace(/[\n\r]+$/, "");
+      if (ci >= 60 && lineStr.length > 80) {
+        const trimStart = Math.min(ci - 39, lineStr.length - 79);
+        lineStr = "\u2026" + lineStr.substring(trimStart);
+        ci -= trimStart - 1;
+      }
+      if (lineStr.length > 80)
+        lineStr = lineStr.substring(0, 79) + "\u2026";
+      if (line > 1 && /^ *$/.test(lineStr.substring(0, ci))) {
+        let prev = src.substring(lc.lineStarts[line - 2], lc.lineStarts[line - 1]);
+        if (prev.length > 80)
+          prev = prev.substring(0, 79) + "\u2026\n";
+        lineStr = prev + lineStr;
+      }
+      if (/[^ ]/.test(lineStr)) {
+        let count = 1;
+        const end = error.linePos[1];
+        if (end?.line === line && end.col > col) {
+          count = Math.max(1, Math.min(end.col - col, 80 - ci));
+        }
+        const pointer = " ".repeat(ci) + "^".repeat(count);
+        error.message += `:
+
+${lineStr}
+${pointer}
+`;
+      }
+    };
+    exports2.YAMLError = YAMLError;
+    exports2.YAMLParseError = YAMLParseError;
+    exports2.YAMLWarning = YAMLWarning;
+    exports2.prettifyError = prettifyError;
+  }
+});
+
+// node_modules/yaml/dist/compose/resolve-props.js
+var require_resolve_props = __commonJS({
+  "node_modules/yaml/dist/compose/resolve-props.js"(exports2) {
+    "use strict";
+    function resolveProps(tokens, { flow, indicator, next, offset, onError, parentIndent, startOnNewline }) {
+      let spaceBefore = false;
+      let atNewline = startOnNewline;
+      let hasSpace = startOnNewline;
+      let comment = "";
+      let commentSep = "";
+      let hasNewline = false;
+      let reqSpace = false;
+      let tab = null;
+      let anchor = null;
+      let tag = null;
+      let newlineAfterProp = null;
+      let comma = null;
+      let found = null;
+      let start = null;
+      for (const token of tokens) {
+        if (reqSpace) {
+          if (token.type !== "space" && token.type !== "newline" && token.type !== "comma")
+            onError(token.offset, "MISSING_CHAR", "Tags and anchors must be separated from the next token by white space");
+          reqSpace = false;
+        }
+        if (tab) {
+          if (atNewline && token.type !== "comment" && token.type !== "newline") {
+            onError(tab, "TAB_AS_INDENT", "Tabs are not allowed as indentation");
+          }
+          tab = null;
+        }
+        switch (token.type) {
+          case "space":
+            if (!flow && (indicator !== "doc-start" || next?.type !== "flow-collection") && token.source.includes("	")) {
+              tab = token;
+            }
+            hasSpace = true;
+            break;
+          case "comment": {
+            if (!hasSpace)
+              onError(token, "MISSING_CHAR", "Comments must be separated from other tokens by white space characters");
+            const cb = token.source.substring(1) || " ";
+            if (!comment)
+              comment = cb;
+            else
+              comment += commentSep + cb;
+            commentSep = "";
+            atNewline = false;
+            break;
+          }
+          case "newline":
+            if (atNewline) {
+              if (comment)
+                comment += token.source;
+              else if (!found || indicator !== "seq-item-ind")
+                spaceBefore = true;
+            } else
+              commentSep += token.source;
+            atNewline = true;
+            hasNewline = true;
+            if (anchor || tag)
+              newlineAfterProp = token;
+            hasSpace = true;
+            break;
+          case "anchor":
+            if (anchor)
+              onError(token, "MULTIPLE_ANCHORS", "A node can have at most one anchor");
+            if (token.source.endsWith(":"))
+              onError(token.offset + token.source.length - 1, "BAD_ALIAS", "Anchor ending in : is ambiguous", true);
+            anchor = token;
+            start ?? (start = token.offset);
+            atNewline = false;
+            hasSpace = false;
+            reqSpace = true;
+            break;
+          case "tag": {
+            if (tag)
+              onError(token, "MULTIPLE_TAGS", "A node can have at most one tag");
+            tag = token;
+            start ?? (start = token.offset);
+            atNewline = false;
+            hasSpace = false;
+            reqSpace = true;
+            break;
+          }
+          case indicator:
+            if (anchor || tag)
+              onError(token, "BAD_PROP_ORDER", `Anchors and tags must be after the ${token.source} indicator`);
+            if (found)
+              onError(token, "UNEXPECTED_TOKEN", `Unexpected ${token.source} in ${flow ?? "collection"}`);
+            found = token;
+            atNewline = indicator === "seq-item-ind" || indicator === "explicit-key-ind";
+            hasSpace = false;
+            break;
+          case "comma":
+            if (flow) {
+              if (comma)
+                onError(token, "UNEXPECTED_TOKEN", `Unexpected , in ${flow}`);
+              comma = token;
+              atNewline = false;
+              hasSpace = false;
+              break;
+            }
+          // else fallthrough
+          default:
+            onError(token, "UNEXPECTED_TOKEN", `Unexpected ${token.type} token`);
+            atNewline = false;
+            hasSpace = false;
+        }
+      }
+      const last = tokens[tokens.length - 1];
+      const end = last ? last.offset + last.source.length : offset;
+      if (reqSpace && next && next.type !== "space" && next.type !== "newline" && next.type !== "comma" && (next.type !== "scalar" || next.source !== "")) {
+        onError(next.offset, "MISSING_CHAR", "Tags and anchors must be separated from the next token by white space");
+      }
+      if (tab && (atNewline && tab.indent <= parentIndent || next?.type === "block-map" || next?.type === "block-seq"))
+        onError(tab, "TAB_AS_INDENT", "Tabs are not allowed as indentation");
+      return {
+        comma,
+        found,
+        spaceBefore,
+        comment,
+        hasNewline,
+        anchor,
+        tag,
+        newlineAfterProp,
+        end,
+        start: start ?? end
+      };
+    }
+    exports2.resolveProps = resolveProps;
+  }
+});
+
+// node_modules/yaml/dist/compose/util-contains-newline.js
+var require_util_contains_newline = __commonJS({
+  "node_modules/yaml/dist/compose/util-contains-newline.js"(exports2) {
+    "use strict";
+    function containsNewline(key) {
+      if (!key)
+        return null;
+      switch (key.type) {
+        case "alias":
+        case "scalar":
+        case "double-quoted-scalar":
+        case "single-quoted-scalar":
+          if (key.source.includes("\n"))
+            return true;
+          if (key.end) {
+            for (const st of key.end)
+              if (st.type === "newline")
+                return true;
+          }
+          return false;
+        case "flow-collection":
+          for (const it of key.items) {
+            for (const st of it.start)
+              if (st.type === "newline")
+                return true;
+            if (it.sep) {
+              for (const st of it.sep)
+                if (st.type === "newline")
+                  return true;
+            }
+            if (containsNewline(it.key) || containsNewline(it.value))
+              return true;
+          }
+          return false;
+        default:
+          return true;
+      }
+    }
+    exports2.containsNewline = containsNewline;
+  }
+});
+
+// node_modules/yaml/dist/compose/util-flow-indent-check.js
+var require_util_flow_indent_check = __commonJS({
+  "node_modules/yaml/dist/compose/util-flow-indent-check.js"(exports2) {
+    "use strict";
+    var utilContainsNewline = require_util_contains_newline();
+    function flowIndentCheck(indent, fc, onError) {
+      if (fc?.type === "flow-collection") {
+        const end = fc.end[0];
+        if (end.indent === indent && (end.source === "]" || end.source === "}") && utilContainsNewline.containsNewline(fc)) {
+          const msg = "Flow end indicator should be more indented than parent";
+          onError(end, "BAD_INDENT", msg, true);
+        }
+      }
+    }
+    exports2.flowIndentCheck = flowIndentCheck;
+  }
+});
+
+// node_modules/yaml/dist/compose/util-map-includes.js
+var require_util_map_includes = __commonJS({
+  "node_modules/yaml/dist/compose/util-map-includes.js"(exports2) {
+    "use strict";
+    var identity = require_identity();
+    function mapIncludes(ctx, items, search) {
+      const { uniqueKeys } = ctx.options;
+      if (uniqueKeys === false)
+        return false;
+      const isEqual = typeof uniqueKeys === "function" ? uniqueKeys : (a, b) => a === b || identity.isScalar(a) && identity.isScalar(b) && a.value === b.value;
+      return items.some((pair) => isEqual(pair.key, search));
+    }
+    exports2.mapIncludes = mapIncludes;
+  }
+});
+
+// node_modules/yaml/dist/compose/resolve-block-map.js
+var require_resolve_block_map = __commonJS({
+  "node_modules/yaml/dist/compose/resolve-block-map.js"(exports2) {
+    "use strict";
+    var Pair = require_Pair();
+    var YAMLMap = require_YAMLMap();
+    var resolveProps = require_resolve_props();
+    var utilContainsNewline = require_util_contains_newline();
+    var utilFlowIndentCheck = require_util_flow_indent_check();
+    var utilMapIncludes = require_util_map_includes();
+    var startColMsg = "All mapping items must start at the same column";
+    function resolveBlockMap({ composeNode, composeEmptyNode }, ctx, bm, onError, tag) {
+      const NodeClass = tag?.nodeClass ?? YAMLMap.YAMLMap;
+      const map = new NodeClass(ctx.schema);
+      if (ctx.atRoot)
+        ctx.atRoot = false;
+      let offset = bm.offset;
+      let commentEnd = null;
+      for (const collItem of bm.items) {
+        const { start, key, sep, value } = collItem;
+        const keyProps = resolveProps.resolveProps(start, {
+          indicator: "explicit-key-ind",
+          next: key ?? sep?.[0],
+          offset,
+          onError,
+          parentIndent: bm.indent,
+          startOnNewline: true
+        });
+        const implicitKey = !keyProps.found;
+        if (implicitKey) {
+          if (key) {
+            if (key.type === "block-seq")
+              onError(offset, "BLOCK_AS_IMPLICIT_KEY", "A block sequence may not be used as an implicit map key");
+            else if ("indent" in key && key.indent !== bm.indent)
+              onError(offset, "BAD_INDENT", startColMsg);
+          }
+          if (!keyProps.anchor && !keyProps.tag && !sep) {
+            commentEnd = keyProps.end;
+            if (keyProps.comment) {
+              if (map.comment)
+                map.comment += "\n" + keyProps.comment;
+              else
+                map.comment = keyProps.comment;
+            }
+            continue;
+          }
+          if (keyProps.newlineAfterProp || utilContainsNewline.containsNewline(key)) {
+            onError(key ?? start[start.length - 1], "MULTILINE_IMPLICIT_KEY", "Implicit keys need to be on a single line");
+          }
+        } else if (keyProps.found?.indent !== bm.indent) {
+          onError(offset, "BAD_INDENT", startColMsg);
+        }
+        ctx.atKey = true;
+        const keyStart = keyProps.end;
+        const keyNode = key ? composeNode(ctx, key, keyProps, onError) : composeEmptyNode(ctx, keyStart, start, null, keyProps, onError);
+        if (ctx.schema.compat)
+          utilFlowIndentCheck.flowIndentCheck(bm.indent, key, onError);
+        ctx.atKey = false;
+        if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
+          onError(keyStart, "DUPLICATE_KEY", "Map keys must be unique");
+        const valueProps = resolveProps.resolveProps(sep ?? [], {
+          indicator: "map-value-ind",
+          next: value,
+          offset: keyNode.range[2],
+          onError,
+          parentIndent: bm.indent,
+          startOnNewline: !key || key.type === "block-scalar"
+        });
+        offset = valueProps.end;
+        if (valueProps.found) {
+          if (implicitKey) {
+            if (value?.type === "block-map" && !valueProps.hasNewline)
+              onError(offset, "BLOCK_AS_IMPLICIT_KEY", "Nested mappings are not allowed in compact mappings");
+            if (ctx.options.strict && keyProps.start < valueProps.found.offset - 1024)
+              onError(keyNode.range, "KEY_OVER_1024_CHARS", "The : indicator must be at most 1024 chars after the start of an implicit block mapping key");
+          }
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep, null, valueProps, onError);
+          if (ctx.schema.compat)
+            utilFlowIndentCheck.flowIndentCheck(bm.indent, value, onError);
+          offset = valueNode.range[2];
+          const pair = new Pair.Pair(keyNode, valueNode);
+          if (ctx.options.keepSourceTokens)
+            pair.srcToken = collItem;
+          map.items.push(pair);
+        } else {
+          if (implicitKey)
+            onError(keyNode.range, "MISSING_CHAR", "Implicit map keys need to be followed by map values");
+          if (valueProps.comment) {
+            if (keyNode.comment)
+              keyNode.comment += "\n" + valueProps.comment;
+            else
+              keyNode.comment = valueProps.comment;
+          }
+          const pair = new Pair.Pair(keyNode);
+          if (ctx.options.keepSourceTokens)
+            pair.srcToken = collItem;
+          map.items.push(pair);
+        }
+      }
+      if (commentEnd && commentEnd < offset)
+        onError(commentEnd, "IMPOSSIBLE", "Map comment with trailing content");
+      map.range = [bm.offset, offset, commentEnd ?? offset];
+      return map;
+    }
+    exports2.resolveBlockMap = resolveBlockMap;
+  }
+});
+
+// node_modules/yaml/dist/compose/resolve-block-seq.js
+var require_resolve_block_seq = __commonJS({
+  "node_modules/yaml/dist/compose/resolve-block-seq.js"(exports2) {
+    "use strict";
+    var YAMLSeq = require_YAMLSeq();
+    var resolveProps = require_resolve_props();
+    var utilFlowIndentCheck = require_util_flow_indent_check();
+    function resolveBlockSeq({ composeNode, composeEmptyNode }, ctx, bs, onError, tag) {
+      const NodeClass = tag?.nodeClass ?? YAMLSeq.YAMLSeq;
+      const seq = new NodeClass(ctx.schema);
+      if (ctx.atRoot)
+        ctx.atRoot = false;
+      if (ctx.atKey)
+        ctx.atKey = false;
+      let offset = bs.offset;
+      let commentEnd = null;
+      for (const { start, value } of bs.items) {
+        const props = resolveProps.resolveProps(start, {
+          indicator: "seq-item-ind",
+          next: value,
+          offset,
+          onError,
+          parentIndent: bs.indent,
+          startOnNewline: true
+        });
+        if (!props.found) {
+          if (props.anchor || props.tag || value) {
+            if (value?.type === "block-seq")
+              onError(props.end, "BAD_INDENT", "All sequence items must start at the same column");
+            else
+              onError(offset, "MISSING_CHAR", "Sequence item without - indicator");
+          } else {
+            commentEnd = props.end;
+            if (props.comment)
+              seq.comment = props.comment;
+            continue;
+          }
+        }
+        const node = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, start, null, props, onError);
+        if (ctx.schema.compat)
+          utilFlowIndentCheck.flowIndentCheck(bs.indent, value, onError);
+        offset = node.range[2];
+        seq.items.push(node);
+      }
+      seq.range = [bs.offset, offset, commentEnd ?? offset];
+      return seq;
+    }
+    exports2.resolveBlockSeq = resolveBlockSeq;
+  }
+});
+
+// node_modules/yaml/dist/compose/resolve-end.js
+var require_resolve_end = __commonJS({
+  "node_modules/yaml/dist/compose/resolve-end.js"(exports2) {
+    "use strict";
+    function resolveEnd(end, offset, reqSpace, onError) {
+      let comment = "";
+      if (end) {
+        let hasSpace = false;
+        let sep = "";
+        for (const token of end) {
+          const { source, type } = token;
+          switch (type) {
+            case "space":
+              hasSpace = true;
+              break;
+            case "comment": {
+              if (reqSpace && !hasSpace)
+                onError(token, "MISSING_CHAR", "Comments must be separated from other tokens by white space characters");
+              const cb = source.substring(1) || " ";
+              if (!comment)
+                comment = cb;
+              else
+                comment += sep + cb;
+              sep = "";
+              break;
+            }
+            case "newline":
+              if (comment)
+                sep += source;
+              hasSpace = true;
+              break;
+            default:
+              onError(token, "UNEXPECTED_TOKEN", `Unexpected ${type} at node end`);
+          }
+          offset += source.length;
+        }
+      }
+      return { comment, offset };
+    }
+    exports2.resolveEnd = resolveEnd;
+  }
+});
+
+// node_modules/yaml/dist/compose/resolve-flow-collection.js
+var require_resolve_flow_collection = __commonJS({
+  "node_modules/yaml/dist/compose/resolve-flow-collection.js"(exports2) {
+    "use strict";
+    var identity = require_identity();
+    var Pair = require_Pair();
+    var YAMLMap = require_YAMLMap();
+    var YAMLSeq = require_YAMLSeq();
+    var resolveEnd = require_resolve_end();
+    var resolveProps = require_resolve_props();
+    var utilContainsNewline = require_util_contains_newline();
+    var utilMapIncludes = require_util_map_includes();
+    var blockMsg = "Block collections are not allowed within flow collections";
+    var isBlock = (token) => token && (token.type === "block-map" || token.type === "block-seq");
+    function resolveFlowCollection({ composeNode, composeEmptyNode }, ctx, fc, onError, tag) {
+      const isMap = fc.start.source === "{";
+      const fcName = isMap ? "flow map" : "flow sequence";
+      const NodeClass = tag?.nodeClass ?? (isMap ? YAMLMap.YAMLMap : YAMLSeq.YAMLSeq);
+      const coll = new NodeClass(ctx.schema);
+      coll.flow = true;
+      const atRoot = ctx.atRoot;
+      if (atRoot)
+        ctx.atRoot = false;
+      if (ctx.atKey)
+        ctx.atKey = false;
+      let offset = fc.offset + fc.start.source.length;
+      for (let i = 0; i < fc.items.length; ++i) {
+        const collItem = fc.items[i];
+        const { start, key, sep, value } = collItem;
+        const props = resolveProps.resolveProps(start, {
+          flow: fcName,
+          indicator: "explicit-key-ind",
+          next: key ?? sep?.[0],
+          offset,
+          onError,
+          parentIndent: fc.indent,
+          startOnNewline: false
+        });
+        if (!props.found) {
+          if (!props.anchor && !props.tag && !sep && !value) {
+            if (i === 0 && props.comma)
+              onError(props.comma, "UNEXPECTED_TOKEN", `Unexpected , in ${fcName}`);
+            else if (i < fc.items.length - 1)
+              onError(props.start, "UNEXPECTED_TOKEN", `Unexpected empty item in ${fcName}`);
+            if (props.comment) {
+              if (coll.comment)
+                coll.comment += "\n" + props.comment;
+              else
+                coll.comment = props.comment;
+            }
+            offset = props.end;
+            continue;
+          }
+          if (!isMap && ctx.options.strict && utilContainsNewline.containsNewline(key))
+            onError(
+              key,
+              // checked by containsNewline()
+              "MULTILINE_IMPLICIT_KEY",
+              "Implicit keys of flow sequence pairs need to be on a single line"
+            );
+        }
+        if (i === 0) {
+          if (props.comma)
+            onError(props.comma, "UNEXPECTED_TOKEN", `Unexpected , in ${fcName}`);
+        } else {
+          if (!props.comma)
+            onError(props.start, "MISSING_CHAR", `Missing , between ${fcName} items`);
+          if (props.comment) {
+            let prevItemComment = "";
+            loop: for (const st of start) {
+              switch (st.type) {
+                case "comma":
+                case "space":
+                  break;
+                case "comment":
+                  prevItemComment = st.source.substring(1);
+                  break loop;
+                default:
+                  break loop;
+              }
+            }
+            if (prevItemComment) {
+              let prev = coll.items[coll.items.length - 1];
+              if (identity.isPair(prev))
+                prev = prev.value ?? prev.key;
+              if (prev.comment)
+                prev.comment += "\n" + prevItemComment;
+              else
+                prev.comment = prevItemComment;
+              props.comment = props.comment.substring(prevItemComment.length + 1);
+            }
+          }
+        }
+        if (!isMap && !sep && !props.found) {
+          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep, null, props, onError);
+          coll.items.push(valueNode);
+          offset = valueNode.range[2];
+          if (isBlock(value))
+            onError(valueNode.range, "BLOCK_IN_FLOW", blockMsg);
+        } else {
+          ctx.atKey = true;
+          const keyStart = props.end;
+          const keyNode = key ? composeNode(ctx, key, props, onError) : composeEmptyNode(ctx, keyStart, start, null, props, onError);
+          if (isBlock(key))
+            onError(keyNode.range, "BLOCK_IN_FLOW", blockMsg);
+          ctx.atKey = false;
+          const valueProps = resolveProps.resolveProps(sep ?? [], {
+            flow: fcName,
+            indicator: "map-value-ind",
+            next: value,
+            offset: keyNode.range[2],
+            onError,
+            parentIndent: fc.indent,
+            startOnNewline: false
+          });
+          if (valueProps.found) {
+            if (!isMap && !props.found && ctx.options.strict) {
+              if (sep)
+                for (const st of sep) {
+                  if (st === valueProps.found)
+                    break;
+                  if (st.type === "newline") {
+                    onError(st, "MULTILINE_IMPLICIT_KEY", "Implicit keys of flow sequence pairs need to be on a single line");
+                    break;
+                  }
+                }
+              if (props.start < valueProps.found.offset - 1024)
+                onError(valueProps.found, "KEY_OVER_1024_CHARS", "The : indicator must be at most 1024 chars after the start of an implicit flow sequence key");
+            }
+          } else if (value) {
+            if ("source" in value && value.source?.[0] === ":")
+              onError(value, "MISSING_CHAR", `Missing space after : in ${fcName}`);
+            else
+              onError(valueProps.start, "MISSING_CHAR", `Missing , or : between ${fcName} items`);
+          }
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep, null, valueProps, onError) : null;
+          if (valueNode) {
+            if (isBlock(value))
+              onError(valueNode.range, "BLOCK_IN_FLOW", blockMsg);
+          } else if (valueProps.comment) {
+            if (keyNode.comment)
+              keyNode.comment += "\n" + valueProps.comment;
+            else
+              keyNode.comment = valueProps.comment;
+          }
+          const pair = new Pair.Pair(keyNode, valueNode);
+          if (ctx.options.keepSourceTokens)
+            pair.srcToken = collItem;
+          if (isMap) {
+            const map = coll;
+            if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
+              onError(keyStart, "DUPLICATE_KEY", "Map keys must be unique");
+            map.items.push(pair);
+          } else {
+            const map = new YAMLMap.YAMLMap(ctx.schema);
+            map.flow = true;
+            map.items.push(pair);
+            const endRange = (valueNode ?? keyNode).range;
+            map.range = [keyNode.range[0], endRange[1], endRange[2]];
+            coll.items.push(map);
+          }
+          offset = valueNode ? valueNode.range[2] : valueProps.end;
+        }
+      }
+      const expectedEnd = isMap ? "}" : "]";
+      const [ce, ...ee] = fc.end;
+      let cePos = offset;
+      if (ce?.source === expectedEnd)
+        cePos = ce.offset + ce.source.length;
+      else {
+        const name = fcName[0].toUpperCase() + fcName.substring(1);
+        const msg = atRoot ? `${name} must end with a ${expectedEnd}` : `${name} in block collection must be sufficiently indented and end with a ${expectedEnd}`;
+        onError(offset, atRoot ? "MISSING_CHAR" : "BAD_INDENT", msg);
+        if (ce && ce.source.length !== 1)
+          ee.unshift(ce);
+      }
+      if (ee.length > 0) {
+        const end = resolveEnd.resolveEnd(ee, cePos, ctx.options.strict, onError);
+        if (end.comment) {
+          if (coll.comment)
+            coll.comment += "\n" + end.comment;
+          else
+            coll.comment = end.comment;
+        }
+        coll.range = [fc.offset, cePos, end.offset];
+      } else {
+        coll.range = [fc.offset, cePos, cePos];
+      }
+      return coll;
+    }
+    exports2.resolveFlowCollection = resolveFlowCollection;
+  }
+});
+
+// node_modules/yaml/dist/compose/compose-collection.js
+var require_compose_collection = __commonJS({
+  "node_modules/yaml/dist/compose/compose-collection.js"(exports2) {
+    "use strict";
+    var identity = require_identity();
+    var Scalar = require_Scalar();
+    var YAMLMap = require_YAMLMap();
+    var YAMLSeq = require_YAMLSeq();
+    var resolveBlockMap = require_resolve_block_map();
+    var resolveBlockSeq = require_resolve_block_seq();
+    var resolveFlowCollection = require_resolve_flow_collection();
+    function resolveCollection(CN, ctx, token, onError, tagName, tag) {
+      const coll = token.type === "block-map" ? resolveBlockMap.resolveBlockMap(CN, ctx, token, onError, tag) : token.type === "block-seq" ? resolveBlockSeq.resolveBlockSeq(CN, ctx, token, onError, tag) : resolveFlowCollection.resolveFlowCollection(CN, ctx, token, onError, tag);
+      const Coll = coll.constructor;
+      if (tagName === "!" || tagName === Coll.tagName) {
+        coll.tag = Coll.tagName;
+        return coll;
+      }
+      if (tagName)
+        coll.tag = tagName;
+      return coll;
+    }
+    function composeCollection(CN, ctx, token, props, onError) {
+      const tagToken = props.tag;
+      const tagName = !tagToken ? null : ctx.directives.tagName(tagToken.source, (msg) => onError(tagToken, "TAG_RESOLVE_FAILED", msg));
+      if (token.type === "block-seq") {
+        const { anchor, newlineAfterProp: nl } = props;
+        const lastProp = anchor && tagToken ? anchor.offset > tagToken.offset ? anchor : tagToken : anchor ?? tagToken;
+        if (lastProp && (!nl || nl.offset < lastProp.offset)) {
+          const message = "Missing newline after block sequence props";
+          onError(lastProp, "MISSING_CHAR", message);
+        }
+      }
+      const expType = token.type === "block-map" ? "map" : token.type === "block-seq" ? "seq" : token.start.source === "{" ? "map" : "seq";
+      if (!tagToken || !tagName || tagName === "!" || tagName === YAMLMap.YAMLMap.tagName && expType === "map" || tagName === YAMLSeq.YAMLSeq.tagName && expType === "seq") {
+        return resolveCollection(CN, ctx, token, onError, tagName);
+      }
+      let tag = ctx.schema.tags.find((t) => t.tag === tagName && t.collection === expType);
+      if (!tag) {
+        const kt = ctx.schema.knownTags[tagName];
+        if (kt?.collection === expType) {
+          ctx.schema.tags.push(Object.assign({}, kt, { default: false }));
+          tag = kt;
+        } else {
+          if (kt) {
+            onError(tagToken, "BAD_COLLECTION_TYPE", `${kt.tag} used for ${expType} collection, but expects ${kt.collection ?? "scalar"}`, true);
+          } else {
+            onError(tagToken, "TAG_RESOLVE_FAILED", `Unresolved tag: ${tagName}`, true);
+          }
+          return resolveCollection(CN, ctx, token, onError, tagName);
+        }
+      }
+      const coll = resolveCollection(CN, ctx, token, onError, tagName, tag);
+      const res = tag.resolve?.(coll, (msg) => onError(tagToken, "TAG_RESOLVE_FAILED", msg), ctx.options) ?? coll;
+      const node = identity.isNode(res) ? res : new Scalar.Scalar(res);
+      node.range = coll.range;
+      node.tag = tagName;
+      if (tag?.format)
+        node.format = tag.format;
+      return node;
+    }
+    exports2.composeCollection = composeCollection;
+  }
+});
+
+// node_modules/yaml/dist/compose/resolve-block-scalar.js
+var require_resolve_block_scalar = __commonJS({
+  "node_modules/yaml/dist/compose/resolve-block-scalar.js"(exports2) {
+    "use strict";
+    var Scalar = require_Scalar();
+    function resolveBlockScalar(ctx, scalar, onError) {
+      const start = scalar.offset;
+      const header = parseBlockScalarHeader(scalar, ctx.options.strict, onError);
+      if (!header)
+        return { value: "", type: null, comment: "", range: [start, start, start] };
+      const type = header.mode === ">" ? Scalar.Scalar.BLOCK_FOLDED : Scalar.Scalar.BLOCK_LITERAL;
+      const lines = scalar.source ? splitLines(scalar.source) : [];
+      let chompStart = lines.length;
+      for (let i = lines.length - 1; i >= 0; --i) {
+        const content = lines[i][1];
+        if (content === "" || content === "\r")
+          chompStart = i;
+        else
+          break;
+      }
+      if (chompStart === 0) {
+        const value2 = header.chomp === "+" && lines.length > 0 ? "\n".repeat(Math.max(1, lines.length - 1)) : "";
+        let end2 = start + header.length;
+        if (scalar.source)
+          end2 += scalar.source.length;
+        return { value: value2, type, comment: header.comment, range: [start, end2, end2] };
+      }
+      let trimIndent = scalar.indent + header.indent;
+      let offset = scalar.offset + header.length;
+      let contentStart = 0;
+      for (let i = 0; i < chompStart; ++i) {
+        const [indent, content] = lines[i];
+        if (content === "" || content === "\r") {
+          if (header.indent === 0 && indent.length > trimIndent)
+            trimIndent = indent.length;
+        } else {
+          if (indent.length < trimIndent) {
+            const message = "Block scalars with more-indented leading empty lines must use an explicit indentation indicator";
+            onError(offset + indent.length, "MISSING_CHAR", message);
+          }
+          if (header.indent === 0)
+            trimIndent = indent.length;
+          contentStart = i;
+          if (trimIndent === 0 && !ctx.atRoot) {
+            const message = "Block scalar values in collections must be indented";
+            onError(offset, "BAD_INDENT", message);
+          }
+          break;
+        }
+        offset += indent.length + content.length + 1;
+      }
+      for (let i = lines.length - 1; i >= chompStart; --i) {
+        if (lines[i][0].length > trimIndent)
+          chompStart = i + 1;
+      }
+      let value = "";
+      let sep = "";
+      let prevMoreIndented = false;
+      for (let i = 0; i < contentStart; ++i)
+        value += lines[i][0].slice(trimIndent) + "\n";
+      for (let i = contentStart; i < chompStart; ++i) {
+        let [indent, content] = lines[i];
+        offset += indent.length + content.length + 1;
+        const crlf = content[content.length - 1] === "\r";
+        if (crlf)
+          content = content.slice(0, -1);
+        if (content && indent.length < trimIndent) {
+          const src = header.indent ? "explicit indentation indicator" : "first line";
+          const message = `Block scalar lines must not be less indented than their ${src}`;
+          onError(offset - content.length - (crlf ? 2 : 1), "BAD_INDENT", message);
+          indent = "";
+        }
+        if (type === Scalar.Scalar.BLOCK_LITERAL) {
+          value += sep + indent.slice(trimIndent) + content;
+          sep = "\n";
+        } else if (indent.length > trimIndent || content[0] === "	") {
+          if (sep === " ")
+            sep = "\n";
+          else if (!prevMoreIndented && sep === "\n")
+            sep = "\n\n";
+          value += sep + indent.slice(trimIndent) + content;
+          sep = "\n";
+          prevMoreIndented = true;
+        } else if (content === "") {
+          if (sep === "\n")
+            value += "\n";
+          else
+            sep = "\n";
+        } else {
+          value += sep + content;
+          sep = " ";
+          prevMoreIndented = false;
+        }
+      }
+      switch (header.chomp) {
+        case "-":
+          break;
+        case "+":
+          for (let i = chompStart; i < lines.length; ++i)
+            value += "\n" + lines[i][0].slice(trimIndent);
+          if (value[value.length - 1] !== "\n")
+            value += "\n";
+          break;
+        default:
+          value += "\n";
+      }
+      const end = start + header.length + scalar.source.length;
+      return { value, type, comment: header.comment, range: [start, end, end] };
+    }
+    function parseBlockScalarHeader({ offset, props }, strict, onError) {
+      if (props[0].type !== "block-scalar-header") {
+        onError(props[0], "IMPOSSIBLE", "Block scalar header not found");
+        return null;
+      }
+      const { source } = props[0];
+      const mode = source[0];
+      let indent = 0;
+      let chomp = "";
+      let error = -1;
+      for (let i = 1; i < source.length; ++i) {
+        const ch = source[i];
+        if (!chomp && (ch === "-" || ch === "+"))
+          chomp = ch;
+        else {
+          const n = Number(ch);
+          if (!indent && n)
+            indent = n;
+          else if (error === -1)
+            error = offset + i;
+        }
+      }
+      if (error !== -1)
+        onError(error, "UNEXPECTED_TOKEN", `Block scalar header includes extra characters: ${source}`);
+      let hasSpace = false;
+      let comment = "";
+      let length = source.length;
+      for (let i = 1; i < props.length; ++i) {
+        const token = props[i];
+        switch (token.type) {
+          case "space":
+            hasSpace = true;
+          // fallthrough
+          case "newline":
+            length += token.source.length;
+            break;
+          case "comment":
+            if (strict && !hasSpace) {
+              const message = "Comments must be separated from other tokens by white space characters";
+              onError(token, "MISSING_CHAR", message);
+            }
+            length += token.source.length;
+            comment = token.source.substring(1);
+            break;
+          case "error":
+            onError(token, "UNEXPECTED_TOKEN", token.message);
+            length += token.source.length;
+            break;
+          /* istanbul ignore next should not happen */
+          default: {
+            const message = `Unexpected token in block scalar header: ${token.type}`;
+            onError(token, "UNEXPECTED_TOKEN", message);
+            const ts = token.source;
+            if (ts && typeof ts === "string")
+              length += ts.length;
+          }
+        }
+      }
+      return { mode, indent, chomp, comment, length };
+    }
+    function splitLines(source) {
+      const split = source.split(/\n( *)/);
+      const first = split[0];
+      const m = first.match(/^( *)/);
+      const line0 = m?.[1] ? [m[1], first.slice(m[1].length)] : ["", first];
+      const lines = [line0];
+      for (let i = 1; i < split.length; i += 2)
+        lines.push([split[i], split[i + 1]]);
+      return lines;
+    }
+    exports2.resolveBlockScalar = resolveBlockScalar;
+  }
+});
+
+// node_modules/yaml/dist/compose/resolve-flow-scalar.js
+var require_resolve_flow_scalar = __commonJS({
+  "node_modules/yaml/dist/compose/resolve-flow-scalar.js"(exports2) {
+    "use strict";
+    var Scalar = require_Scalar();
+    var resolveEnd = require_resolve_end();
+    function resolveFlowScalar(scalar, strict, onError) {
+      const { offset, type, source, end } = scalar;
+      let _type;
+      let value;
+      const _onError = (rel, code, msg) => onError(offset + rel, code, msg);
+      switch (type) {
+        case "scalar":
+          _type = Scalar.Scalar.PLAIN;
+          value = plainValue(source, _onError);
+          break;
+        case "single-quoted-scalar":
+          _type = Scalar.Scalar.QUOTE_SINGLE;
+          value = singleQuotedValue(source, _onError);
+          break;
+        case "double-quoted-scalar":
+          _type = Scalar.Scalar.QUOTE_DOUBLE;
+          value = doubleQuotedValue(source, _onError);
+          break;
+        /* istanbul ignore next should not happen */
+        default:
+          onError(scalar, "UNEXPECTED_TOKEN", `Expected a flow scalar value, but found: ${type}`);
+          return {
+            value: "",
+            type: null,
+            comment: "",
+            range: [offset, offset + source.length, offset + source.length]
+          };
+      }
+      const valueEnd = offset + source.length;
+      const re = resolveEnd.resolveEnd(end, valueEnd, strict, onError);
+      return {
+        value,
+        type: _type,
+        comment: re.comment,
+        range: [offset, valueEnd, re.offset]
+      };
+    }
+    function plainValue(source, onError) {
+      let badChar = "";
+      switch (source[0]) {
+        /* istanbul ignore next should not happen */
+        case "	":
+          badChar = "a tab character";
+          break;
+        case ",":
+          badChar = "flow indicator character ,";
+          break;
+        case "%":
+          badChar = "directive indicator character %";
+          break;
+        case "|":
+        case ">": {
+          badChar = `block scalar indicator ${source[0]}`;
+          break;
+        }
+        case "@":
+        case "`": {
+          badChar = `reserved character ${source[0]}`;
+          break;
+        }
+      }
+      if (badChar)
+        onError(0, "BAD_SCALAR_START", `Plain value cannot start with ${badChar}`);
+      return foldLines(source);
+    }
+    function singleQuotedValue(source, onError) {
+      if (source[source.length - 1] !== "'" || source.length === 1)
+        onError(source.length, "MISSING_CHAR", "Missing closing 'quote");
+      return foldLines(source.slice(1, -1)).replace(/''/g, "'");
+    }
+    function foldLines(source) {
+      let first, line;
+      try {
+        first = new RegExp("(.*?)(?<![ 	])[ 	]*\r?\n", "sy");
+        line = new RegExp("[ 	]*(.*?)(?:(?<![ 	])[ 	]*)?\r?\n", "sy");
+      } catch {
+        first = /(.*?)[ \t]*\r?\n/sy;
+        line = /[ \t]*(.*?)[ \t]*\r?\n/sy;
+      }
+      let match = first.exec(source);
+      if (!match)
+        return source;
+      let res = match[1];
+      let sep = " ";
+      let pos = first.lastIndex;
+      line.lastIndex = pos;
+      while (match = line.exec(source)) {
+        if (match[1] === "") {
+          if (sep === "\n")
+            res += sep;
+          else
+            sep = "\n";
+        } else {
+          res += sep + match[1];
+          sep = " ";
+        }
+        pos = line.lastIndex;
+      }
+      const last = /[ \t]*(.*)/sy;
+      last.lastIndex = pos;
+      match = last.exec(source);
+      return res + sep + (match?.[1] ?? "");
+    }
+    function doubleQuotedValue(source, onError) {
+      let res = "";
+      for (let i = 1; i < source.length - 1; ++i) {
+        const ch = source[i];
+        if (ch === "\r" && source[i + 1] === "\n")
+          continue;
+        if (ch === "\n") {
+          const { fold, offset } = foldNewline(source, i);
+          res += fold;
+          i = offset;
+        } else if (ch === "\\") {
+          let next = source[++i];
+          const cc = escapeCodes[next];
+          if (cc)
+            res += cc;
+          else if (next === "\n") {
+            next = source[i + 1];
+            while (next === " " || next === "	")
+              next = source[++i + 1];
+          } else if (next === "\r" && source[i + 1] === "\n") {
+            next = source[++i + 1];
+            while (next === " " || next === "	")
+              next = source[++i + 1];
+          } else if (next === "x" || next === "u" || next === "U") {
+            const length = next === "x" ? 2 : next === "u" ? 4 : 8;
+            res += parseCharCode(source, i + 1, length, onError);
+            i += length;
+          } else {
+            const raw = source.substr(i - 1, 2);
+            onError(i - 1, "BAD_DQ_ESCAPE", `Invalid escape sequence ${raw}`);
+            res += raw;
+          }
+        } else if (ch === " " || ch === "	") {
+          const wsStart = i;
+          let next = source[i + 1];
+          while (next === " " || next === "	")
+            next = source[++i + 1];
+          if (next !== "\n" && !(next === "\r" && source[i + 2] === "\n"))
+            res += i > wsStart ? source.slice(wsStart, i + 1) : ch;
+        } else {
+          res += ch;
+        }
+      }
+      if (source[source.length - 1] !== '"' || source.length === 1)
+        onError(source.length, "MISSING_CHAR", 'Missing closing "quote');
+      return res;
+    }
+    function foldNewline(source, offset) {
+      let fold = "";
+      let ch = source[offset + 1];
+      while (ch === " " || ch === "	" || ch === "\n" || ch === "\r") {
+        if (ch === "\r" && source[offset + 2] !== "\n")
+          break;
+        if (ch === "\n")
+          fold += "\n";
+        offset += 1;
+        ch = source[offset + 1];
+      }
+      if (!fold)
+        fold = " ";
+      return { fold, offset };
+    }
+    var escapeCodes = {
+      "0": "\0",
+      // null character
+      a: "\x07",
+      // bell character
+      b: "\b",
+      // backspace
+      e: "\x1B",
+      // escape character
+      f: "\f",
+      // form feed
+      n: "\n",
+      // line feed
+      r: "\r",
+      // carriage return
+      t: "	",
+      // horizontal tab
+      v: "\v",
+      // vertical tab
+      N: "\x85",
+      // Unicode next line
+      _: "\xA0",
+      // Unicode non-breaking space
+      L: "\u2028",
+      // Unicode line separator
+      P: "\u2029",
+      // Unicode paragraph separator
+      " ": " ",
+      '"': '"',
+      "/": "/",
+      "\\": "\\",
+      "	": "	"
+    };
+    function parseCharCode(source, offset, length, onError) {
+      const cc = source.substr(offset, length);
+      const ok = cc.length === length && /^[0-9a-fA-F]+$/.test(cc);
+      const code = ok ? parseInt(cc, 16) : NaN;
+      try {
+        return String.fromCodePoint(code);
+      } catch {
+        const raw = source.substr(offset - 2, length + 2);
+        onError(offset - 2, "BAD_DQ_ESCAPE", `Invalid escape sequence ${raw}`);
+        return raw;
+      }
+    }
+    exports2.resolveFlowScalar = resolveFlowScalar;
+  }
+});
+
+// node_modules/yaml/dist/compose/compose-scalar.js
+var require_compose_scalar = __commonJS({
+  "node_modules/yaml/dist/compose/compose-scalar.js"(exports2) {
+    "use strict";
+    var identity = require_identity();
+    var Scalar = require_Scalar();
+    var resolveBlockScalar = require_resolve_block_scalar();
+    var resolveFlowScalar = require_resolve_flow_scalar();
+    function composeScalar(ctx, token, tagToken, onError) {
+      const { value, type, comment, range } = token.type === "block-scalar" ? resolveBlockScalar.resolveBlockScalar(ctx, token, onError) : resolveFlowScalar.resolveFlowScalar(token, ctx.options.strict, onError);
+      const tagName = tagToken ? ctx.directives.tagName(tagToken.source, (msg) => onError(tagToken, "TAG_RESOLVE_FAILED", msg)) : null;
+      let tag;
+      if (ctx.options.stringKeys && ctx.atKey) {
+        tag = ctx.schema[identity.SCALAR];
+      } else if (tagName)
+        tag = findScalarTagByName(ctx.schema, value, tagName, tagToken, onError);
+      else if (token.type === "scalar")
+        tag = findScalarTagByTest(ctx, value, token, onError);
+      else
+        tag = ctx.schema[identity.SCALAR];
+      let scalar;
+      try {
+        const res = tag.resolve(value, (msg) => onError(tagToken ?? token, "TAG_RESOLVE_FAILED", msg), ctx.options);
+        scalar = identity.isScalar(res) ? res : new Scalar.Scalar(res);
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        onError(tagToken ?? token, "TAG_RESOLVE_FAILED", msg);
+        scalar = new Scalar.Scalar(value);
+      }
+      scalar.range = range;
+      scalar.source = value;
+      if (type)
+        scalar.type = type;
+      if (tagName)
+        scalar.tag = tagName;
+      if (tag.format)
+        scalar.format = tag.format;
+      if (comment)
+        scalar.comment = comment;
+      return scalar;
+    }
+    function findScalarTagByName(schema, value, tagName, tagToken, onError) {
+      if (tagName === "!")
+        return schema[identity.SCALAR];
+      const matchWithTest = [];
+      for (const tag of schema.tags) {
+        if (!tag.collection && tag.tag === tagName) {
+          if (tag.default && tag.test)
+            matchWithTest.push(tag);
+          else
+            return tag;
+        }
+      }
+      for (const tag of matchWithTest)
+        if (tag.test?.test(value))
+          return tag;
+      const kt = schema.knownTags[tagName];
+      if (kt && !kt.collection) {
+        schema.tags.push(Object.assign({}, kt, { default: false, test: void 0 }));
+        return kt;
+      }
+      onError(tagToken, "TAG_RESOLVE_FAILED", `Unresolved tag: ${tagName}`, tagName !== "tag:yaml.org,2002:str");
+      return schema[identity.SCALAR];
+    }
+    function findScalarTagByTest({ atKey, directives, schema }, value, token, onError) {
+      const tag = schema.tags.find((tag2) => (tag2.default === true || atKey && tag2.default === "key") && tag2.test?.test(value)) || schema[identity.SCALAR];
+      if (schema.compat) {
+        const compat = schema.compat.find((tag2) => tag2.default && tag2.test?.test(value)) ?? schema[identity.SCALAR];
+        if (tag.tag !== compat.tag) {
+          const ts = directives.tagString(tag.tag);
+          const cs = directives.tagString(compat.tag);
+          const msg = `Value may be parsed as either ${ts} or ${cs}`;
+          onError(token, "TAG_RESOLVE_FAILED", msg, true);
+        }
+      }
+      return tag;
+    }
+    exports2.composeScalar = composeScalar;
+  }
+});
+
+// node_modules/yaml/dist/compose/util-empty-scalar-position.js
+var require_util_empty_scalar_position = __commonJS({
+  "node_modules/yaml/dist/compose/util-empty-scalar-position.js"(exports2) {
+    "use strict";
+    function emptyScalarPosition(offset, before, pos) {
+      if (before) {
+        pos ?? (pos = before.length);
+        for (let i = pos - 1; i >= 0; --i) {
+          let st = before[i];
+          switch (st.type) {
+            case "space":
+            case "comment":
+            case "newline":
+              offset -= st.source.length;
+              continue;
+          }
+          st = before[++i];
+          while (st?.type === "space") {
+            offset += st.source.length;
+            st = before[++i];
+          }
+          break;
+        }
+      }
+      return offset;
+    }
+    exports2.emptyScalarPosition = emptyScalarPosition;
+  }
+});
+
+// node_modules/yaml/dist/compose/compose-node.js
+var require_compose_node = __commonJS({
+  "node_modules/yaml/dist/compose/compose-node.js"(exports2) {
+    "use strict";
+    var Alias = require_Alias();
+    var identity = require_identity();
+    var composeCollection = require_compose_collection();
+    var composeScalar = require_compose_scalar();
+    var resolveEnd = require_resolve_end();
+    var utilEmptyScalarPosition = require_util_empty_scalar_position();
+    var CN = { composeNode, composeEmptyNode };
+    function composeNode(ctx, token, props, onError) {
+      const atKey = ctx.atKey;
+      const { spaceBefore, comment, anchor, tag } = props;
+      let node;
+      let isSrcToken = true;
+      switch (token.type) {
+        case "alias":
+          node = composeAlias(ctx, token, onError);
+          if (anchor || tag)
+            onError(token, "ALIAS_PROPS", "An alias node must not specify any properties");
+          break;
+        case "scalar":
+        case "single-quoted-scalar":
+        case "double-quoted-scalar":
+        case "block-scalar":
+          node = composeScalar.composeScalar(ctx, token, tag, onError);
+          if (anchor)
+            node.anchor = anchor.source.substring(1);
+          break;
+        case "block-map":
+        case "block-seq":
+        case "flow-collection":
+          try {
+            node = composeCollection.composeCollection(CN, ctx, token, props, onError);
+            if (anchor)
+              node.anchor = anchor.source.substring(1);
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            onError(token, "RESOURCE_EXHAUSTION", message);
+          }
+          break;
+        default: {
+          const message = token.type === "error" ? token.message : `Unsupported token (type: ${token.type})`;
+          onError(token, "UNEXPECTED_TOKEN", message);
+          isSrcToken = false;
+        }
+      }
+      node ?? (node = composeEmptyNode(ctx, token.offset, void 0, null, props, onError));
+      if (anchor && node.anchor === "")
+        onError(anchor, "BAD_ALIAS", "Anchor cannot be an empty string");
+      if (atKey && ctx.options.stringKeys && (!identity.isScalar(node) || typeof node.value !== "string" || node.tag && node.tag !== "tag:yaml.org,2002:str")) {
+        const msg = "With stringKeys, all keys must be strings";
+        onError(tag ?? token, "NON_STRING_KEY", msg);
+      }
+      if (spaceBefore)
+        node.spaceBefore = true;
+      if (comment) {
+        if (token.type === "scalar" && token.source === "")
+          node.comment = comment;
+        else
+          node.commentBefore = comment;
+      }
+      if (ctx.options.keepSourceTokens && isSrcToken)
+        node.srcToken = token;
+      return node;
+    }
+    function composeEmptyNode(ctx, offset, before, pos, { spaceBefore, comment, anchor, tag, end }, onError) {
+      const token = {
+        type: "scalar",
+        offset: utilEmptyScalarPosition.emptyScalarPosition(offset, before, pos),
+        indent: -1,
+        source: ""
+      };
+      const node = composeScalar.composeScalar(ctx, token, tag, onError);
+      if (anchor) {
+        node.anchor = anchor.source.substring(1);
+        if (node.anchor === "")
+          onError(anchor, "BAD_ALIAS", "Anchor cannot be an empty string");
+      }
+      if (spaceBefore)
+        node.spaceBefore = true;
+      if (comment) {
+        node.comment = comment;
+        node.range[2] = end;
+      }
+      return node;
+    }
+    function composeAlias({ options }, { offset, source, end }, onError) {
+      const alias = new Alias.Alias(source.substring(1));
+      if (alias.source === "")
+        onError(offset, "BAD_ALIAS", "Alias cannot be an empty string");
+      if (alias.source.endsWith(":"))
+        onError(offset + source.length - 1, "BAD_ALIAS", "Alias ending in : is ambiguous", true);
+      const valueEnd = offset + source.length;
+      const re = resolveEnd.resolveEnd(end, valueEnd, options.strict, onError);
+      alias.range = [offset, valueEnd, re.offset];
+      if (re.comment)
+        alias.comment = re.comment;
+      return alias;
+    }
+    exports2.composeEmptyNode = composeEmptyNode;
+    exports2.composeNode = composeNode;
+  }
+});
+
+// node_modules/yaml/dist/compose/compose-doc.js
+var require_compose_doc = __commonJS({
+  "node_modules/yaml/dist/compose/compose-doc.js"(exports2) {
+    "use strict";
+    var Document = require_Document();
+    var composeNode = require_compose_node();
+    var resolveEnd = require_resolve_end();
+    var resolveProps = require_resolve_props();
+    function composeDoc(options, directives, { offset, start, value, end }, onError) {
+      const opts = Object.assign({ _directives: directives }, options);
+      const doc = new Document.Document(void 0, opts);
+      const ctx = {
+        atKey: false,
+        atRoot: true,
+        directives: doc.directives,
+        options: doc.options,
+        schema: doc.schema
+      };
+      const props = resolveProps.resolveProps(start, {
+        indicator: "doc-start",
+        next: value ?? end?.[0],
+        offset,
+        onError,
+        parentIndent: 0,
+        startOnNewline: true
+      });
+      if (props.found) {
+        doc.directives.docStart = true;
+        if (value && (value.type === "block-map" || value.type === "block-seq") && !props.hasNewline)
+          onError(props.end, "MISSING_CHAR", "Block collection cannot start on same line with directives-end marker");
+      }
+      doc.contents = value ? composeNode.composeNode(ctx, value, props, onError) : composeNode.composeEmptyNode(ctx, props.end, start, null, props, onError);
+      const contentEnd = doc.contents.range[2];
+      const re = resolveEnd.resolveEnd(end, contentEnd, false, onError);
+      if (re.comment)
+        doc.comment = re.comment;
+      doc.range = [offset, contentEnd, re.offset];
+      return doc;
+    }
+    exports2.composeDoc = composeDoc;
+  }
+});
+
+// node_modules/yaml/dist/compose/composer.js
+var require_composer = __commonJS({
+  "node_modules/yaml/dist/compose/composer.js"(exports2) {
+    "use strict";
+    var node_process = require("process");
+    var directives = require_directives();
+    var Document = require_Document();
+    var errors = require_errors();
+    var identity = require_identity();
+    var composeDoc = require_compose_doc();
+    var resolveEnd = require_resolve_end();
+    function getErrorPos(src) {
+      if (typeof src === "number")
+        return [src, src + 1];
+      if (Array.isArray(src))
+        return src.length === 2 ? src : [src[0], src[1]];
+      const { offset, source } = src;
+      return [offset, offset + (typeof source === "string" ? source.length : 1)];
+    }
+    function parsePrelude(prelude) {
+      let comment = "";
+      let atComment = false;
+      let afterEmptyLine = false;
+      for (let i = 0; i < prelude.length; ++i) {
+        const source = prelude[i];
+        switch (source[0]) {
+          case "#":
+            comment += (comment === "" ? "" : afterEmptyLine ? "\n\n" : "\n") + (source.substring(1) || " ");
+            atComment = true;
+            afterEmptyLine = false;
+            break;
+          case "%":
+            if (prelude[i + 1]?.[0] !== "#")
+              i += 1;
+            atComment = false;
+            break;
+          default:
+            if (!atComment)
+              afterEmptyLine = true;
+            atComment = false;
+        }
+      }
+      return { comment, afterEmptyLine };
+    }
+    var Composer = class {
+      constructor(options = {}) {
+        this.doc = null;
+        this.atDirectives = false;
+        this.prelude = [];
+        this.errors = [];
+        this.warnings = [];
+        this.onError = (source, code, message, warning) => {
+          const pos = getErrorPos(source);
+          if (warning)
+            this.warnings.push(new errors.YAMLWarning(pos, code, message));
+          else
+            this.errors.push(new errors.YAMLParseError(pos, code, message));
+        };
+        this.directives = new directives.Directives({ version: options.version || "1.2" });
+        this.options = options;
+      }
+      decorate(doc, afterDoc) {
+        const { comment, afterEmptyLine } = parsePrelude(this.prelude);
+        if (comment) {
+          const dc = doc.contents;
+          if (afterDoc) {
+            doc.comment = doc.comment ? `${doc.comment}
+${comment}` : comment;
+          } else if (afterEmptyLine || doc.directives.docStart || !dc) {
+            doc.commentBefore = comment;
+          } else if (identity.isCollection(dc) && !dc.flow && dc.items.length > 0) {
+            let it = dc.items[0];
+            if (identity.isPair(it))
+              it = it.key;
+            const cb = it.commentBefore;
+            it.commentBefore = cb ? `${comment}
+${cb}` : comment;
+          } else {
+            const cb = dc.commentBefore;
+            dc.commentBefore = cb ? `${comment}
+${cb}` : comment;
+          }
+        }
+        if (afterDoc) {
+          for (let i = 0; i < this.errors.length; ++i)
+            doc.errors.push(this.errors[i]);
+          for (let i = 0; i < this.warnings.length; ++i)
+            doc.warnings.push(this.warnings[i]);
+        } else {
+          doc.errors = this.errors;
+          doc.warnings = this.warnings;
+        }
+        this.prelude = [];
+        this.errors = [];
+        this.warnings = [];
+      }
+      /**
+       * Current stream status information.
+       *
+       * Mostly useful at the end of input for an empty stream.
+       */
+      streamInfo() {
+        return {
+          comment: parsePrelude(this.prelude).comment,
+          directives: this.directives,
+          errors: this.errors,
+          warnings: this.warnings
+        };
+      }
+      /**
+       * Compose tokens into documents.
+       *
+       * @param forceDoc - If the stream contains no document, still emit a final document including any comments and directives that would be applied to a subsequent document.
+       * @param endOffset - Should be set if `forceDoc` is also set, to set the document range end and to indicate errors correctly.
+       */
+      *compose(tokens, forceDoc = false, endOffset = -1) {
+        for (const token of tokens)
+          yield* this.next(token);
+        yield* this.end(forceDoc, endOffset);
+      }
+      /** Advance the composer by one CST token. */
+      *next(token) {
+        if (node_process.env.LOG_STREAM)
+          console.dir(token, { depth: null });
+        switch (token.type) {
+          case "directive":
+            this.directives.add(token.source, (offset, message, warning) => {
+              const pos = getErrorPos(token);
+              pos[0] += offset;
+              this.onError(pos, "BAD_DIRECTIVE", message, warning);
+            });
+            this.prelude.push(token.source);
+            this.atDirectives = true;
+            break;
+          case "document": {
+            const doc = composeDoc.composeDoc(this.options, this.directives, token, this.onError);
+            if (this.atDirectives && !doc.directives.docStart)
+              this.onError(token, "MISSING_CHAR", "Missing directives-end/doc-start indicator line");
+            this.decorate(doc, false);
+            if (this.doc)
+              yield this.doc;
+            this.doc = doc;
+            this.atDirectives = false;
+            break;
+          }
+          case "byte-order-mark":
+          case "space":
+            break;
+          case "comment":
+          case "newline":
+            this.prelude.push(token.source);
+            break;
+          case "error": {
+            const msg = token.source ? `${token.message}: ${JSON.stringify(token.source)}` : token.message;
+            const error = new errors.YAMLParseError(getErrorPos(token), "UNEXPECTED_TOKEN", msg);
+            if (this.atDirectives || !this.doc)
+              this.errors.push(error);
+            else
+              this.doc.errors.push(error);
+            break;
+          }
+          case "doc-end": {
+            if (!this.doc) {
+              const msg = "Unexpected doc-end without preceding document";
+              this.errors.push(new errors.YAMLParseError(getErrorPos(token), "UNEXPECTED_TOKEN", msg));
+              break;
+            }
+            this.doc.directives.docEnd = true;
+            const end = resolveEnd.resolveEnd(token.end, token.offset + token.source.length, this.doc.options.strict, this.onError);
+            this.decorate(this.doc, true);
+            if (end.comment) {
+              const dc = this.doc.comment;
+              this.doc.comment = dc ? `${dc}
+${end.comment}` : end.comment;
+            }
+            this.doc.range[2] = end.offset;
+            break;
+          }
+          default:
+            this.errors.push(new errors.YAMLParseError(getErrorPos(token), "UNEXPECTED_TOKEN", `Unsupported token ${token.type}`));
+        }
+      }
+      /**
+       * Call at end of input to yield any remaining document.
+       *
+       * @param forceDoc - If the stream contains no document, still emit a final document including any comments and directives that would be applied to a subsequent document.
+       * @param endOffset - Should be set if `forceDoc` is also set, to set the document range end and to indicate errors correctly.
+       */
+      *end(forceDoc = false, endOffset = -1) {
+        if (this.doc) {
+          this.decorate(this.doc, true);
+          yield this.doc;
+          this.doc = null;
+        } else if (forceDoc) {
+          const opts = Object.assign({ _directives: this.directives }, this.options);
+          const doc = new Document.Document(void 0, opts);
+          if (this.atDirectives)
+            this.onError(endOffset, "MISSING_CHAR", "Missing directives-end indicator line");
+          doc.range = [0, endOffset, endOffset];
+          this.decorate(doc, false);
+          yield doc;
+        }
+      }
+    };
+    exports2.Composer = Composer;
+  }
+});
+
+// node_modules/yaml/dist/parse/cst-scalar.js
+var require_cst_scalar = __commonJS({
+  "node_modules/yaml/dist/parse/cst-scalar.js"(exports2) {
+    "use strict";
+    var resolveBlockScalar = require_resolve_block_scalar();
+    var resolveFlowScalar = require_resolve_flow_scalar();
+    var errors = require_errors();
+    var stringifyString = require_stringifyString();
+    function resolveAsScalar(token, strict = true, onError) {
+      if (token) {
+        const _onError = (pos, code, message) => {
+          const offset = typeof pos === "number" ? pos : Array.isArray(pos) ? pos[0] : pos.offset;
+          if (onError)
+            onError(offset, code, message);
+          else
+            throw new errors.YAMLParseError([offset, offset + 1], code, message);
+        };
+        switch (token.type) {
+          case "scalar":
+          case "single-quoted-scalar":
+          case "double-quoted-scalar":
+            return resolveFlowScalar.resolveFlowScalar(token, strict, _onError);
+          case "block-scalar":
+            return resolveBlockScalar.resolveBlockScalar({ options: { strict } }, token, _onError);
+        }
+      }
+      return null;
+    }
+    function createScalarToken(value, context) {
+      const { implicitKey = false, indent, inFlow = false, offset = -1, type = "PLAIN" } = context;
+      const source = stringifyString.stringifyString({ type, value }, {
+        implicitKey,
+        indent: indent > 0 ? " ".repeat(indent) : "",
+        inFlow,
+        options: { blockQuote: true, lineWidth: -1 }
+      });
+      const end = context.end ?? [
+        { type: "newline", offset: -1, indent, source: "\n" }
+      ];
+      switch (source[0]) {
+        case "|":
+        case ">": {
+          const he = source.indexOf("\n");
+          const head = source.substring(0, he);
+          const body = source.substring(he + 1) + "\n";
+          const props = [
+            { type: "block-scalar-header", offset, indent, source: head }
+          ];
+          if (!addEndtoBlockProps(props, end))
+            props.push({ type: "newline", offset: -1, indent, source: "\n" });
+          return { type: "block-scalar", offset, indent, props, source: body };
+        }
+        case '"':
+          return { type: "double-quoted-scalar", offset, indent, source, end };
+        case "'":
+          return { type: "single-quoted-scalar", offset, indent, source, end };
+        default:
+          return { type: "scalar", offset, indent, source, end };
+      }
+    }
+    function setScalarValue(token, value, context = {}) {
+      let { afterKey = false, implicitKey = false, inFlow = false, type } = context;
+      let indent = "indent" in token ? token.indent : null;
+      if (afterKey && typeof indent === "number")
+        indent += 2;
+      if (!type)
+        switch (token.type) {
+          case "single-quoted-scalar":
+            type = "QUOTE_SINGLE";
+            break;
+          case "double-quoted-scalar":
+            type = "QUOTE_DOUBLE";
+            break;
+          case "block-scalar": {
+            const header = token.props[0];
+            if (header.type !== "block-scalar-header")
+              throw new Error("Invalid block scalar header");
+            type = header.source[0] === ">" ? "BLOCK_FOLDED" : "BLOCK_LITERAL";
+            break;
+          }
+          default:
+            type = "PLAIN";
+        }
+      const source = stringifyString.stringifyString({ type, value }, {
+        implicitKey: implicitKey || indent === null,
+        indent: indent !== null && indent > 0 ? " ".repeat(indent) : "",
+        inFlow,
+        options: { blockQuote: true, lineWidth: -1 }
+      });
+      switch (source[0]) {
+        case "|":
+        case ">":
+          setBlockScalarValue(token, source);
+          break;
+        case '"':
+          setFlowScalarValue(token, source, "double-quoted-scalar");
+          break;
+        case "'":
+          setFlowScalarValue(token, source, "single-quoted-scalar");
+          break;
+        default:
+          setFlowScalarValue(token, source, "scalar");
+      }
+    }
+    function setBlockScalarValue(token, source) {
+      const he = source.indexOf("\n");
+      const head = source.substring(0, he);
+      const body = source.substring(he + 1) + "\n";
+      if (token.type === "block-scalar") {
+        const header = token.props[0];
+        if (header.type !== "block-scalar-header")
+          throw new Error("Invalid block scalar header");
+        header.source = head;
+        token.source = body;
+      } else {
+        const { offset } = token;
+        const indent = "indent" in token ? token.indent : -1;
+        const props = [
+          { type: "block-scalar-header", offset, indent, source: head }
+        ];
+        if (!addEndtoBlockProps(props, "end" in token ? token.end : void 0))
+          props.push({ type: "newline", offset: -1, indent, source: "\n" });
+        for (const key of Object.keys(token))
+          if (key !== "type" && key !== "offset")
+            delete token[key];
+        Object.assign(token, { type: "block-scalar", indent, props, source: body });
+      }
+    }
+    function addEndtoBlockProps(props, end) {
+      if (end)
+        for (const st of end)
+          switch (st.type) {
+            case "space":
+            case "comment":
+              props.push(st);
+              break;
+            case "newline":
+              props.push(st);
+              return true;
+          }
+      return false;
+    }
+    function setFlowScalarValue(token, source, type) {
+      switch (token.type) {
+        case "scalar":
+        case "double-quoted-scalar":
+        case "single-quoted-scalar":
+          token.type = type;
+          token.source = source;
+          break;
+        case "block-scalar": {
+          const end = token.props.slice(1);
+          let oa = source.length;
+          if (token.props[0].type === "block-scalar-header")
+            oa -= token.props[0].source.length;
+          for (const tok of end)
+            tok.offset += oa;
+          delete token.props;
+          Object.assign(token, { type, source, end });
+          break;
+        }
+        case "block-map":
+        case "block-seq": {
+          const offset = token.offset + source.length;
+          const nl = { type: "newline", offset, indent: token.indent, source: "\n" };
+          delete token.items;
+          Object.assign(token, { type, source, end: [nl] });
+          break;
+        }
+        default: {
+          const indent = "indent" in token ? token.indent : -1;
+          const end = "end" in token && Array.isArray(token.end) ? token.end.filter((st) => st.type === "space" || st.type === "comment" || st.type === "newline") : [];
+          for (const key of Object.keys(token))
+            if (key !== "type" && key !== "offset")
+              delete token[key];
+          Object.assign(token, { type, indent, source, end });
+        }
+      }
+    }
+    exports2.createScalarToken = createScalarToken;
+    exports2.resolveAsScalar = resolveAsScalar;
+    exports2.setScalarValue = setScalarValue;
+  }
+});
+
+// node_modules/yaml/dist/parse/cst-stringify.js
+var require_cst_stringify = __commonJS({
+  "node_modules/yaml/dist/parse/cst-stringify.js"(exports2) {
+    "use strict";
+    var stringify = (cst) => "type" in cst ? stringifyToken(cst) : stringifyItem(cst);
+    function stringifyToken(token) {
+      switch (token.type) {
+        case "block-scalar": {
+          let res = "";
+          for (const tok of token.props)
+            res += stringifyToken(tok);
+          return res + token.source;
+        }
+        case "block-map":
+        case "block-seq": {
+          let res = "";
+          for (const item of token.items)
+            res += stringifyItem(item);
+          return res;
+        }
+        case "flow-collection": {
+          let res = token.start.source;
+          for (const item of token.items)
+            res += stringifyItem(item);
+          for (const st of token.end)
+            res += st.source;
+          return res;
+        }
+        case "document": {
+          let res = stringifyItem(token);
+          if (token.end)
+            for (const st of token.end)
+              res += st.source;
+          return res;
+        }
+        default: {
+          let res = token.source;
+          if ("end" in token && token.end)
+            for (const st of token.end)
+              res += st.source;
+          return res;
+        }
+      }
+    }
+    function stringifyItem({ start, key, sep, value }) {
+      let res = "";
+      for (const st of start)
+        res += st.source;
+      if (key)
+        res += stringifyToken(key);
+      if (sep)
+        for (const st of sep)
+          res += st.source;
+      if (value)
+        res += stringifyToken(value);
+      return res;
+    }
+    exports2.stringify = stringify;
+  }
+});
+
+// node_modules/yaml/dist/parse/cst-visit.js
+var require_cst_visit = __commonJS({
+  "node_modules/yaml/dist/parse/cst-visit.js"(exports2) {
+    "use strict";
+    var BREAK = /* @__PURE__ */ Symbol("break visit");
+    var SKIP = /* @__PURE__ */ Symbol("skip children");
+    var REMOVE = /* @__PURE__ */ Symbol("remove item");
+    function visit(cst, visitor) {
+      if ("type" in cst && cst.type === "document")
+        cst = { start: cst.start, value: cst.value };
+      _visit(Object.freeze([]), cst, visitor);
+    }
+    visit.BREAK = BREAK;
+    visit.SKIP = SKIP;
+    visit.REMOVE = REMOVE;
+    visit.itemAtPath = (cst, path2) => {
+      let item = cst;
+      for (const [field, index] of path2) {
+        const tok = item?.[field];
+        if (tok && "items" in tok) {
+          item = tok.items[index];
+        } else
+          return void 0;
+      }
+      return item;
+    };
+    visit.parentCollection = (cst, path2) => {
+      const parent = visit.itemAtPath(cst, path2.slice(0, -1));
+      const field = path2[path2.length - 1][0];
+      const coll = parent?.[field];
+      if (coll && "items" in coll)
+        return coll;
+      throw new Error("Parent collection not found");
+    };
+    function _visit(path2, item, visitor) {
+      let ctrl = visitor(item, path2);
+      if (typeof ctrl === "symbol")
+        return ctrl;
+      for (const field of ["key", "value"]) {
+        const token = item[field];
+        if (token && "items" in token) {
+          for (let i = 0; i < token.items.length; ++i) {
+            const ci = _visit(Object.freeze(path2.concat([[field, i]])), token.items[i], visitor);
+            if (typeof ci === "number")
+              i = ci - 1;
+            else if (ci === BREAK)
+              return BREAK;
+            else if (ci === REMOVE) {
+              token.items.splice(i, 1);
+              i -= 1;
+            }
+          }
+          if (typeof ctrl === "function" && field === "key")
+            ctrl = ctrl(item, path2);
+        }
+      }
+      return typeof ctrl === "function" ? ctrl(item, path2) : ctrl;
+    }
+    exports2.visit = visit;
+  }
+});
+
+// node_modules/yaml/dist/parse/cst.js
+var require_cst = __commonJS({
+  "node_modules/yaml/dist/parse/cst.js"(exports2) {
+    "use strict";
+    var cstScalar = require_cst_scalar();
+    var cstStringify = require_cst_stringify();
+    var cstVisit = require_cst_visit();
+    var BOM = "\uFEFF";
+    var DOCUMENT = "";
+    var FLOW_END = "";
+    var SCALAR = "";
+    var isCollection = (token) => !!token && "items" in token;
+    var isScalar = (token) => !!token && (token.type === "scalar" || token.type === "single-quoted-scalar" || token.type === "double-quoted-scalar" || token.type === "block-scalar");
+    function prettyToken(token) {
+      switch (token) {
+        case BOM:
+          return "<BOM>";
+        case DOCUMENT:
+          return "<DOC>";
+        case FLOW_END:
+          return "<FLOW_END>";
+        case SCALAR:
+          return "<SCALAR>";
+        default:
+          return JSON.stringify(token);
+      }
+    }
+    function tokenType(source) {
+      switch (source) {
+        case BOM:
+          return "byte-order-mark";
+        case DOCUMENT:
+          return "doc-mode";
+        case FLOW_END:
+          return "flow-error-end";
+        case SCALAR:
+          return "scalar";
+        case "---":
+          return "doc-start";
+        case "...":
+          return "doc-end";
+        case "":
+        case "\n":
+        case "\r\n":
+          return "newline";
+        case "-":
+          return "seq-item-ind";
+        case "?":
+          return "explicit-key-ind";
+        case ":":
+          return "map-value-ind";
+        case "{":
+          return "flow-map-start";
+        case "}":
+          return "flow-map-end";
+        case "[":
+          return "flow-seq-start";
+        case "]":
+          return "flow-seq-end";
+        case ",":
+          return "comma";
+      }
+      switch (source[0]) {
+        case " ":
+        case "	":
+          return "space";
+        case "#":
+          return "comment";
+        case "%":
+          return "directive-line";
+        case "*":
+          return "alias";
+        case "&":
+          return "anchor";
+        case "!":
+          return "tag";
+        case "'":
+          return "single-quoted-scalar";
+        case '"':
+          return "double-quoted-scalar";
+        case "|":
+        case ">":
+          return "block-scalar-header";
+      }
+      return null;
+    }
+    exports2.createScalarToken = cstScalar.createScalarToken;
+    exports2.resolveAsScalar = cstScalar.resolveAsScalar;
+    exports2.setScalarValue = cstScalar.setScalarValue;
+    exports2.stringify = cstStringify.stringify;
+    exports2.visit = cstVisit.visit;
+    exports2.BOM = BOM;
+    exports2.DOCUMENT = DOCUMENT;
+    exports2.FLOW_END = FLOW_END;
+    exports2.SCALAR = SCALAR;
+    exports2.isCollection = isCollection;
+    exports2.isScalar = isScalar;
+    exports2.prettyToken = prettyToken;
+    exports2.tokenType = tokenType;
+  }
+});
+
+// node_modules/yaml/dist/parse/lexer.js
+var require_lexer = __commonJS({
+  "node_modules/yaml/dist/parse/lexer.js"(exports2) {
+    "use strict";
+    var cst = require_cst();
+    function isEmpty(ch) {
+      switch (ch) {
+        case void 0:
+        case " ":
+        case "\n":
+        case "\r":
+        case "	":
+          return true;
+        default:
+          return false;
+      }
+    }
+    var hexDigits = new Set("0123456789ABCDEFabcdef");
+    var tagChars = new Set("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-#;/?:@&=+$_.!~*'()");
+    var flowIndicatorChars = new Set(",[]{}");
+    var invalidAnchorChars = new Set(" ,[]{}\n\r	");
+    var isNotAnchorChar = (ch) => !ch || invalidAnchorChars.has(ch);
+    var Lexer = class {
+      constructor() {
+        this.atEnd = false;
+        this.blockScalarIndent = -1;
+        this.blockScalarKeep = false;
+        this.buffer = "";
+        this.flowKey = false;
+        this.flowLevel = 0;
+        this.indentNext = 0;
+        this.indentValue = 0;
+        this.lineEndPos = null;
+        this.next = null;
+        this.pos = 0;
+      }
+      /**
+       * Generate YAML tokens from the `source` string. If `incomplete`,
+       * a part of the last line may be left as a buffer for the next call.
+       *
+       * @returns A generator of lexical tokens
+       */
+      *lex(source, incomplete = false) {
+        if (source) {
+          if (typeof source !== "string")
+            throw TypeError("source is not a string");
+          this.buffer = this.buffer ? this.buffer + source : source;
+          this.lineEndPos = null;
+        }
+        this.atEnd = !incomplete;
+        let next = this.next ?? "stream";
+        while (next && (incomplete || this.hasChars(1)))
+          next = yield* this.parseNext(next);
+      }
+      atLineEnd() {
+        let i = this.pos;
+        let ch = this.buffer[i];
+        while (ch === " " || ch === "	")
+          ch = this.buffer[++i];
+        if (!ch || ch === "#" || ch === "\n")
+          return true;
+        if (ch === "\r")
+          return this.buffer[i + 1] === "\n";
+        return false;
+      }
+      charAt(n) {
+        return this.buffer[this.pos + n];
+      }
+      continueScalar(offset) {
+        let ch = this.buffer[offset];
+        if (this.indentNext > 0) {
+          let indent = 0;
+          while (ch === " ")
+            ch = this.buffer[++indent + offset];
+          if (ch === "\r") {
+            const next = this.buffer[indent + offset + 1];
+            if (next === "\n" || !next && !this.atEnd)
+              return offset + indent + 1;
+          }
+          return ch === "\n" || indent >= this.indentNext || !ch && !this.atEnd ? offset + indent : -1;
+        }
+        if (ch === "-" || ch === ".") {
+          const dt = this.buffer.substr(offset, 3);
+          if ((dt === "---" || dt === "...") && isEmpty(this.buffer[offset + 3]))
+            return -1;
+        }
+        return offset;
+      }
+      getLine() {
+        let end = this.lineEndPos;
+        if (typeof end !== "number" || end !== -1 && end < this.pos) {
+          end = this.buffer.indexOf("\n", this.pos);
+          this.lineEndPos = end;
+        }
+        if (end === -1)
+          return this.atEnd ? this.buffer.substring(this.pos) : null;
+        if (this.buffer[end - 1] === "\r")
+          end -= 1;
+        return this.buffer.substring(this.pos, end);
+      }
+      hasChars(n) {
+        return this.pos + n <= this.buffer.length;
+      }
+      setNext(state) {
+        this.buffer = this.buffer.substring(this.pos);
+        this.pos = 0;
+        this.lineEndPos = null;
+        this.next = state;
+        return null;
+      }
+      peek(n) {
+        return this.buffer.substr(this.pos, n);
+      }
+      *parseNext(next) {
+        switch (next) {
+          case "stream":
+            return yield* this.parseStream();
+          case "line-start":
+            return yield* this.parseLineStart();
+          case "block-start":
+            return yield* this.parseBlockStart();
+          case "doc":
+            return yield* this.parseDocument();
+          case "flow":
+            return yield* this.parseFlowCollection();
+          case "quoted-scalar":
+            return yield* this.parseQuotedScalar();
+          case "block-scalar":
+            return yield* this.parseBlockScalar();
+          case "plain-scalar":
+            return yield* this.parsePlainScalar();
+        }
+      }
+      *parseStream() {
+        let line = this.getLine();
+        if (line === null)
+          return this.setNext("stream");
+        if (line[0] === cst.BOM) {
+          yield* this.pushCount(1);
+          line = line.substring(1);
+        }
+        if (line[0] === "%") {
+          let dirEnd = line.length;
+          let cs = line.indexOf("#");
+          while (cs !== -1) {
+            const ch = line[cs - 1];
+            if (ch === " " || ch === "	") {
+              dirEnd = cs - 1;
+              break;
+            } else {
+              cs = line.indexOf("#", cs + 1);
+            }
+          }
+          while (true) {
+            const ch = line[dirEnd - 1];
+            if (ch === " " || ch === "	")
+              dirEnd -= 1;
+            else
+              break;
+          }
+          const n = (yield* this.pushCount(dirEnd)) + (yield* this.pushSpaces(true));
+          yield* this.pushCount(line.length - n);
+          this.pushNewline();
+          return "stream";
+        }
+        if (this.atLineEnd()) {
+          const sp = yield* this.pushSpaces(true);
+          yield* this.pushCount(line.length - sp);
+          yield* this.pushNewline();
+          return "stream";
+        }
+        yield cst.DOCUMENT;
+        return yield* this.parseLineStart();
+      }
+      *parseLineStart() {
+        const ch = this.charAt(0);
+        if (!ch && !this.atEnd)
+          return this.setNext("line-start");
+        if (ch === "-" || ch === ".") {
+          if (!this.atEnd && !this.hasChars(4))
+            return this.setNext("line-start");
+          const s = this.peek(3);
+          if ((s === "---" || s === "...") && isEmpty(this.charAt(3))) {
+            yield* this.pushCount(3);
+            this.indentValue = 0;
+            this.indentNext = 0;
+            return s === "---" ? "doc" : "stream";
+          }
+        }
+        this.indentValue = yield* this.pushSpaces(false);
+        if (this.indentNext > this.indentValue && !isEmpty(this.charAt(1)))
+          this.indentNext = this.indentValue;
+        return yield* this.parseBlockStart();
+      }
+      *parseBlockStart() {
+        const [ch0, ch1] = this.peek(2);
+        if (!ch1 && !this.atEnd)
+          return this.setNext("block-start");
+        if ((ch0 === "-" || ch0 === "?" || ch0 === ":") && isEmpty(ch1)) {
+          const n = (yield* this.pushCount(1)) + (yield* this.pushSpaces(true));
+          this.indentNext = this.indentValue + 1;
+          this.indentValue += n;
+          return "block-start";
+        }
+        return "doc";
+      }
+      *parseDocument() {
+        yield* this.pushSpaces(true);
+        const line = this.getLine();
+        if (line === null)
+          return this.setNext("doc");
+        let n = yield* this.pushIndicators();
+        switch (line[n]) {
+          case "#":
+            yield* this.pushCount(line.length - n);
+          // fallthrough
+          case void 0:
+            yield* this.pushNewline();
+            return yield* this.parseLineStart();
+          case "{":
+          case "[":
+            yield* this.pushCount(1);
+            this.flowKey = false;
+            this.flowLevel = 1;
+            return "flow";
+          case "}":
+          case "]":
+            yield* this.pushCount(1);
+            return "doc";
+          case "*":
+            yield* this.pushUntil(isNotAnchorChar);
+            return "doc";
+          case '"':
+          case "'":
+            return yield* this.parseQuotedScalar();
+          case "|":
+          case ">":
+            n += yield* this.parseBlockScalarHeader();
+            n += yield* this.pushSpaces(true);
+            yield* this.pushCount(line.length - n);
+            yield* this.pushNewline();
+            return yield* this.parseBlockScalar();
+          default:
+            return yield* this.parsePlainScalar();
+        }
+      }
+      *parseFlowCollection() {
+        let nl, sp;
+        let indent = -1;
+        do {
+          nl = yield* this.pushNewline();
+          if (nl > 0) {
+            sp = yield* this.pushSpaces(false);
+            this.indentValue = indent = sp;
+          } else {
+            sp = 0;
+          }
+          sp += yield* this.pushSpaces(true);
+        } while (nl + sp > 0);
+        const line = this.getLine();
+        if (line === null)
+          return this.setNext("flow");
+        if (indent !== -1 && indent < this.indentNext && line[0] !== "#" || indent === 0 && (line.startsWith("---") || line.startsWith("...")) && isEmpty(line[3])) {
+          const atFlowEndMarker = indent === this.indentNext - 1 && this.flowLevel === 1 && (line[0] === "]" || line[0] === "}");
+          if (!atFlowEndMarker) {
+            this.flowLevel = 0;
+            yield cst.FLOW_END;
+            return yield* this.parseLineStart();
+          }
+        }
+        let n = 0;
+        while (line[n] === ",") {
+          n += yield* this.pushCount(1);
+          n += yield* this.pushSpaces(true);
+          this.flowKey = false;
+        }
+        n += yield* this.pushIndicators();
+        switch (line[n]) {
+          case void 0:
+            return "flow";
+          case "#":
+            yield* this.pushCount(line.length - n);
+            return "flow";
+          case "{":
+          case "[":
+            yield* this.pushCount(1);
+            this.flowKey = false;
+            this.flowLevel += 1;
+            return "flow";
+          case "}":
+          case "]":
+            yield* this.pushCount(1);
+            this.flowKey = true;
+            this.flowLevel -= 1;
+            return this.flowLevel ? "flow" : "doc";
+          case "*":
+            yield* this.pushUntil(isNotAnchorChar);
+            return "flow";
+          case '"':
+          case "'":
+            this.flowKey = true;
+            return yield* this.parseQuotedScalar();
+          case ":": {
+            const next = this.charAt(1);
+            if (this.flowKey || isEmpty(next) || next === ",") {
+              this.flowKey = false;
+              yield* this.pushCount(1);
+              yield* this.pushSpaces(true);
+              return "flow";
+            }
+          }
+          // fallthrough
+          default:
+            this.flowKey = false;
+            return yield* this.parsePlainScalar();
+        }
+      }
+      *parseQuotedScalar() {
+        const quote = this.charAt(0);
+        let end = this.buffer.indexOf(quote, this.pos + 1);
+        if (quote === "'") {
+          while (end !== -1 && this.buffer[end + 1] === "'")
+            end = this.buffer.indexOf("'", end + 2);
+        } else {
+          while (end !== -1) {
+            let n = 0;
+            while (this.buffer[end - 1 - n] === "\\")
+              n += 1;
+            if (n % 2 === 0)
+              break;
+            end = this.buffer.indexOf('"', end + 1);
+          }
+        }
+        const qb = this.buffer.substring(0, end);
+        let nl = qb.indexOf("\n", this.pos);
+        if (nl !== -1) {
+          while (nl !== -1) {
+            const cs = this.continueScalar(nl + 1);
+            if (cs === -1)
+              break;
+            nl = qb.indexOf("\n", cs);
+          }
+          if (nl !== -1) {
+            end = nl - (qb[nl - 1] === "\r" ? 2 : 1);
+          }
+        }
+        if (end === -1) {
+          if (!this.atEnd)
+            return this.setNext("quoted-scalar");
+          end = this.buffer.length;
+        }
+        yield* this.pushToIndex(end + 1, false);
+        return this.flowLevel ? "flow" : "doc";
+      }
+      *parseBlockScalarHeader() {
+        this.blockScalarIndent = -1;
+        this.blockScalarKeep = false;
+        let i = this.pos;
+        while (true) {
+          const ch = this.buffer[++i];
+          if (ch === "+")
+            this.blockScalarKeep = true;
+          else if (ch > "0" && ch <= "9")
+            this.blockScalarIndent = Number(ch) - 1;
+          else if (ch !== "-")
+            break;
+        }
+        return yield* this.pushUntil((ch) => isEmpty(ch) || ch === "#");
+      }
+      *parseBlockScalar() {
+        let nl = this.pos - 1;
+        let indent = 0;
+        let ch;
+        loop: for (let i2 = this.pos; ch = this.buffer[i2]; ++i2) {
+          switch (ch) {
+            case " ":
+              indent += 1;
+              break;
+            case "\n":
+              nl = i2;
+              indent = 0;
+              break;
+            case "\r": {
+              const next = this.buffer[i2 + 1];
+              if (!next && !this.atEnd)
+                return this.setNext("block-scalar");
+              if (next === "\n")
+                break;
+            }
+            // fallthrough
+            default:
+              break loop;
+          }
+        }
+        if (!ch && !this.atEnd)
+          return this.setNext("block-scalar");
+        if (indent >= this.indentNext) {
+          if (this.blockScalarIndent === -1)
+            this.indentNext = indent;
+          else {
+            this.indentNext = this.blockScalarIndent + (this.indentNext === 0 ? 1 : this.indentNext);
+          }
+          do {
+            const cs = this.continueScalar(nl + 1);
+            if (cs === -1)
+              break;
+            nl = this.buffer.indexOf("\n", cs);
+          } while (nl !== -1);
+          if (nl === -1) {
+            if (!this.atEnd)
+              return this.setNext("block-scalar");
+            nl = this.buffer.length;
+          }
+        }
+        let i = nl + 1;
+        ch = this.buffer[i];
+        while (ch === " ")
+          ch = this.buffer[++i];
+        if (ch === "	") {
+          while (ch === "	" || ch === " " || ch === "\r" || ch === "\n")
+            ch = this.buffer[++i];
+          nl = i - 1;
+        } else if (!this.blockScalarKeep) {
+          do {
+            let i2 = nl - 1;
+            let ch2 = this.buffer[i2];
+            if (ch2 === "\r")
+              ch2 = this.buffer[--i2];
+            const lastChar = i2;
+            while (ch2 === " ")
+              ch2 = this.buffer[--i2];
+            if (ch2 === "\n" && i2 >= this.pos && i2 + 1 + indent > lastChar)
+              nl = i2;
+            else
+              break;
+          } while (true);
+        }
+        yield cst.SCALAR;
+        yield* this.pushToIndex(nl + 1, true);
+        return yield* this.parseLineStart();
+      }
+      *parsePlainScalar() {
+        const inFlow = this.flowLevel > 0;
+        let end = this.pos - 1;
+        let i = this.pos - 1;
+        let ch;
+        while (ch = this.buffer[++i]) {
+          if (ch === ":") {
+            const next = this.buffer[i + 1];
+            if (isEmpty(next) || inFlow && flowIndicatorChars.has(next))
+              break;
+            end = i;
+          } else if (isEmpty(ch)) {
+            let next = this.buffer[i + 1];
+            if (ch === "\r") {
+              if (next === "\n") {
+                i += 1;
+                ch = "\n";
+                next = this.buffer[i + 1];
+              } else
+                end = i;
+            }
+            if (next === "#" || inFlow && flowIndicatorChars.has(next))
+              break;
+            if (ch === "\n") {
+              const cs = this.continueScalar(i + 1);
+              if (cs === -1)
+                break;
+              i = Math.max(i, cs - 2);
+            }
+          } else {
+            if (inFlow && flowIndicatorChars.has(ch))
+              break;
+            end = i;
+          }
+        }
+        if (!ch && !this.atEnd)
+          return this.setNext("plain-scalar");
+        yield cst.SCALAR;
+        yield* this.pushToIndex(end + 1, true);
+        return inFlow ? "flow" : "doc";
+      }
+      *pushCount(n) {
+        if (n > 0) {
+          yield this.buffer.substr(this.pos, n);
+          this.pos += n;
+          return n;
+        }
+        return 0;
+      }
+      *pushToIndex(i, allowEmpty) {
+        const s = this.buffer.slice(this.pos, i);
+        if (s) {
+          yield s;
+          this.pos += s.length;
+          return s.length;
+        } else if (allowEmpty)
+          yield "";
+        return 0;
+      }
+      *pushIndicators() {
+        let n = 0;
+        loop: while (true) {
+          switch (this.charAt(0)) {
+            case "!":
+              n += yield* this.pushTag();
+              n += yield* this.pushSpaces(true);
+              continue loop;
+            case "&":
+              n += yield* this.pushUntil(isNotAnchorChar);
+              n += yield* this.pushSpaces(true);
+              continue loop;
+            case "-":
+            // this is an error
+            case "?":
+            // this is an error outside flow collections
+            case ":": {
+              const inFlow = this.flowLevel > 0;
+              const ch1 = this.charAt(1);
+              if (isEmpty(ch1) || inFlow && flowIndicatorChars.has(ch1)) {
+                if (!inFlow)
+                  this.indentNext = this.indentValue + 1;
+                else if (this.flowKey)
+                  this.flowKey = false;
+                n += yield* this.pushCount(1);
+                n += yield* this.pushSpaces(true);
+                continue loop;
+              }
+            }
+          }
+          break loop;
+        }
+        return n;
+      }
+      *pushTag() {
+        if (this.charAt(1) === "<") {
+          let i = this.pos + 2;
+          let ch = this.buffer[i];
+          while (!isEmpty(ch) && ch !== ">")
+            ch = this.buffer[++i];
+          return yield* this.pushToIndex(ch === ">" ? i + 1 : i, false);
+        } else {
+          let i = this.pos + 1;
+          let ch = this.buffer[i];
+          while (ch) {
+            if (tagChars.has(ch))
+              ch = this.buffer[++i];
+            else if (ch === "%" && hexDigits.has(this.buffer[i + 1]) && hexDigits.has(this.buffer[i + 2])) {
+              ch = this.buffer[i += 3];
+            } else
+              break;
+          }
+          return yield* this.pushToIndex(i, false);
+        }
+      }
+      *pushNewline() {
+        const ch = this.buffer[this.pos];
+        if (ch === "\n")
+          return yield* this.pushCount(1);
+        else if (ch === "\r" && this.charAt(1) === "\n")
+          return yield* this.pushCount(2);
+        else
+          return 0;
+      }
+      *pushSpaces(allowTabs) {
+        let i = this.pos - 1;
+        let ch;
+        do {
+          ch = this.buffer[++i];
+        } while (ch === " " || allowTabs && ch === "	");
+        const n = i - this.pos;
+        if (n > 0) {
+          yield this.buffer.substr(this.pos, n);
+          this.pos = i;
+        }
+        return n;
+      }
+      *pushUntil(test) {
+        let i = this.pos;
+        let ch = this.buffer[i];
+        while (!test(ch))
+          ch = this.buffer[++i];
+        return yield* this.pushToIndex(i, false);
+      }
+    };
+    exports2.Lexer = Lexer;
+  }
+});
+
+// node_modules/yaml/dist/parse/line-counter.js
+var require_line_counter = __commonJS({
+  "node_modules/yaml/dist/parse/line-counter.js"(exports2) {
+    "use strict";
+    var LineCounter = class {
+      constructor() {
+        this.lineStarts = [];
+        this.addNewLine = (offset) => this.lineStarts.push(offset);
+        this.linePos = (offset) => {
+          let low = 0;
+          let high = this.lineStarts.length;
+          while (low < high) {
+            const mid = low + high >> 1;
+            if (this.lineStarts[mid] < offset)
+              low = mid + 1;
+            else
+              high = mid;
+          }
+          if (this.lineStarts[low] === offset)
+            return { line: low + 1, col: 1 };
+          if (low === 0)
+            return { line: 0, col: offset };
+          const start = this.lineStarts[low - 1];
+          return { line: low, col: offset - start + 1 };
+        };
+      }
+    };
+    exports2.LineCounter = LineCounter;
+  }
+});
+
+// node_modules/yaml/dist/parse/parser.js
+var require_parser = __commonJS({
+  "node_modules/yaml/dist/parse/parser.js"(exports2) {
+    "use strict";
+    var node_process = require("process");
+    var cst = require_cst();
+    var lexer = require_lexer();
+    function includesToken(list, type) {
+      for (let i = 0; i < list.length; ++i)
+        if (list[i].type === type)
+          return true;
+      return false;
+    }
+    function findNonEmptyIndex(list) {
+      for (let i = 0; i < list.length; ++i) {
+        switch (list[i].type) {
+          case "space":
+          case "comment":
+          case "newline":
+            break;
+          default:
+            return i;
+        }
+      }
+      return -1;
+    }
+    function isFlowToken(token) {
+      switch (token?.type) {
+        case "alias":
+        case "scalar":
+        case "single-quoted-scalar":
+        case "double-quoted-scalar":
+        case "flow-collection":
+          return true;
+        default:
+          return false;
+      }
+    }
+    function getPrevProps(parent) {
+      switch (parent.type) {
+        case "document":
+          return parent.start;
+        case "block-map": {
+          const it = parent.items[parent.items.length - 1];
+          return it.sep ?? it.start;
+        }
+        case "block-seq":
+          return parent.items[parent.items.length - 1].start;
+        /* istanbul ignore next should not happen */
+        default:
+          return [];
+      }
+    }
+    function getFirstKeyStartProps(prev) {
+      if (prev.length === 0)
+        return [];
+      let i = prev.length;
+      loop: while (--i >= 0) {
+        switch (prev[i].type) {
+          case "doc-start":
+          case "explicit-key-ind":
+          case "map-value-ind":
+          case "seq-item-ind":
+          case "newline":
+            break loop;
+        }
+      }
+      while (prev[++i]?.type === "space") {
+      }
+      return prev.splice(i, prev.length);
+    }
+    function arrayPushArray(target, source) {
+      if (source.length < 1e5)
+        Array.prototype.push.apply(target, source);
+      else
+        for (let i = 0; i < source.length; ++i)
+          target.push(source[i]);
+    }
+    function fixFlowSeqItems(fc) {
+      if (fc.start.type === "flow-seq-start") {
+        for (const it of fc.items) {
+          if (it.sep && !it.value && !includesToken(it.start, "explicit-key-ind") && !includesToken(it.sep, "map-value-ind")) {
+            if (it.key)
+              it.value = it.key;
+            delete it.key;
+            if (isFlowToken(it.value)) {
+              if (it.value.end)
+                arrayPushArray(it.value.end, it.sep);
+              else
+                it.value.end = it.sep;
+            } else
+              arrayPushArray(it.start, it.sep);
+            delete it.sep;
+          }
+        }
+      }
+    }
+    var Parser = class {
+      /**
+       * @param onNewLine - If defined, called separately with the start position of
+       *   each new line (in `parse()`, including the start of input).
+       */
+      constructor(onNewLine) {
+        this.atNewLine = true;
+        this.atScalar = false;
+        this.indent = 0;
+        this.offset = 0;
+        this.onKeyLine = false;
+        this.stack = [];
+        this.source = "";
+        this.type = "";
+        this.lexer = new lexer.Lexer();
+        this.onNewLine = onNewLine;
+      }
+      /**
+       * Parse `source` as a YAML stream.
+       * If `incomplete`, a part of the last line may be left as a buffer for the next call.
+       *
+       * Errors are not thrown, but yielded as `{ type: 'error', message }` tokens.
+       *
+       * @returns A generator of tokens representing each directive, document, and other structure.
+       */
+      *parse(source, incomplete = false) {
+        if (this.onNewLine && this.offset === 0)
+          this.onNewLine(0);
+        for (const lexeme of this.lexer.lex(source, incomplete))
+          yield* this.next(lexeme);
+        if (!incomplete)
+          yield* this.end();
+      }
+      /**
+       * Advance the parser by the `source` of one lexical token.
+       */
+      *next(source) {
+        this.source = source;
+        if (node_process.env.LOG_TOKENS)
+          console.log("|", cst.prettyToken(source));
+        if (this.atScalar) {
+          this.atScalar = false;
+          yield* this.step();
+          this.offset += source.length;
+          return;
+        }
+        const type = cst.tokenType(source);
+        if (!type) {
+          const message = `Not a YAML token: ${source}`;
+          yield* this.pop({ type: "error", offset: this.offset, message, source });
+          this.offset += source.length;
+        } else if (type === "scalar") {
+          this.atNewLine = false;
+          this.atScalar = true;
+          this.type = "scalar";
+        } else {
+          this.type = type;
+          yield* this.step();
+          switch (type) {
+            case "newline":
+              this.atNewLine = true;
+              this.indent = 0;
+              if (this.onNewLine)
+                this.onNewLine(this.offset + source.length);
+              break;
+            case "space":
+              if (this.atNewLine && source[0] === " ")
+                this.indent += source.length;
+              break;
+            case "explicit-key-ind":
+            case "map-value-ind":
+            case "seq-item-ind":
+              if (this.atNewLine)
+                this.indent += source.length;
+              break;
+            case "doc-mode":
+            case "flow-error-end":
+              return;
+            default:
+              this.atNewLine = false;
+          }
+          this.offset += source.length;
+        }
+      }
+      /** Call at end of input to push out any remaining constructions */
+      *end() {
+        while (this.stack.length > 0)
+          yield* this.pop();
+      }
+      get sourceToken() {
+        const st = {
+          type: this.type,
+          offset: this.offset,
+          indent: this.indent,
+          source: this.source
+        };
+        return st;
+      }
+      *step() {
+        const top = this.peek(1);
+        if (this.type === "doc-end" && top?.type !== "doc-end") {
+          while (this.stack.length > 0)
+            yield* this.pop();
+          this.stack.push({
+            type: "doc-end",
+            offset: this.offset,
+            source: this.source
+          });
+          return;
+        }
+        if (!top)
+          return yield* this.stream();
+        switch (top.type) {
+          case "document":
+            return yield* this.document(top);
+          case "alias":
+          case "scalar":
+          case "single-quoted-scalar":
+          case "double-quoted-scalar":
+            return yield* this.scalar(top);
+          case "block-scalar":
+            return yield* this.blockScalar(top);
+          case "block-map":
+            return yield* this.blockMap(top);
+          case "block-seq":
+            return yield* this.blockSequence(top);
+          case "flow-collection":
+            return yield* this.flowCollection(top);
+          case "doc-end":
+            return yield* this.documentEnd(top);
+        }
+        yield* this.pop();
+      }
+      peek(n) {
+        return this.stack[this.stack.length - n];
+      }
+      *pop(error) {
+        const token = error ?? this.stack.pop();
+        if (!token) {
+          const message = "Tried to pop an empty stack";
+          yield { type: "error", offset: this.offset, source: "", message };
+        } else if (this.stack.length === 0) {
+          yield token;
+        } else {
+          const top = this.peek(1);
+          if (token.type === "block-scalar") {
+            token.indent = "indent" in top ? top.indent : 0;
+          } else if (token.type === "flow-collection" && top.type === "document") {
+            token.indent = 0;
+          }
+          if (token.type === "flow-collection")
+            fixFlowSeqItems(token);
+          switch (top.type) {
+            case "document":
+              top.value = token;
+              break;
+            case "block-scalar":
+              top.props.push(token);
+              break;
+            case "block-map": {
+              const it = top.items[top.items.length - 1];
+              if (it.value) {
+                top.items.push({ start: [], key: token, sep: [] });
+                this.onKeyLine = true;
+                return;
+              } else if (it.sep) {
+                it.value = token;
+              } else {
+                Object.assign(it, { key: token, sep: [] });
+                this.onKeyLine = !it.explicitKey;
+                return;
+              }
+              break;
+            }
+            case "block-seq": {
+              const it = top.items[top.items.length - 1];
+              if (it.value)
+                top.items.push({ start: [], value: token });
+              else
+                it.value = token;
+              break;
+            }
+            case "flow-collection": {
+              const it = top.items[top.items.length - 1];
+              if (!it || it.value)
+                top.items.push({ start: [], key: token, sep: [] });
+              else if (it.sep)
+                it.value = token;
+              else
+                Object.assign(it, { key: token, sep: [] });
+              return;
+            }
+            /* istanbul ignore next should not happen */
+            default:
+              yield* this.pop();
+              yield* this.pop(token);
+          }
+          if ((top.type === "document" || top.type === "block-map" || top.type === "block-seq") && (token.type === "block-map" || token.type === "block-seq")) {
+            const last = token.items[token.items.length - 1];
+            if (last && !last.sep && !last.value && last.start.length > 0 && findNonEmptyIndex(last.start) === -1 && (token.indent === 0 || last.start.every((st) => st.type !== "comment" || st.indent < token.indent))) {
+              if (top.type === "document")
+                top.end = last.start;
+              else
+                top.items.push({ start: last.start });
+              token.items.splice(-1, 1);
+            }
+          }
+        }
+      }
+      *stream() {
+        switch (this.type) {
+          case "directive-line":
+            yield { type: "directive", offset: this.offset, source: this.source };
+            return;
+          case "byte-order-mark":
+          case "space":
+          case "comment":
+          case "newline":
+            yield this.sourceToken;
+            return;
+          case "doc-mode":
+          case "doc-start": {
+            const doc = {
+              type: "document",
+              offset: this.offset,
+              start: []
+            };
+            if (this.type === "doc-start")
+              doc.start.push(this.sourceToken);
+            this.stack.push(doc);
+            return;
+          }
+        }
+        yield {
+          type: "error",
+          offset: this.offset,
+          message: `Unexpected ${this.type} token in YAML stream`,
+          source: this.source
+        };
+      }
+      *document(doc) {
+        if (doc.value)
+          return yield* this.lineEnd(doc);
+        switch (this.type) {
+          case "doc-start": {
+            if (findNonEmptyIndex(doc.start) !== -1) {
+              yield* this.pop();
+              yield* this.step();
+            } else
+              doc.start.push(this.sourceToken);
+            return;
+          }
+          case "anchor":
+          case "tag":
+          case "space":
+          case "comment":
+          case "newline":
+            doc.start.push(this.sourceToken);
+            return;
+        }
+        const bv = this.startBlockValue(doc);
+        if (bv)
+          this.stack.push(bv);
+        else {
+          yield {
+            type: "error",
+            offset: this.offset,
+            message: `Unexpected ${this.type} token in YAML document`,
+            source: this.source
+          };
+        }
+      }
+      *scalar(scalar) {
+        if (this.type === "map-value-ind") {
+          const prev = getPrevProps(this.peek(2));
+          const start = getFirstKeyStartProps(prev);
+          let sep;
+          if (scalar.end) {
+            sep = scalar.end;
+            sep.push(this.sourceToken);
+            delete scalar.end;
+          } else
+            sep = [this.sourceToken];
+          const map = {
+            type: "block-map",
+            offset: scalar.offset,
+            indent: scalar.indent,
+            items: [{ start, key: scalar, sep }]
+          };
+          this.onKeyLine = true;
+          this.stack[this.stack.length - 1] = map;
+        } else
+          yield* this.lineEnd(scalar);
+      }
+      *blockScalar(scalar) {
+        switch (this.type) {
+          case "space":
+          case "comment":
+          case "newline":
+            scalar.props.push(this.sourceToken);
+            return;
+          case "scalar":
+            scalar.source = this.source;
+            this.atNewLine = true;
+            this.indent = 0;
+            if (this.onNewLine) {
+              let nl = this.source.indexOf("\n") + 1;
+              while (nl !== 0) {
+                this.onNewLine(this.offset + nl);
+                nl = this.source.indexOf("\n", nl) + 1;
+              }
+            }
+            yield* this.pop();
+            break;
+          /* istanbul ignore next should not happen */
+          default:
+            yield* this.pop();
+            yield* this.step();
+        }
+      }
+      *blockMap(map) {
+        const it = map.items[map.items.length - 1];
+        switch (this.type) {
+          case "newline":
+            this.onKeyLine = false;
+            if (it.value) {
+              const end = "end" in it.value ? it.value.end : void 0;
+              const last = Array.isArray(end) ? end[end.length - 1] : void 0;
+              if (last?.type === "comment")
+                end?.push(this.sourceToken);
+              else
+                map.items.push({ start: [this.sourceToken] });
+            } else if (it.sep) {
+              it.sep.push(this.sourceToken);
+            } else {
+              it.start.push(this.sourceToken);
+            }
+            return;
+          case "space":
+          case "comment":
+            if (it.value) {
+              map.items.push({ start: [this.sourceToken] });
+            } else if (it.sep) {
+              it.sep.push(this.sourceToken);
+            } else {
+              if (this.atIndentedComment(it.start, map.indent)) {
+                const prev = map.items[map.items.length - 2];
+                const end = prev?.value?.end;
+                if (Array.isArray(end)) {
+                  arrayPushArray(end, it.start);
+                  end.push(this.sourceToken);
+                  map.items.pop();
+                  return;
+                }
+              }
+              it.start.push(this.sourceToken);
+            }
+            return;
+        }
+        if (this.indent >= map.indent) {
+          const atMapIndent = !this.onKeyLine && this.indent === map.indent;
+          const atNextItem = atMapIndent && (it.sep || it.explicitKey) && this.type !== "seq-item-ind";
+          let start = [];
+          if (atNextItem && it.sep && !it.value) {
+            const nl = [];
+            for (let i = 0; i < it.sep.length; ++i) {
+              const st = it.sep[i];
+              switch (st.type) {
+                case "newline":
+                  nl.push(i);
+                  break;
+                case "space":
+                  break;
+                case "comment":
+                  if (st.indent > map.indent)
+                    nl.length = 0;
+                  break;
+                default:
+                  nl.length = 0;
+              }
+            }
+            if (nl.length >= 2)
+              start = it.sep.splice(nl[1]);
+          }
+          switch (this.type) {
+            case "anchor":
+            case "tag":
+              if (atNextItem || it.value) {
+                start.push(this.sourceToken);
+                map.items.push({ start });
+                this.onKeyLine = true;
+              } else if (it.sep) {
+                it.sep.push(this.sourceToken);
+              } else {
+                it.start.push(this.sourceToken);
+              }
+              return;
+            case "explicit-key-ind":
+              if (!it.sep && !it.explicitKey) {
+                it.start.push(this.sourceToken);
+                it.explicitKey = true;
+              } else if (atNextItem || it.value) {
+                start.push(this.sourceToken);
+                map.items.push({ start, explicitKey: true });
+              } else {
+                this.stack.push({
+                  type: "block-map",
+                  offset: this.offset,
+                  indent: this.indent,
+                  items: [{ start: [this.sourceToken], explicitKey: true }]
+                });
+              }
+              this.onKeyLine = true;
+              return;
+            case "map-value-ind":
+              if (it.explicitKey) {
+                if (!it.sep) {
+                  if (includesToken(it.start, "newline")) {
+                    Object.assign(it, { key: null, sep: [this.sourceToken] });
+                  } else {
+                    const start2 = getFirstKeyStartProps(it.start);
+                    this.stack.push({
+                      type: "block-map",
+                      offset: this.offset,
+                      indent: this.indent,
+                      items: [{ start: start2, key: null, sep: [this.sourceToken] }]
+                    });
+                  }
+                } else if (it.value) {
+                  map.items.push({ start: [], key: null, sep: [this.sourceToken] });
+                } else if (includesToken(it.sep, "map-value-ind")) {
+                  this.stack.push({
+                    type: "block-map",
+                    offset: this.offset,
+                    indent: this.indent,
+                    items: [{ start, key: null, sep: [this.sourceToken] }]
+                  });
+                } else if (isFlowToken(it.key) && !includesToken(it.sep, "newline")) {
+                  const start2 = getFirstKeyStartProps(it.start);
+                  const key = it.key;
+                  const sep = it.sep;
+                  sep.push(this.sourceToken);
+                  delete it.key;
+                  delete it.sep;
+                  this.stack.push({
+                    type: "block-map",
+                    offset: this.offset,
+                    indent: this.indent,
+                    items: [{ start: start2, key, sep }]
+                  });
+                } else if (start.length > 0) {
+                  it.sep = it.sep.concat(start, this.sourceToken);
+                } else {
+                  it.sep.push(this.sourceToken);
+                }
+              } else {
+                if (!it.sep) {
+                  Object.assign(it, { key: null, sep: [this.sourceToken] });
+                } else if (it.value || atNextItem) {
+                  map.items.push({ start, key: null, sep: [this.sourceToken] });
+                } else if (includesToken(it.sep, "map-value-ind")) {
+                  this.stack.push({
+                    type: "block-map",
+                    offset: this.offset,
+                    indent: this.indent,
+                    items: [{ start: [], key: null, sep: [this.sourceToken] }]
+                  });
+                } else {
+                  it.sep.push(this.sourceToken);
+                }
+              }
+              this.onKeyLine = true;
+              return;
+            case "alias":
+            case "scalar":
+            case "single-quoted-scalar":
+            case "double-quoted-scalar": {
+              const fs = this.flowScalar(this.type);
+              if (atNextItem || it.value) {
+                map.items.push({ start, key: fs, sep: [] });
+                this.onKeyLine = true;
+              } else if (it.sep) {
+                this.stack.push(fs);
+              } else {
+                Object.assign(it, { key: fs, sep: [] });
+                this.onKeyLine = true;
+              }
+              return;
+            }
+            default: {
+              const bv = this.startBlockValue(map);
+              if (bv) {
+                if (bv.type === "block-seq") {
+                  if (!it.explicitKey && it.sep && !includesToken(it.sep, "newline")) {
+                    yield* this.pop({
+                      type: "error",
+                      offset: this.offset,
+                      message: "Unexpected block-seq-ind on same line with key",
+                      source: this.source
+                    });
+                    return;
+                  }
+                } else if (atMapIndent) {
+                  map.items.push({ start });
+                }
+                this.stack.push(bv);
+                return;
+              }
+            }
+          }
+        }
+        yield* this.pop();
+        yield* this.step();
+      }
+      *blockSequence(seq) {
+        const it = seq.items[seq.items.length - 1];
+        switch (this.type) {
+          case "newline":
+            if (it.value) {
+              const end = "end" in it.value ? it.value.end : void 0;
+              const last = Array.isArray(end) ? end[end.length - 1] : void 0;
+              if (last?.type === "comment")
+                end?.push(this.sourceToken);
+              else
+                seq.items.push({ start: [this.sourceToken] });
+            } else
+              it.start.push(this.sourceToken);
+            return;
+          case "space":
+          case "comment":
+            if (it.value)
+              seq.items.push({ start: [this.sourceToken] });
+            else {
+              if (this.atIndentedComment(it.start, seq.indent)) {
+                const prev = seq.items[seq.items.length - 2];
+                const end = prev?.value?.end;
+                if (Array.isArray(end)) {
+                  arrayPushArray(end, it.start);
+                  end.push(this.sourceToken);
+                  seq.items.pop();
+                  return;
+                }
+              }
+              it.start.push(this.sourceToken);
+            }
+            return;
+          case "anchor":
+          case "tag":
+            if (it.value || this.indent <= seq.indent)
+              break;
+            it.start.push(this.sourceToken);
+            return;
+          case "seq-item-ind":
+            if (this.indent !== seq.indent)
+              break;
+            if (it.value || includesToken(it.start, "seq-item-ind"))
+              seq.items.push({ start: [this.sourceToken] });
+            else
+              it.start.push(this.sourceToken);
+            return;
+        }
+        if (this.indent > seq.indent) {
+          const bv = this.startBlockValue(seq);
+          if (bv) {
+            this.stack.push(bv);
+            return;
+          }
+        }
+        yield* this.pop();
+        yield* this.step();
+      }
+      *flowCollection(fc) {
+        const it = fc.items[fc.items.length - 1];
+        if (this.type === "flow-error-end") {
+          let top;
+          do {
+            yield* this.pop();
+            top = this.peek(1);
+          } while (top?.type === "flow-collection");
+        } else if (fc.end.length === 0) {
+          switch (this.type) {
+            case "comma":
+            case "explicit-key-ind":
+              if (!it || it.sep)
+                fc.items.push({ start: [this.sourceToken] });
+              else
+                it.start.push(this.sourceToken);
+              return;
+            case "map-value-ind":
+              if (!it || it.value)
+                fc.items.push({ start: [], key: null, sep: [this.sourceToken] });
+              else if (it.sep)
+                it.sep.push(this.sourceToken);
+              else
+                Object.assign(it, { key: null, sep: [this.sourceToken] });
+              return;
+            case "space":
+            case "comment":
+            case "newline":
+            case "anchor":
+            case "tag":
+              if (!it || it.value)
+                fc.items.push({ start: [this.sourceToken] });
+              else if (it.sep)
+                it.sep.push(this.sourceToken);
+              else
+                it.start.push(this.sourceToken);
+              return;
+            case "alias":
+            case "scalar":
+            case "single-quoted-scalar":
+            case "double-quoted-scalar": {
+              const fs = this.flowScalar(this.type);
+              if (!it || it.value)
+                fc.items.push({ start: [], key: fs, sep: [] });
+              else if (it.sep)
+                this.stack.push(fs);
+              else
+                Object.assign(it, { key: fs, sep: [] });
+              return;
+            }
+            case "flow-map-end":
+            case "flow-seq-end":
+              fc.end.push(this.sourceToken);
+              return;
+          }
+          const bv = this.startBlockValue(fc);
+          if (bv)
+            this.stack.push(bv);
+          else {
+            yield* this.pop();
+            yield* this.step();
+          }
+        } else {
+          const parent = this.peek(2);
+          if (parent.type === "block-map" && (this.type === "map-value-ind" && parent.indent === fc.indent || this.type === "newline" && !parent.items[parent.items.length - 1].sep)) {
+            yield* this.pop();
+            yield* this.step();
+          } else if (this.type === "map-value-ind" && parent.type !== "flow-collection") {
+            const prev = getPrevProps(parent);
+            const start = getFirstKeyStartProps(prev);
+            fixFlowSeqItems(fc);
+            const sep = fc.end.splice(1, fc.end.length);
+            sep.push(this.sourceToken);
+            const map = {
+              type: "block-map",
+              offset: fc.offset,
+              indent: fc.indent,
+              items: [{ start, key: fc, sep }]
+            };
+            this.onKeyLine = true;
+            this.stack[this.stack.length - 1] = map;
+          } else {
+            yield* this.lineEnd(fc);
+          }
+        }
+      }
+      flowScalar(type) {
+        if (this.onNewLine) {
+          let nl = this.source.indexOf("\n") + 1;
+          while (nl !== 0) {
+            this.onNewLine(this.offset + nl);
+            nl = this.source.indexOf("\n", nl) + 1;
+          }
+        }
+        return {
+          type,
+          offset: this.offset,
+          indent: this.indent,
+          source: this.source
+        };
+      }
+      startBlockValue(parent) {
+        switch (this.type) {
+          case "alias":
+          case "scalar":
+          case "single-quoted-scalar":
+          case "double-quoted-scalar":
+            return this.flowScalar(this.type);
+          case "block-scalar-header":
+            return {
+              type: "block-scalar",
+              offset: this.offset,
+              indent: this.indent,
+              props: [this.sourceToken],
+              source: ""
+            };
+          case "flow-map-start":
+          case "flow-seq-start":
+            return {
+              type: "flow-collection",
+              offset: this.offset,
+              indent: this.indent,
+              start: this.sourceToken,
+              items: [],
+              end: []
+            };
+          case "seq-item-ind":
+            return {
+              type: "block-seq",
+              offset: this.offset,
+              indent: this.indent,
+              items: [{ start: [this.sourceToken] }]
+            };
+          case "explicit-key-ind": {
+            this.onKeyLine = true;
+            const prev = getPrevProps(parent);
+            const start = getFirstKeyStartProps(prev);
+            start.push(this.sourceToken);
+            return {
+              type: "block-map",
+              offset: this.offset,
+              indent: this.indent,
+              items: [{ start, explicitKey: true }]
+            };
+          }
+          case "map-value-ind": {
+            this.onKeyLine = true;
+            const prev = getPrevProps(parent);
+            const start = getFirstKeyStartProps(prev);
+            return {
+              type: "block-map",
+              offset: this.offset,
+              indent: this.indent,
+              items: [{ start, key: null, sep: [this.sourceToken] }]
+            };
+          }
+        }
+        return null;
+      }
+      atIndentedComment(start, indent) {
+        if (this.type !== "comment")
+          return false;
+        if (this.indent <= indent)
+          return false;
+        return start.every((st) => st.type === "newline" || st.type === "space");
+      }
+      *documentEnd(docEnd) {
+        if (this.type !== "doc-mode") {
+          if (docEnd.end)
+            docEnd.end.push(this.sourceToken);
+          else
+            docEnd.end = [this.sourceToken];
+          if (this.type === "newline")
+            yield* this.pop();
+        }
+      }
+      *lineEnd(token) {
+        switch (this.type) {
+          case "comma":
+          case "doc-start":
+          case "doc-end":
+          case "flow-seq-end":
+          case "flow-map-end":
+          case "map-value-ind":
+            yield* this.pop();
+            yield* this.step();
+            break;
+          case "newline":
+            this.onKeyLine = false;
+          // fallthrough
+          case "space":
+          case "comment":
+          default:
+            if (token.end)
+              token.end.push(this.sourceToken);
+            else
+              token.end = [this.sourceToken];
+            if (this.type === "newline")
+              yield* this.pop();
+        }
+      }
+    };
+    exports2.Parser = Parser;
+  }
+});
+
+// node_modules/yaml/dist/public-api.js
+var require_public_api = __commonJS({
+  "node_modules/yaml/dist/public-api.js"(exports2) {
+    "use strict";
+    var composer = require_composer();
+    var Document = require_Document();
+    var errors = require_errors();
+    var log = require_log();
+    var identity = require_identity();
+    var lineCounter = require_line_counter();
+    var parser = require_parser();
+    function parseOptions(options) {
+      const prettyErrors = options.prettyErrors !== false;
+      const lineCounter$1 = options.lineCounter || prettyErrors && new lineCounter.LineCounter() || null;
+      return { lineCounter: lineCounter$1, prettyErrors };
+    }
+    function parseAllDocuments(source, options = {}) {
+      const { lineCounter: lineCounter2, prettyErrors } = parseOptions(options);
+      const parser$1 = new parser.Parser(lineCounter2?.addNewLine);
+      const composer$1 = new composer.Composer(options);
+      const docs = Array.from(composer$1.compose(parser$1.parse(source)));
+      if (prettyErrors && lineCounter2)
+        for (const doc of docs) {
+          doc.errors.forEach(errors.prettifyError(source, lineCounter2));
+          doc.warnings.forEach(errors.prettifyError(source, lineCounter2));
+        }
+      if (docs.length > 0)
+        return docs;
+      return Object.assign([], { empty: true }, composer$1.streamInfo());
+    }
+    function parseDocument(source, options = {}) {
+      const { lineCounter: lineCounter2, prettyErrors } = parseOptions(options);
+      const parser$1 = new parser.Parser(lineCounter2?.addNewLine);
+      const composer$1 = new composer.Composer(options);
+      let doc = null;
+      for (const _doc of composer$1.compose(parser$1.parse(source), true, source.length)) {
+        if (!doc)
+          doc = _doc;
+        else if (doc.options.logLevel !== "silent") {
+          doc.errors.push(new errors.YAMLParseError(_doc.range.slice(0, 2), "MULTIPLE_DOCS", "Source contains multiple documents; please use YAML.parseAllDocuments()"));
+          break;
+        }
+      }
+      if (prettyErrors && lineCounter2) {
+        doc.errors.forEach(errors.prettifyError(source, lineCounter2));
+        doc.warnings.forEach(errors.prettifyError(source, lineCounter2));
+      }
+      return doc;
+    }
+    function parse2(src, reviver, options) {
+      let _reviver = void 0;
+      if (typeof reviver === "function") {
+        _reviver = reviver;
+      } else if (options === void 0 && reviver && typeof reviver === "object") {
+        options = reviver;
+      }
+      const doc = parseDocument(src, options);
+      if (!doc)
+        return null;
+      doc.warnings.forEach((warning) => log.warn(doc.options.logLevel, warning));
+      if (doc.errors.length > 0) {
+        if (doc.options.logLevel !== "silent")
+          throw doc.errors[0];
+        else
+          doc.errors = [];
+      }
+      return doc.toJS(Object.assign({ reviver: _reviver }, options));
+    }
+    function stringify(value, replacer, options) {
+      let _replacer = null;
+      if (typeof replacer === "function" || Array.isArray(replacer)) {
+        _replacer = replacer;
+      } else if (options === void 0 && replacer) {
+        options = replacer;
+      }
+      if (typeof options === "string")
+        options = options.length;
+      if (typeof options === "number") {
+        const indent = Math.round(options);
+        options = indent < 1 ? void 0 : indent > 8 ? { indent: 8 } : { indent };
+      }
+      if (value === void 0) {
+        const { keepUndefined } = options ?? replacer ?? {};
+        if (!keepUndefined)
+          return void 0;
+      }
+      if (identity.isDocument(value) && !_replacer)
+        return value.toString(options);
+      return new Document.Document(value, _replacer, options).toString(options);
+    }
+    exports2.parse = parse2;
+    exports2.parseAllDocuments = parseAllDocuments;
+    exports2.parseDocument = parseDocument;
+    exports2.stringify = stringify;
+  }
+});
+
+// node_modules/yaml/dist/index.js
+var require_dist = __commonJS({
+  "node_modules/yaml/dist/index.js"(exports2) {
+    "use strict";
+    var composer = require_composer();
+    var Document = require_Document();
+    var Schema = require_Schema();
+    var errors = require_errors();
+    var Alias = require_Alias();
+    var identity = require_identity();
+    var Pair = require_Pair();
+    var Scalar = require_Scalar();
+    var YAMLMap = require_YAMLMap();
+    var YAMLSeq = require_YAMLSeq();
+    var cst = require_cst();
+    var lexer = require_lexer();
+    var lineCounter = require_line_counter();
+    var parser = require_parser();
+    var publicApi = require_public_api();
+    var visit = require_visit();
+    exports2.Composer = composer.Composer;
+    exports2.Document = Document.Document;
+    exports2.Schema = Schema.Schema;
+    exports2.YAMLError = errors.YAMLError;
+    exports2.YAMLParseError = errors.YAMLParseError;
+    exports2.YAMLWarning = errors.YAMLWarning;
+    exports2.Alias = Alias.Alias;
+    exports2.isAlias = identity.isAlias;
+    exports2.isCollection = identity.isCollection;
+    exports2.isDocument = identity.isDocument;
+    exports2.isMap = identity.isMap;
+    exports2.isNode = identity.isNode;
+    exports2.isPair = identity.isPair;
+    exports2.isScalar = identity.isScalar;
+    exports2.isSeq = identity.isSeq;
+    exports2.Pair = Pair.Pair;
+    exports2.Scalar = Scalar.Scalar;
+    exports2.YAMLMap = YAMLMap.YAMLMap;
+    exports2.YAMLSeq = YAMLSeq.YAMLSeq;
+    exports2.CST = cst;
+    exports2.Lexer = lexer.Lexer;
+    exports2.LineCounter = lineCounter.LineCounter;
+    exports2.Parser = parser.Parser;
+    exports2.parse = publicApi.parse;
+    exports2.parseAllDocuments = publicApi.parseAllDocuments;
+    exports2.parseDocument = publicApi.parseDocument;
+    exports2.stringify = publicApi.stringify;
+    exports2.visit = visit.visit;
+    exports2.visitAsync = visit.visitAsync;
+  }
+});
+
+// src/extension.ts
+var extension_exports = {};
+__export(extension_exports, {
+  activate: () => activate,
+  deactivate: () => deactivate
+});
+module.exports = __toCommonJS(extension_exports);
+var vscode3 = __toESM(require("vscode"));
+
+// src/controllerClient.ts
+var DEFAULT_TIMEOUT_MS = 15e3;
+var ControllerError = class extends Error {
+  constructor(message, status, detail, currentRevision) {
+    super(message);
+    this.status = status;
+    this.detail = detail;
+    this.currentRevision = currentRevision;
+    this.name = "ControllerError";
+  }
+  status;
+  detail;
+  currentRevision;
+};
+var ControllerClient = class {
+  constructor(baseUrl = "http://127.0.0.1:8787", timeoutMs = DEFAULT_TIMEOUT_MS, fetchImpl = globalThis.fetch) {
+    this.baseUrl = baseUrl;
+    this.timeoutMs = timeoutMs;
+    this.fetchImpl = fetchImpl;
+  }
+  baseUrl;
+  timeoutMs;
+  fetchImpl;
+  async getSkills() {
+    const value = await this.request("/skills", { method: "GET" });
+    return parseCatalog(value);
+  }
+  async setSkill(name, enabled, expectedRevision) {
+    const value = await this.request(`/skills/${encodeURIComponent(name)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled, expected_revision: expectedRevision })
+    });
+    return parseToggleResult(value);
+  }
+  async getScenes() {
+    const value = await this.request("/scenes", { method: "GET" });
+    return parseSceneCatalog(value);
+  }
+  async createScene(name) {
+    const value = await this.request("/scenes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name })
+    });
+    return parseSceneMutationResult(value);
+  }
+  async activateScene(name, expectedRevision) {
+    const value = await this.request(`/scenes/${encodeURIComponent(name)}/activate`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ expected_revision: expectedRevision })
+    });
+    return parseActivateSceneResult(value);
+  }
+  async renameScene(name, newName, expectedRevision) {
+    const value = await this.request(`/scenes/${encodeURIComponent(name)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ new_name: newName, expected_revision: expectedRevision })
+    });
+    return parseSceneMutationResult(value);
+  }
+  async deleteScene(name, expectedRevision) {
+    const value = await this.request(`/scenes/${encodeURIComponent(name)}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ expected_revision: expectedRevision })
+    });
+    return parseDeleteSceneResult(value);
+  }
+  async request(path2, init) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+    try {
+      const response = await this.fetchImpl(`${this.baseUrl}${path2}`, {
+        ...init,
+        headers: { Accept: "application/json", ...init.headers },
+        signal: controller.signal
+      });
+      const body = await readJson(response);
+      if (!response.ok) {
+        const detail = isRecord(body) ? body.detail : void 0;
+        const conflict = isRecord(detail) ? detail.current_revision : void 0;
+        const currentRevision = typeof conflict === "number" ? conflict : void 0;
+        throw new ControllerError(
+          formatHttpError(response.status, detail),
+          response.status,
+          detail,
+          currentRevision
+        );
+      }
+      return body;
+    } catch (error) {
+      if (error instanceof ControllerError) {
+        throw error;
+      }
+      const message = error instanceof Error ? error.message : String(error);
+      throw new ControllerError(`SkillPanel controller request failed: ${message}`);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+};
+async function readJson(response) {
+  const text = await response.text();
+  if (!text) {
+    throw new ControllerError(`Controller returned an empty HTTP ${response.status} response`);
+  }
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new ControllerError(`Controller returned invalid JSON with HTTP ${response.status}`);
+  }
+}
+function formatHttpError(status, detail) {
+  if (typeof detail === "string") {
+    return `Controller returned HTTP ${status}: ${detail}`;
+  }
+  if (isRecord(detail) && typeof detail.message === "string") {
+    return `Controller returned HTTP ${status}: ${detail.message}`;
+  }
+  return `Controller returned HTTP ${status}`;
+}
+function parseCatalog(value) {
+  const data = requireRecord(value, "catalog");
+  const revision = requireInteger(data.revision, "catalog.revision");
+  const skills = requireArray(data.skills, "catalog.skills").map(parseSkill);
+  const reconciliations = requireArray(
+    data.reconciliations ?? [],
+    "catalog.reconciliations"
+  ).map(parseReconciliation);
+  return {
+    revision,
+    skills,
+    reconciliations,
+    pids: parsePids(data.pids)
+  };
+}
+function parseToggleResult(value) {
+  const data = requireRecord(value, "toggle result");
+  const refresh = data.hermes_refresh;
+  if (refresh !== void 0 && refresh !== "next-turn") {
+    throw new ControllerError("Controller returned an invalid hermes_refresh value");
+  }
+  return {
+    ok: requireBoolean(data.ok, "toggle.ok"),
+    changed: requireBoolean(data.changed, "toggle.changed"),
+    name: requireString(data.name, "toggle.name"),
+    enabled: requireBoolean(data.enabled, "toggle.enabled"),
+    revision: requireInteger(data.revision, "toggle.revision"),
+    reconciliations: requireArray(
+      data.reconciliations ?? [],
+      "toggle.reconciliations"
+    ).map(parseReconciliation),
+    opencode_skills: requireArray(data.opencode_skills, "toggle.opencode_skills").map(
+      (item) => requireString(item, "toggle.opencode_skills[]")
+    ),
+    pids: parsePids(data.pids),
+    latency_ms: requireNumber(data.latency_ms, "toggle.latency_ms"),
+    hermes_refresh: refresh,
+    active_scene: requireString(data.active_scene, "toggle.active_scene"),
+    scenes_revision: requireInteger(data.scenes_revision, "toggle.scenes_revision")
+  };
+}
+function parseScene(value) {
+  const data = requireRecord(value, "scene");
+  return {
+    name: requireString(data.name, "scene.name"),
+    disabled: requireArray(data.disabled, "scene.disabled").map(
+      (item) => requireString(item, "scene.disabled[]")
+    ),
+    active: requireBoolean(data.active, "scene.active")
+  };
+}
+function parseSceneCatalog(value) {
+  const data = requireRecord(value, "scene catalog");
+  return {
+    revision: requireInteger(data.revision, "scenes.revision"),
+    active: requireString(data.active, "scenes.active"),
+    scenes: requireArray(data.scenes, "scenes.scenes").map(parseScene),
+    pids: parsePids(data.pids)
+  };
+}
+function parseSceneMutationResult(value) {
+  const catalog = parseSceneCatalog(value);
+  const data = requireRecord(value, "scene mutation result");
+  return {
+    ...catalog,
+    ok: requireBoolean(data.ok, "scenes.ok"),
+    skill_revision: requireInteger(data.skill_revision, "scenes.skill_revision"),
+    latency_ms: requireNumber(data.latency_ms, "scenes.latency_ms")
+  };
+}
+function parseActivateSceneResult(value) {
+  const mutation = parseSceneMutationResult(value);
+  const data = requireRecord(value, "activate scene result");
+  return { ...mutation, changed: requireBoolean(data.changed, "scenes.changed") };
+}
+function parseDeleteSceneResult(value) {
+  const catalog = parseSceneCatalog(value);
+  const data = requireRecord(value, "delete scene result");
+  return { ...catalog, ok: requireBoolean(data.ok, "scenes.ok") };
+}
+function parseSkill(value) {
+  const data = requireRecord(value, "skill");
+  return {
+    name: requireString(data.name, "skill.name"),
+    description: requireString(data.description, "skill.description"),
+    enabled: requireBoolean(data.enabled, "skill.enabled"),
+    location: requireString(data.location, "skill.location")
+  };
+}
+function parseReconciliation(value) {
+  const data = requireRecord(value, "reconciliation");
+  return {
+    name: requireString(data.name, "reconciliation.name"),
+    policy: requireString(data.policy, "reconciliation.policy"),
+    action: requireString(data.action, "reconciliation.action"),
+    disabled_location: optionalString(data.disabled_location, "reconciliation.disabled_location"),
+    quarantine_location: optionalString(
+      data.quarantine_location,
+      "reconciliation.quarantine_location"
+    )
+  };
+}
+function parsePids(value) {
+  const data = requireRecord(value, "pids");
+  return {
+    opencode: optionalInteger(data.opencode, "pids.opencode"),
+    hermes: optionalInteger(data.hermes, "pids.hermes"),
+    controller: optionalInteger(data.controller, "pids.controller")
+  };
+}
+function requireRecord(value, field) {
+  if (!isRecord(value)) {
+    throw new ControllerError(`Controller returned an invalid ${field}`);
+  }
+  return value;
+}
+function isRecord(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function requireArray(value, field) {
+  if (!Array.isArray(value)) {
+    throw new ControllerError(`Controller returned an invalid ${field}`);
+  }
+  return value;
+}
+function requireString(value, field) {
+  if (typeof value !== "string") {
+    throw new ControllerError(`Controller returned an invalid ${field}`);
+  }
+  return value;
+}
+function optionalString(value, field) {
+  return value === void 0 ? void 0 : requireString(value, field);
+}
+function requireBoolean(value, field) {
+  if (typeof value !== "boolean") {
+    throw new ControllerError(`Controller returned an invalid ${field}`);
+  }
+  return value;
+}
+function requireInteger(value, field) {
+  if (typeof value !== "number" || !Number.isInteger(value)) {
+    throw new ControllerError(`Controller returned an invalid ${field}`);
+  }
+  return value;
+}
+function optionalInteger(value, field) {
+  return value === null ? null : requireInteger(value, field);
+}
+function requireNumber(value, field) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new ControllerError(`Controller returned an invalid ${field}`);
+  }
+  return value;
+}
+
+// src/projectScanner.ts
+var path = __toESM(require("node:path"));
+var vscode = __toESM(require("vscode"));
+
+// src/skillDocument.ts
+var import_yaml = __toESM(require_dist());
+var SKILL_NAME_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+function parseSkillDocument(text, directoryName) {
+  const match = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(text);
+  if (!match) {
+    return void 0;
+  }
+  let frontmatter;
+  try {
+    frontmatter = (0, import_yaml.parse)(match[1]);
+  } catch {
+    return void 0;
+  }
+  if (!isRecord2(frontmatter)) {
+    return void 0;
+  }
+  const { name, description } = frontmatter;
+  if (typeof name !== "string" || !SKILL_NAME_PATTERN.test(name) || name !== directoryName || typeof description !== "string" || description.length < 1 || description.length > 1024) {
+    return void 0;
+  }
+  return { name, description };
+}
+function isRecord2(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+// src/projectScanner.ts
+var PROJECT_SKILL_PATHS = [
+  [".opencode", "skills"],
+  [".agents", "skills"],
+  [".claude", "skills"]
+];
+var ProjectSkillScanner = class {
+  constructor(fileSystem = vscode.workspace.fs) {
+    this.fileSystem = fileSystem;
+  }
+  fileSystem;
+  async scan() {
+    const merged = /* @__PURE__ */ new Map();
+    for (const folder of vscode.workspace.workspaceFolders ?? []) {
+      const gitRoot = await this.findGitRoot(folder.uri);
+      for (const directory of directoriesThrough(folder.uri, gitRoot)) {
+        for (const segments of PROJECT_SKILL_PATHS) {
+          await this.scanRoot(vscode.Uri.joinPath(directory, ...segments), merged);
+        }
+      }
+    }
+    return [...merged.values()].map((skill) => ({ ...skill, sourcePaths: [...skill.sourcePaths].sort() })).sort((left, right) => left.name.localeCompare(right.name));
+  }
+  async findGitRoot(start) {
+    let current = start;
+    for (; ; ) {
+      if (await this.exists(vscode.Uri.joinPath(current, ".git"))) {
+        return current;
+      }
+      const parent = parentUri(current);
+      if (parent.path === current.path) {
+        return start;
+      }
+      current = parent;
+    }
+  }
+  async scanRoot(root, merged) {
+    let entries;
+    try {
+      entries = await this.fileSystem.readDirectory(root);
+    } catch {
+      return;
+    }
+    for (const [directoryName, fileType] of entries) {
+      if (directoryName.startsWith(".") || (fileType & vscode.FileType.SymbolicLink) !== 0 || (fileType & vscode.FileType.Directory) === 0) {
+        continue;
+      }
+      const skillFile = vscode.Uri.joinPath(root, directoryName, "SKILL.md");
+      let content;
+      try {
+        content = await this.fileSystem.readFile(skillFile);
+      } catch {
+        continue;
+      }
+      const metadata = parseSkillDocument(new TextDecoder().decode(content), directoryName);
+      if (!metadata) {
+        continue;
+      }
+      const sourcePath = skillFile.fsPath;
+      const existing = merged.get(metadata.name);
+      if (existing) {
+        if (!existing.sourcePaths.includes(sourcePath)) {
+          existing.sourcePaths.push(sourcePath);
+        }
+      } else {
+        merged.set(metadata.name, {
+          ...metadata,
+          sourcePaths: [sourcePath]
+        });
+      }
+    }
+  }
+  async exists(uri) {
+    try {
+      await this.fileSystem.stat(uri);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+};
+function parentUri(uri) {
+  return uri.with({ path: path.posix.dirname(uri.path) });
+}
+function directoriesThrough(start, end) {
+  const result = [];
+  let current = start;
+  for (; ; ) {
+    result.push(current);
+    if (current.path === end.path) {
+      return result;
+    }
+    const parent = parentUri(current);
+    if (parent.path === current.path) {
+      return result;
+    }
+    current = parent;
+  }
+}
+
+// src/skillPanelModel.ts
+var SkillPanelModel = class {
+  constructor(controller, projectSource, notifications) {
+    this.controller = controller;
+    this.projectSource = projectSource;
+    this.notifications = notifications;
+  }
+  controller;
+  projectSource;
+  notifications;
+  catalog;
+  scenes;
+  projectSkills = [];
+  pendingName;
+  pendingSceneName;
+  refreshing = false;
+  connectionError;
+  listeners = /* @__PURE__ */ new Set();
+  refreshPromise;
+  onDidChange(listener) {
+    this.listeners.add(listener);
+    return { dispose: () => this.listeners.delete(listener) };
+  }
+  async refresh() {
+    if (this.pendingName || this.pendingSceneName) {
+      return;
+    }
+    if (this.refreshPromise) {
+      return this.refreshPromise;
+    }
+    this.refreshPromise = this.performRefresh();
+    try {
+      await this.refreshPromise;
+    } finally {
+      this.refreshPromise = void 0;
+    }
+  }
+  async performRefresh() {
+    this.refreshing = true;
+    this.emit();
+    try {
+      await this.loadAuthoritativeState();
+    } catch (error) {
+      this.connectionError = errorMessage(error);
+      this.notifications.error(`\u65E0\u6CD5\u5237\u65B0 Skills\uFF1A${this.connectionError}`);
+    } finally {
+      this.refreshing = false;
+      this.emit();
+    }
+  }
+  async toggle(name) {
+    if (this.pendingName || this.pendingSceneName || this.refreshing || this.connectionError || !this.catalog) {
+      return;
+    }
+    const skill = this.catalog.skills.find((item) => item.name === name);
+    if (!skill) {
+      return;
+    }
+    this.pendingName = name;
+    this.emit();
+    try {
+      await this.controller.setSkill(name, !skill.enabled, this.catalog.revision);
+    } catch (error) {
+      this.notifyToggleFailure(error);
+    } finally {
+      try {
+        await this.loadAuthoritativeState();
+      } catch (error) {
+        this.connectionError = errorMessage(error);
+        this.notifications.error(`\u65E0\u6CD5\u8BFB\u53D6\u5207\u6362\u540E\u7684\u771F\u5B9E\u72B6\u6001\uFF1A${this.connectionError}`);
+      }
+      this.pendingName = void 0;
+      this.emit();
+    }
+  }
+  async activateScene(name) {
+    await this.runSceneMutation(
+      "\u5207\u6362\u573A\u666F",
+      name,
+      (revision) => this.controller.activateScene(name, revision)
+    );
+  }
+  async createScene(name) {
+    await this.runSceneMutation("\u521B\u5EFA\u573A\u666F", name, () => this.controller.createScene(name));
+  }
+  async renameScene(name, newName) {
+    await this.runSceneMutation(
+      "\u91CD\u547D\u540D\u573A\u666F",
+      name,
+      (revision) => this.controller.renameScene(name, newName, revision)
+    );
+  }
+  async deleteScene(name) {
+    await this.runSceneMutation(
+      "\u5220\u9664\u573A\u666F",
+      name,
+      (revision) => this.controller.deleteScene(name, revision)
+    );
+  }
+  async runSceneMutation(action, name, mutate) {
+    if (this.pendingName || this.pendingSceneName || this.refreshing || this.connectionError || !this.scenes) {
+      return;
+    }
+    this.pendingSceneName = name;
+    this.emit();
+    try {
+      await mutate(this.scenes.revision);
+    } catch (error) {
+      this.notifySceneFailure(action, error);
+    } finally {
+      try {
+        await this.loadAuthoritativeState();
+      } catch (error) {
+        this.connectionError = errorMessage(error);
+        this.notifications.error(`\u65E0\u6CD5\u8BFB\u53D6${action}\u540E\u7684\u771F\u5B9E\u72B6\u6001\uFF1A${this.connectionError}`);
+      }
+      this.pendingSceneName = void 0;
+      this.emit();
+    }
+  }
+  async loadAuthoritativeState() {
+    const [catalog, scenes, projectSkills] = await Promise.all([
+      this.controller.getSkills(),
+      this.controller.getScenes(),
+      this.projectSource.scan()
+    ]);
+    this.catalog = catalog;
+    this.scenes = scenes;
+    this.projectSkills = projectSkills;
+    this.connectionError = void 0;
+  }
+  notifyToggleFailure(error) {
+    if (error instanceof ControllerError && error.status === 409) {
+      const revision = error.currentRevision;
+      this.notifications.warning(
+        revision === void 0 ? "Skill \u72B6\u6001\u5DF2\u88AB\u5176\u4ED6\u5BA2\u6237\u7AEF\u4FEE\u6539\uFF0C\u5217\u8868\u5DF2\u5237\u65B0\uFF1B\u8BF7\u786E\u8BA4\u540E\u91CD\u65B0\u70B9\u51FB\u3002" : `Skill \u72B6\u6001\u5DF2\u66F4\u65B0\u5230 revision ${revision}\uFF0C\u5217\u8868\u5DF2\u5237\u65B0\uFF1B\u8BF7\u786E\u8BA4\u540E\u91CD\u65B0\u70B9\u51FB\u3002`
+      );
+      return;
+    }
+    const status = error instanceof ControllerError ? error.status : void 0;
+    const prefix = status === 503 || status === 507 ? "\u5207\u6362\u5931\u8D25\uFF0C\u63A7\u5236\u5668\u5DF2\u6267\u884C\u56DE\u6EDA" : "\u5207\u6362\u5931\u8D25";
+    this.notifications.error(`${prefix}\uFF1A${errorMessage(error)}`);
+  }
+  notifySceneFailure(action, error) {
+    if (error instanceof ControllerError && error.status === 409) {
+      const revision = error.currentRevision;
+      this.notifications.warning(
+        revision === void 0 ? "\u573A\u666F\u5DF2\u88AB\u5176\u4ED6\u5BA2\u6237\u7AEF\u4FEE\u6539\uFF0C\u5217\u8868\u5DF2\u5237\u65B0\uFF1B\u8BF7\u786E\u8BA4\u540E\u91CD\u65B0\u64CD\u4F5C\u3002" : `\u573A\u666F\u5DF2\u66F4\u65B0\u5230 revision ${revision}\uFF0C\u5217\u8868\u5DF2\u5237\u65B0\uFF1B\u8BF7\u786E\u8BA4\u540E\u91CD\u65B0\u64CD\u4F5C\u3002`
+      );
+      return;
+    }
+    this.notifications.error(`${action}\u5931\u8D25\uFF1A${errorMessage(error)}`);
+  }
+  emit() {
+    for (const listener of this.listeners) {
+      listener();
+    }
+  }
+};
+function errorMessage(error) {
+  return error instanceof Error ? error.message : String(error);
+}
+
+// src/treeProvider.ts
+var vscode2 = __toESM(require("vscode"));
+
+// src/viewModel.ts
+function sceneItemDescription(scene) {
+  if (scene.active) {
+    return "\u5F53\u524D";
+  }
+  return scene.disabled.length > 0 ? `\u5173\u95ED ${scene.disabled.length} \u9879` : void 0;
+}
+function sceneTooltipLines(scene) {
+  const lines = [scene.name, scene.active ? "\u72B6\u6001\uFF1A\u5F53\u524D\u573A\u666F" : "\u72B6\u6001\uFF1A\u672A\u6FC0\u6D3B"];
+  if (scene.disabled.length === 0) {
+    lines.push("\u5173\u95ED\u540D\u5355\uFF1A\u7A7A\uFF08\u5168\u90E8\u542F\u7528\uFF09");
+  } else {
+    lines.push(`\u5173\u95ED\u540D\u5355\uFF08${scene.disabled.length} \u9879\uFF09\uFF1A`);
+    lines.push(...scene.disabled.map((name) => `\xB7 ${name}`));
+  }
+  return lines;
+}
+function buildConflicts(catalog, projectSkills) {
+  if (!catalog) {
+    return [];
+  }
+  const globalByName = new Map(catalog.skills.map((skill) => [skill.name, skill]));
+  const conflicts = [];
+  for (const project of projectSkills) {
+    const global = globalByName.get(project.name);
+    if (!global) {
+      continue;
+    }
+    conflicts.push({
+      id: `scope:${project.name}`,
+      name: project.name,
+      summary: global.enabled ? "\u5168\u5C40\u4E0E\u9879\u76EE Skill \u540C\u540D\uFF0COpenCode \u8981\u6C42\u540D\u79F0\u552F\u4E00" : "\u5168\u5C40\u7248\u672C\u5DF2\u7981\u7528\uFF0C\u5F53\u524D\u9879\u76EE\u7684\u540C\u540D Skill \u4ECD\u7136\u542F\u7528",
+      sourcePaths: [global.location, ...project.sourcePaths]
+    });
+  }
+  for (const reconciliation of catalog.reconciliations) {
+    const location = reconciliation.quarantine_location ?? reconciliation.disabled_location;
+    conflicts.push({
+      id: `reconciliation:${reconciliation.name}:${location ?? reconciliation.action}`,
+      name: reconciliation.name,
+      summary: reconciliation.policy === "disabled-wins" ? "\u68C0\u6D4B\u5230\u91CD\u590D\u5B89\u88C5\uFF1B\u7981\u7528\u7248\u672C\u4F18\u5148\uFF0C\u65B0\u542F\u7528\u526F\u672C\u5DF2\u9694\u79BB" : `\u63A7\u5236\u5668\u5DF2\u6267\u884C ${reconciliation.action}`,
+      sourcePaths: [reconciliation.disabled_location, reconciliation.quarantine_location].filter(
+        (value) => typeof value === "string"
+      )
+    });
+  }
+  return conflicts.sort(
+    (left, right) => left.name === right.name ? left.id.localeCompare(right.id) : left.name.localeCompare(right.name)
+  );
+}
+
+// src/treeProvider.ts
+var SkillTreeProvider = class {
+  constructor(model) {
+    this.model = model;
+  }
+  model;
+  changed = new vscode2.EventEmitter();
+  onDidChangeTreeData = this.changed.event;
+  refresh() {
+    this.changed.fire(void 0);
+  }
+  getTreeItem(node) {
+    switch (node.kind) {
+      case "group":
+        return this.groupItem(node);
+      case "scenes":
+        return this.scenesRootItem();
+      case "scene":
+        return this.sceneItem(node.scene);
+      case "global":
+        return this.globalItem(node.skill);
+      case "project":
+        return this.projectItem(node.skill);
+      case "conflict":
+        return this.conflictItem(node.conflict);
+      case "empty":
+        return this.emptyItem();
+      case "error":
+        return this.errorItem();
+    }
+  }
+  getChildren(node) {
+    if (!node) {
+      return this.rootNodes();
+    }
+    if (node.kind === "scenes") {
+      return [...this.model.scenes?.scenes ?? []].sort(compareNames).map((scene) => ({ kind: "scene", scene }));
+    }
+    if (node.kind !== "group") {
+      return [];
+    }
+    const catalog = this.model.catalog;
+    switch (node.group) {
+      case "enabled":
+        return (catalog?.skills ?? []).filter((skill) => skill.enabled).sort(compareNames).map((skill) => ({ kind: "global", skill }));
+      case "disabled":
+        return (catalog?.skills ?? []).filter((skill) => !skill.enabled).sort(compareNames).map((skill) => ({ kind: "global", skill }));
+      case "project":
+        return [...this.model.projectSkills].sort(compareNames).map((skill) => ({ kind: "project", skill }));
+      case "conflict":
+        return buildConflicts(this.model.catalog, this.model.projectSkills).map((conflict) => ({
+          kind: "conflict",
+          conflict
+        }));
+    }
+  }
+  rootNodes() {
+    const result = [];
+    const catalog = this.model.catalog;
+    if (this.model.connectionError || !catalog) {
+      result.push({ kind: "error" });
+    }
+    const emptyCatalog = catalog?.skills.length === 0 && !this.model.connectionError;
+    if (emptyCatalog) {
+      result.push({ kind: "empty" });
+    }
+    if (this.model.scenes) {
+      result.push({ kind: "scenes" });
+    }
+    if (!emptyCatalog && catalog?.skills.length) {
+      result.push(
+        {
+          kind: "group",
+          group: "enabled",
+          count: catalog.skills.filter((skill) => skill.enabled).length
+        },
+        {
+          kind: "group",
+          group: "disabled",
+          count: catalog.skills.filter((skill) => !skill.enabled).length
+        }
+      );
+    }
+    if (this.model.projectSkills.length > 0) {
+      result.push({ kind: "group", group: "project", count: this.model.projectSkills.length });
+    }
+    const conflicts = buildConflicts(catalog, this.model.projectSkills);
+    if (conflicts.length > 0) {
+      result.push({ kind: "group", group: "conflict", count: conflicts.length });
+    }
+    return result;
+  }
+  groupItem(node) {
+    const labels = {
+      enabled: "\u5DF2\u542F\u7528",
+      disabled: "\u5DF2\u7981\u7528",
+      project: "\u9879\u76EE\u7EA7",
+      conflict: "\u51B2\u7A81"
+    };
+    const item = new vscode2.TreeItem(labels[node.group], vscode2.TreeItemCollapsibleState.Expanded);
+    item.id = `group:${node.group}`;
+    item.description = String(node.count);
+    item.contextValue = `skillPanel.group.${node.group}`;
+    return item;
+  }
+  scenesRootItem() {
+    const scenes = this.model.scenes;
+    const item = new vscode2.TreeItem("\u573A\u666F", vscode2.TreeItemCollapsibleState.Expanded);
+    item.id = "scenes";
+    item.description = scenes?.active;
+    item.contextValue = "skillPanel.scenes";
+    item.tooltip = linesTooltip([
+      "\u573A\u666F",
+      `\u5F53\u524D\uFF1A${scenes?.active ?? "\u672A\u77E5"}`,
+      ...(scenes?.scenes ?? []).map((scene) => scene.name)
+    ]);
+    item.accessibilityInformation = {
+      role: "treeitem",
+      label: `\u573A\u666F\uFF0C\u5F53\u524D\uFF1A${scenes?.active ?? "\u672A\u77E5"}`
+    };
+    return item;
+  }
+  sceneItem(scene) {
+    const pending = this.model.pendingSceneName === scene.name;
+    const item = new vscode2.TreeItem(scene.name, vscode2.TreeItemCollapsibleState.None);
+    item.id = `scene:${scene.name}`;
+    item.description = pending ? "\u5207\u6362\u4E2D\u2026" : sceneItemDescription(scene);
+    item.contextValue = pending ? "skillPanel.scene.pending" : scene.active ? "skillPanel.scene.active" : "skillPanel.scene";
+    item.iconPath = pending ? new vscode2.ThemeIcon("loading~spin") : scene.active ? new vscode2.ThemeIcon("check", new vscode2.ThemeColor("charts.green")) : new vscode2.ThemeIcon("circle-outline", new vscode2.ThemeColor("disabledForeground"));
+    item.tooltip = linesTooltip(sceneTooltipLines(scene));
+    item.accessibilityInformation = {
+      role: "button",
+      label: pending ? `${scene.name}\uFF0C\u6B63\u5728\u5207\u6362` : scene.active ? `${scene.name}\uFF0C\u5F53\u524D\u573A\u666F` : `${scene.name}\uFF0C\u70B9\u51FB\u5207\u6362\u5230\u8BE5\u573A\u666F`
+    };
+    if (!scene.active && !this.model.pendingName && !this.model.pendingSceneName && !this.model.refreshing && !this.model.connectionError) {
+      item.command = {
+        command: "skillPanel.activateScene",
+        title: "\u5207\u6362\u573A\u666F",
+        arguments: [scene.name]
+      };
+    }
+    return item;
+  }
+  globalItem(skill) {
+    const pending = this.model.pendingName === skill.name;
+    const item = new vscode2.TreeItem(skill.name, vscode2.TreeItemCollapsibleState.None);
+    item.id = `global:${skill.name}`;
+    item.description = pending ? "\u5207\u6362\u4E2D\u2026" : void 0;
+    item.contextValue = pending ? "skillPanel.global.pending" : "skillPanel.global";
+    item.iconPath = pending ? new vscode2.ThemeIcon("loading~spin") : skill.enabled ? new vscode2.ThemeIcon("circle-filled", new vscode2.ThemeColor("charts.green")) : new vscode2.ThemeIcon("circle-outline", new vscode2.ThemeColor("disabledForeground"));
+    item.tooltip = skillTooltip(skill);
+    item.accessibilityInformation = {
+      role: "button",
+      label: pending ? `${skill.name}\uFF0C\u6B63\u5728\u5207\u6362` : `${skill.name}\uFF0C${skill.enabled ? "\u5DF2\u542F\u7528\uFF0C\u70B9\u51FB\u7981\u7528" : "\u5DF2\u7981\u7528\uFF0C\u70B9\u51FB\u542F\u7528"}`
+    };
+    if (!this.model.pendingName && !this.model.refreshing && !this.model.connectionError) {
+      item.command = {
+        command: "skillPanel.toggleSkill",
+        title: skill.enabled ? "\u7981\u7528 Skill" : "\u542F\u7528 Skill",
+        arguments: [skill.name]
+      };
+    }
+    return item;
+  }
+  projectItem(skill) {
+    const item = new vscode2.TreeItem(skill.name, vscode2.TreeItemCollapsibleState.None);
+    item.id = `project:${skill.name}`;
+    item.contextValue = "skillPanel.project";
+    item.iconPath = new vscode2.ThemeIcon("circle-filled", new vscode2.ThemeColor("charts.blue"));
+    item.tooltip = projectTooltip(skill);
+    item.accessibilityInformation = {
+      role: "treeitem",
+      label: `${skill.name}\uFF0C\u9879\u76EE\u7EA7\uFF0C\u59CB\u7EC8\u542F\u7528`
+    };
+    return item;
+  }
+  conflictItem(conflict) {
+    const item = new vscode2.TreeItem(conflict.name, vscode2.TreeItemCollapsibleState.None);
+    item.id = `conflict:${conflict.id}`;
+    item.description = conflict.summary;
+    item.contextValue = "skillPanel.conflict";
+    item.iconPath = new vscode2.ThemeIcon(
+      "warning",
+      new vscode2.ThemeColor("problemsWarningIcon.foreground")
+    );
+    item.tooltip = linesTooltip([conflict.name, conflict.summary, ...conflict.sourcePaths]);
+    return item;
+  }
+  emptyItem() {
+    const item = new vscode2.TreeItem("\u672A\u53D1\u73B0\u5168\u5C40 Skills", vscode2.TreeItemCollapsibleState.None);
+    item.id = "status:empty";
+    item.description = "\u70B9\u51FB\u5237\u65B0";
+    item.iconPath = new vscode2.ThemeIcon("info");
+    item.tooltip = linesTooltip([
+      "\u672A\u53D1\u73B0\u5168\u5C40 Skills",
+      "\u542F\u7528\u76EE\u5F55\uFF1A/root/.config/opencode/skills",
+      "\u7981\u7528\u76EE\u5F55\uFF1A/root/.config/opencode/skills-disabled"
+    ]);
+    item.command = { command: "skillPanel.refresh", title: "\u5237\u65B0 Skills" };
+    return item;
+  }
+  errorItem() {
+    const item = new vscode2.TreeItem("\u65E0\u6CD5\u8FDE\u63A5 SkillPanel \u63A7\u5236\u5668", vscode2.TreeItemCollapsibleState.None);
+    item.id = "status:error";
+    item.description = "\u70B9\u51FB\u91CD\u8BD5";
+    item.iconPath = new vscode2.ThemeIcon(
+      "error",
+      new vscode2.ThemeColor("problemsErrorIcon.foreground")
+    );
+    item.tooltip = linesTooltip([
+      this.model.connectionError ?? "\u5C1A\u672A\u8BFB\u53D6\u63A7\u5236\u5668\u72B6\u6001",
+      "\u63A7\u5236\u5668\u5730\u5740\uFF1Ahttp://127.0.0.1:8787"
+    ]);
+    item.command = { command: "skillPanel.refresh", title: "\u5237\u65B0 Skills" };
+    return item;
+  }
+};
+function panelMessage(_model) {
+  return "\u5F00\u5173\u6210\u529F\u540E\uFF0C\u4ECE\u4E0B\u4E00\u8F6E\u5BF9\u8BDD\u5F00\u59CB\u751F\u6548";
+}
+function skillTooltip(skill) {
+  return linesTooltip([
+    skill.name,
+    skill.description || "\u65E0\u63CF\u8FF0",
+    `\u72B6\u6001\uFF1A${skill.enabled ? "\u5DF2\u542F\u7528" : "\u5DF2\u7981\u7528"}`,
+    `\u6765\u6E90\uFF1A${skill.location}`
+  ]);
+}
+function projectTooltip(skill) {
+  return linesTooltip([
+    skill.name,
+    skill.description,
+    "\u72B6\u6001\uFF1A\u9879\u76EE\u7EA7\uFF0C\u59CB\u7EC8\u542F\u7528",
+    ...skill.sourcePaths.map((source) => `\u6765\u6E90\uFF1A${source}`)
+  ]);
+}
+function linesTooltip(lines) {
+  const tooltip = new vscode2.MarkdownString();
+  tooltip.isTrusted = false;
+  tooltip.supportHtml = false;
+  lines.forEach((line, index) => {
+    if (index > 0) {
+      tooltip.appendMarkdown("\n\n");
+    }
+    tooltip.appendText(line);
+  });
+  return tooltip;
+}
+function compareNames(left, right) {
+  return left.name.localeCompare(right.name);
+}
+
+// src/extension.ts
+function activate(context) {
+  const controllerUrl = process.env.SKILLPANEL_CONTROLLER_URL ?? "http://127.0.0.1:8787";
+  const model = new SkillPanelModel(
+    new ControllerClient(controllerUrl),
+    new ProjectSkillScanner(),
+    {
+      warning: (message) => void vscode3.window.showWarningMessage(message),
+      error: (message) => void vscode3.window.showErrorMessage(message)
+    }
+  );
+  const provider = new SkillTreeProvider(model);
+  const treeView = vscode3.window.createTreeView("skillPanel.skills", {
+    treeDataProvider: provider,
+    showCollapseAll: false
+  });
+  const updateView = () => {
+    provider.refresh();
+    treeView.message = panelMessage(model);
+    void vscode3.commands.executeCommand(
+      "setContext",
+      "skillPanel.hasGlobalSkills",
+      (model.catalog?.skills.length ?? 0) > 0
+    );
+  };
+  context.subscriptions.push(
+    treeView,
+    model.onDidChange(updateView),
+    vscode3.commands.registerCommand("skillPanel.refresh", () => model.refresh()),
+    vscode3.commands.registerCommand(
+      "skillPanel.toggleSkill",
+      (name) => typeof name === "string" ? model.toggle(name) : void 0
+    ),
+    vscode3.commands.registerCommand(
+      "skillPanel.activateScene",
+      (name) => typeof name === "string" ? model.activateScene(name) : void 0
+    ),
+    vscode3.commands.registerCommand("skillPanel.createScene", () => promptCreateScene(model)),
+    vscode3.commands.registerCommand("skillPanel.renameScene", (target) => {
+      const name = sceneNameFrom(target);
+      return name === void 0 ? void 0 : promptRenameScene(model, name);
+    }),
+    vscode3.commands.registerCommand("skillPanel.deleteScene", (target) => {
+      const name = sceneNameFrom(target);
+      return name === void 0 ? void 0 : confirmDeleteScene(model, name);
+    })
+  );
+  updateView();
+  void model.refresh();
+  return {
+    model,
+    provider,
+    refresh: () => model.refresh()
+  };
+}
+function deactivate() {
+}
+function sceneNameFrom(target) {
+  if (typeof target === "string") {
+    return target;
+  }
+  if (target instanceof vscode3.TreeItem && typeof target.id === "string" && target.id.startsWith("scene:")) {
+    return target.id.slice("scene:".length);
+  }
+  return void 0;
+}
+function validateSceneName(model, value, original) {
+  const name = value.trim();
+  if (!name) {
+    return "\u573A\u666F\u540D\u79F0\u4E0D\u80FD\u4E3A\u7A7A";
+  }
+  if (name !== original && model.scenes?.scenes.some((scene) => scene.name === name)) {
+    return "\u5DF2\u5B58\u5728\u540C\u540D\u573A\u666F";
+  }
+  return void 0;
+}
+async function promptCreateScene(model) {
+  const name = await vscode3.window.showInputBox({
+    title: "\u65B0\u5EFA\u573A\u666F",
+    prompt: "\u521B\u5EFA\u540E\u7ACB\u5373\u5207\u6362\u5230\u8BE5\u573A\u666F\uFF0C\u5E76\u542F\u7528\u5168\u90E8 Skill",
+    placeHolder: "\u573A\u666F\u540D\u79F0",
+    validateInput: (value) => validateSceneName(model, value)
+  });
+  if (name === void 0) {
+    return;
+  }
+  await model.createScene(name.trim());
+}
+async function promptRenameScene(model, name) {
+  const newName = await vscode3.window.showInputBox({
+    title: "\u91CD\u547D\u540D\u573A\u666F",
+    prompt: `\u4E3A\u573A\u666F\u300C${name}\u300D\u8F93\u5165\u65B0\u540D\u79F0`,
+    value: name,
+    validateInput: (value) => validateSceneName(model, value, name)
+  });
+  if (newName === void 0) {
+    return;
+  }
+  const trimmed = newName.trim();
+  if (trimmed === name) {
+    return;
+  }
+  await model.renameScene(name, trimmed);
+}
+async function confirmDeleteScene(model, name) {
+  const active = model.scenes?.active === name;
+  const choice = await vscode3.window.showWarningMessage(
+    active ? `\u786E\u5B9A\u5220\u9664\u573A\u666F\u300C${name}\u300D\uFF1F\u5220\u9664\u5F53\u524D\u6FC0\u6D3B\u573A\u666F\u4F1A\u81EA\u52A8\u5207\u6362\u5230\u5176\u4ED6\u573A\u666F\u3002` : `\u786E\u5B9A\u5220\u9664\u573A\u666F\u300C${name}\u300D\uFF1F`,
+    { modal: true },
+    "\u5220\u9664"
+  );
+  if (choice !== "\u5220\u9664") {
+    return;
+  }
+  await model.deleteScene(name);
+}
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  activate,
+  deactivate
+});
 //# sourceMappingURL=extension.js.map

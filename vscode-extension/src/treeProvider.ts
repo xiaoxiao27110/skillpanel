@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import type { SkillPanelModel } from "./skillPanelModel";
-import type { ConflictItem, ControllerSkill, ProjectSkill } from "./types";
-import { buildConflicts } from "./viewModel";
+import type { ConflictItem, ControllerSkill, ProjectSkill, Scene } from "./types";
+import { buildConflicts, sceneItemDescription, sceneTooltipLines } from "./viewModel";
 
 type GroupKind = "enabled" | "disabled" | "project" | "conflict";
 
@@ -9,6 +9,15 @@ interface GroupNode {
   kind: "group";
   group: GroupKind;
   count: number;
+}
+
+interface ScenesNode {
+  kind: "scenes";
+}
+
+interface SceneNode {
+  kind: "scene";
+  scene: Scene;
 }
 
 interface GlobalNode {
@@ -30,7 +39,14 @@ interface StatusNode {
   kind: "empty" | "error";
 }
 
-export type SkillTreeNode = GroupNode | GlobalNode | ProjectNode | ConflictNode | StatusNode;
+export type SkillTreeNode =
+  | GroupNode
+  | ScenesNode
+  | SceneNode
+  | GlobalNode
+  | ProjectNode
+  | ConflictNode
+  | StatusNode;
 
 export class SkillTreeProvider implements vscode.TreeDataProvider<SkillTreeNode> {
   private readonly changed = new vscode.EventEmitter<SkillTreeNode | undefined>();
@@ -46,6 +62,10 @@ export class SkillTreeProvider implements vscode.TreeDataProvider<SkillTreeNode>
     switch (node.kind) {
       case "group":
         return this.groupItem(node);
+      case "scenes":
+        return this.scenesRootItem();
+      case "scene":
+        return this.sceneItem(node.scene);
       case "global":
         return this.globalItem(node.skill);
       case "project":
@@ -62,6 +82,11 @@ export class SkillTreeProvider implements vscode.TreeDataProvider<SkillTreeNode>
   getChildren(node?: SkillTreeNode): SkillTreeNode[] {
     if (!node) {
       return this.rootNodes();
+    }
+    if (node.kind === "scenes") {
+      return [...(this.model.scenes?.scenes ?? [])]
+        .sort(compareNames)
+        .map((scene) => ({ kind: "scene", scene }));
     }
     if (node.kind !== "group") {
       return [];
@@ -96,9 +121,14 @@ export class SkillTreeProvider implements vscode.TreeDataProvider<SkillTreeNode>
     if (this.model.connectionError || !catalog) {
       result.push({ kind: "error" });
     }
-    if (catalog?.skills.length === 0 && !this.model.connectionError) {
+    const emptyCatalog = catalog?.skills.length === 0 && !this.model.connectionError;
+    if (emptyCatalog) {
       result.push({ kind: "empty" });
-    } else if (catalog?.skills.length) {
+    }
+    if (this.model.scenes) {
+      result.push({ kind: "scenes" });
+    }
+    if (!emptyCatalog && catalog?.skills.length) {
       result.push(
         {
           kind: "group",
@@ -134,6 +164,64 @@ export class SkillTreeProvider implements vscode.TreeDataProvider<SkillTreeNode>
     item.id = `group:${node.group}`;
     item.description = String(node.count);
     item.contextValue = `skillPanel.group.${node.group}`;
+    return item;
+  }
+
+  private scenesRootItem(): vscode.TreeItem {
+    const scenes = this.model.scenes;
+    const item = new vscode.TreeItem("场景", vscode.TreeItemCollapsibleState.Expanded);
+    item.id = "scenes";
+    item.description = scenes?.active;
+    item.contextValue = "skillPanel.scenes";
+    item.tooltip = linesTooltip([
+      "场景",
+      `当前：${scenes?.active ?? "未知"}`,
+      ...(scenes?.scenes ?? []).map((scene) => scene.name)
+    ]);
+    item.accessibilityInformation = {
+      role: "treeitem",
+      label: `场景，当前：${scenes?.active ?? "未知"}`
+    };
+    return item;
+  }
+
+  private sceneItem(scene: Scene): vscode.TreeItem {
+    const pending = this.model.pendingSceneName === scene.name;
+    const item = new vscode.TreeItem(scene.name, vscode.TreeItemCollapsibleState.None);
+    item.id = `scene:${scene.name}`;
+    item.description = pending ? "切换中…" : sceneItemDescription(scene);
+    item.contextValue = pending
+      ? "skillPanel.scene.pending"
+      : scene.active
+        ? "skillPanel.scene.active"
+        : "skillPanel.scene";
+    item.iconPath = pending
+      ? new vscode.ThemeIcon("loading~spin")
+      : scene.active
+        ? new vscode.ThemeIcon("check", new vscode.ThemeColor("charts.green"))
+        : new vscode.ThemeIcon("circle-outline", new vscode.ThemeColor("disabledForeground"));
+    item.tooltip = linesTooltip(sceneTooltipLines(scene));
+    item.accessibilityInformation = {
+      role: "button",
+      label: pending
+        ? `${scene.name}，正在切换`
+        : scene.active
+          ? `${scene.name}，当前场景`
+          : `${scene.name}，点击切换到该场景`
+    };
+    if (
+      !scene.active &&
+      !this.model.pendingName &&
+      !this.model.pendingSceneName &&
+      !this.model.refreshing &&
+      !this.model.connectionError
+    ) {
+      item.command = {
+        command: "skillPanel.activateScene",
+        title: "切换场景",
+        arguments: [scene.name]
+      };
+    }
     return item;
   }
 
