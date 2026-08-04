@@ -57,7 +57,7 @@ Iterate until the user approves the breakdown.
 
 Publish the approved tickets: write one file per ticket under `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` in dependency order (blockers first). Each file's "Blocked by" lists the numbers/titles it depends on. Use the per-ticket file template below — one ticket per file, never a single combined file.
 
-Work the **frontier**: any ticket whose blockers are all done. For a purely linear chain that means top to bottom.
+Hand the ticket directory to `/implement` — it works the **frontier** (any ticket whose blockers are all done; for a purely linear chain, top to bottom), orchestrating one sub-agent per ticket.
 
 Do NOT close or modify any parent issue.
 
