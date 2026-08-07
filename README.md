@@ -1,15 +1,16 @@
-# SkillPanel 双 Agent Skill 热切换 PoC
+# SkillPanel 三 Agent Skill 热切换 PoC
 
-这是一个 Ubuntu 22.04 单容器验证环境，用来验证 OpenCode 与 Hermes 共用同一套 skill 时，能否在不重启两个主进程的前提下，于同一 session 的下一轮对话看到开关结果。
+这是一个 Ubuntu 22.04 单容器验证环境，用来验证 OpenCode、Hermes 与 Codex 共用同一套 skill 时，能否在不重启主进程的前提下看到开关结果（OpenCode 与 Hermes 在同一 session 的下一轮对话生效，Codex 在下次会话生效）。
 
 本仓库包含验证环境、最小控制面和 VS Code workspace 插件。实际运行结果、版本对比和延迟数据应记录在 `REPORT.md`；本文只描述实现、接口和复现方法，不预先声明集成验证已经通过。
 
 ## 架构
 
-容器内由 Supervisor 长期运行四个进程：
+容器内由 Supervisor 长期运行五个进程：
 
 - OpenCode server：`0.0.0.0:4096`
 - Hermes Dashboard（带完整 Web UI）：`0.0.0.0:9119`
+- Codex CLI：交互式 TUI，没有常驻 HTTP 端口，由 Supervisor 以前台方式托管
 - SkillPanel 控制器：`0.0.0.0:8787`
 - code-server：`0.0.0.0:8080`
 
@@ -31,6 +32,7 @@ SkillPanel controller :8787
         |       +-- 裸 TUI：随机 127.0.0.1 端口
         |
         +-- Hermes :9119 下一轮读取 revision、清缓存并重扫
+        +-- Codex TUI 无热刷新通道，下次会话原生扫描共享池
         |
         v
 ~/.agents/skills
@@ -135,9 +137,11 @@ Compose 将文件只读挂载为 `/run/secrets/opencode-auth.json:ro`，不会�
 
 可以通过 `SKILLPANEL_OPENCODE_PROVIDER`、`SKILLPANEL_HERMES_PROVIDER` 和 `SKILLPANEL_MODEL` 覆盖，但当前 Hermes 启动脚本固定导出 `MINIMAX_CN_API_KEY`，因此更换为非 MiniMax provider 需要同步调整启动脚本。
 
+Codex 的配置和 session 数据持久化在 `codex-home` volume（`/root/.codex`）。entrypoint 只创建该目录，不向 Codex 注入任何凭据；首次使用需自行 `docker exec -it skillpanel-poc codex login`，或把已登录的 `~/.codex` 内容预置进 volume。
+
 ## 构建与启动
 
-默认组合是 OpenCode 1.17.12、Hermes 0.18.2、code-server 4.121.0（Code 1.121.0）与 SkillPanel 0.1.0：
+默认组合是 OpenCode 1.17.12、Hermes 0.18.2、Codex（`CODEX_VERSION` build arg，当前默认 `latest` 占位，未固定版本）、code-server 4.121.0（Code 1.121.0）与 SkillPanel 0.1.0：
 
 ```bash
 docker compose config
@@ -154,7 +158,7 @@ curl -fsS http://127.0.0.1:4096/global/health | jq
 curl -fsS http://127.0.0.1:8080/healthz | jq
 ```
 
-控制器健康响应包含当前 revision、skill 数量和三个进程 PID。Supervisor 仍在启动时，`ok` 可能暂时为 `false`。
+控制器健康响应包含当前 revision、skill 数量和四个进程 PID。Supervisor 仍在启动时，`ok` 可能暂时为 `false`。
 
 Hermes dashboard 默认 Basic Auth 是 `skillpanel / skillpanel-dev`。未登录访问 `http://127.0.0.1:9119/` 应进入 `/login`；出现 500 视为 UI smoke 失败。启动共享或长期环境前必须覆盖：
 
@@ -194,6 +198,140 @@ docker compose down
 ```
 
 不要使用 `docker compose down -v`，除非明确要删除 OpenCode、Hermes、skill 开关状态和所有 named volumes。
+
+## 集成到自己的 Docker 镜像
+
+本节描述的是集成形态：把 SkillPanel 的控制面装进自有镜像（自带 entrypoint、不用 Supervisor、三个 agent 自行拉起）。本仓库的 PoC 镜像仍是参考实现；集成形态未在 CI 中验证，接入后应跑 `tests/` 里的对应冒烟（至少 `tests/integration.py --cycles 2`）确认。
+
+### 工件清单
+
+| 工件 | 作用 |
+| ---- | ---- |
+| `src/controller.py` | 控制面本体：GET/PUT API、原子移动、revision 提交、OpenCode 刷新校验 |
+| `src/bootstrap_config.py` | 启动期一次性写入 opencode.json 模型配置和 hermes `skills.external_dirs` |
+| `src/skillpanel_hot_reload.py` | Hermes 每轮 revision 检查的 hook 实现，被补丁调用 |
+| `docker/opencode_launcher.py` | `opencode` 透明启动器：TUI runtime 登记，controller 热刷新的前提 |
+| `docker/start-controller.sh` 等启动脚本 | 参考实现；自有 entrypoint 可只借鉴其中的命令行 |
+| `patches/hermes-*.patch` | 三个 Hermes 补丁：turn revision（热刷新）、basic-auth 登录路由、内置 TUI |
+| `vscode-extension/skill-panel.vsix` | 插件产物，由 `npm run package` 生成在仓库 `vscode-extension/` 下（不在 `dist/`，`dist/` 只有 esbuild 的 `extension.js`）；PoC 镜像内位于 `/opt/skillpanel/vscode-extension/skill-panel.vsix` |
+| `fixtures/skills/`（可选） | canary-alpha / canary-beta，冒烟测试用 |
+| `docker/scenes.seed.json`（可选） | 预置场景 seed，见 `SKILLPANEL_SCENES_SEED` |
+
+### controller 运行依赖
+
+PoC 用 python3.12 运行 controller（代码用到 3.10+ 的类型语法），pip 依赖为 `fastapi`、`uvicorn`、`pydantic`、`PyYAML`。PoC 镜像没有单独安装它们，而是随 `hermes-agent[web,pty]` 传递装入；自有镜像应显式安装这四个包。`bootstrap_config.py` 还需要 `PyYAML`。
+
+### 环境变量
+
+路径类默认值在 controller 内由 `Path.home()` 从 `$HOME` 派生；容器以 root 运行时即 `/root/...`。`bootstrap_config.py` 例外：它用 `os.environ["SKILLPANEL_ENABLED_DIR"]` 强制读取，运行前必须显式设置。
+
+| 变量 | 默认值 | 作用 |
+| ---- | ---- | ---- |
+| `SKILLPANEL_ENABLED_DIR` | `$HOME/.agents/skills` | 共享池启用目录 |
+| `SKILLPANEL_DISABLED_DIR` | `$HOME/.agents/skills-disabled` | 共享池停用目录 |
+| `SKILLPANEL_STATE_FILE` | `/data/skill-state.json` | skill revision 状态；锁文件为同目录 `.lock` |
+| `SKILLPANEL_SCENES_FILE` | `/data/scenes.json` | 场景状态（独立 revision） |
+| `SKILLPANEL_SCENES_SEED` | `/opt/skillpanel/docker/scenes.seed.json` | entrypoint 首次启动时复制的场景 seed；文件缺失或已存在则不动作 |
+| `SKILLPANEL_OPENCODE_URL` | `http://127.0.0.1:4096` | OpenCode server 基址，用于 `/global/dispose` 和 catalog 校验 |
+| `SKILLPANEL_OPENCODE_DIRECTORY` | `/workspace` | catalog 校验使用的工作目录 |
+| `SKILLPANEL_OPENCODE_TUI_DIR` | `/run/skillpanel-opencode-tuis` | 裸 TUI runtime 登记目录，controller 只读 |
+| `HERMES_SKILL_STATE_FILE` | 无 | 指向状态文件；未设置时 hermes hook 完全不生效（无 next-turn 刷新） |
+| `HERMES_HOME` | `$HOME/.hermes`（PoC 镜像 ENV） | Hermes 配置和 session 根 |
+| `SKILLPANEL_CONTROLLER_URL` | `http://127.0.0.1:8787` | 插件侧变量：插件连接的控制器基址 |
+
+`bootstrap_config.py` 另读 `SKILLPANEL_MODEL`、`SKILLPANEL_OPENCODE_PROVIDER`、`SKILLPANEL_HERMES_PROVIDER` 写入两个 agent 的模型配置。注意它写死的两个目标路径是 `/root/.config/opencode/opencode.json` 和 `/root/.hermes/config.yaml`（外加 touch `/root/.hermes/.no-bundled-skills`），非 root 运行时需先调整。
+
+### 硬性约束
+
+- 启用和停用目录必须在同一文件系统：切换是 `os.rename()` 整目录原子移动，跨设备会直接 `OSError`，PUT 以 507 失败回滚。把两目录的公共父目录（如 `$HOME/.agents`）挂成同一个 volume 即可满足。
+- 状态文件所在目录对 controller 进程用户可写：状态提交是临时文件 + `fsync` + `os.replace()` + 目录 `fsync`，目录不可写时提交失败并回滚。
+- skill 目录命名规则和 frontmatter 要求见下文「Skill 控制 API」的 `GET /skills` 一节，不满足的目录会被扫描忽略。
+
+### 启动顺序（自有 entrypoint）
+
+1. `bootstrap_config.py` 必须在 Hermes **首次启动前**执行：它把 `SKILLPANEL_ENABLED_DIR` 并入 hermes `config.yaml` 的 `skills.external_dirs`，Hermes 之后才会扫描共享池；它同时写入 opencode.json 的 `model` / `small_model`（保留已有配置的其他键，重复执行幂等）。opencode 和 codex 原生扫描 `$HOME/.agents/skills`，无需注入。
+2. controller 只需在插件或客户端连接前就绪，与 agent 启动无先后依赖。
+3. entrypoint 片段示例：
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+export HOME="${HOME:-/root}"
+export SKILLPANEL_ENABLED_DIR="${HOME}/.agents/skills"
+export SKILLPANEL_DISABLED_DIR="${HOME}/.agents/skills-disabled"
+export SKILLPANEL_STATE_FILE=/data/skill-state.json
+export SKILLPANEL_SCENES_FILE=/data/scenes.json
+export HERMES_SKILL_STATE_FILE="${SKILLPANEL_STATE_FILE}"
+
+mkdir -p "${SKILLPANEL_ENABLED_DIR}" "${SKILLPANEL_DISABLED_DIR}" /data
+
+# Hermes 首次启动前注入 external_dirs 与模型配置(PYTHONPATH 指向 src/)
+python3 -m bootstrap_config
+
+# 后台拉起 controller 并写 pid(命令行与 docker/start-controller.sh 一致)
+python3 -m uvicorn controller:app --app-dir /opt/skillpanel/src \
+  --host 0.0.0.0 --port 8787 &
+echo $! > /run/controller.pid
+
+exec /your/original/main-program
+```
+
+### 各 agent 接入要点
+
+| Agent | 共享池接入 | 生效语义 |
+| ----- | ---- | ---- |
+| OpenCode | 原生扫描 `$HOME/.agents/skills`，零配置 | server 模式（`opencode serve`）由 controller 调 `/global/dispose` 热刷新；裸 TUI 必须用 `docker/opencode_launcher.py` 包装启动才会登记 runtime，否则 controller 找不到它，只能重启进程生效 |
+| Hermes | `bootstrap_config.py` 注入 `external_dirs` | build 期必须应用 `patches/` 三个补丁且 `HERMES_SKILL_STATE_FILE` 指向状态文件，才有 next-turn 热刷新；补丁针对 0.18.2，版本不匹配时 `patch` 失败应视为构建失败 |
+| Codex | 原生扫描 `$HOME/.agents/skills`，零配置 | 无热刷新通道，下次会话生效（toggle 响应的 `codex_refresh: "next-session"`） |
+
+### code-server 侧
+
+启动时安装 VSIX（与 PoC 的 `docker/start-code-server.sh` 相同）：
+
+```bash
+code-server --install-extension /opt/skillpanel/vscode-extension/skill-panel.vsix --force
+```
+
+controller 不在 `127.0.0.1:8787` 时，在 code-server 进程环境中设置 `SKILLPANEL_CONTROLLER_URL`（插件在 extension host 进程环境读取，见 `vscode-extension/src/extension.ts:14`）。
+
+### 最小 Dockerfile 片段
+
+只是片段，不是完整镜像；agent 安装步骤从略，hermes 补丁步骤不可省：
+
+```dockerfile
+FROM your-own-image
+
+# controller 运行依赖(PoC 用 python3.12)
+RUN pip install --no-cache-dir fastapi uvicorn pydantic pyyaml
+
+WORKDIR /opt/skillpanel
+COPY src/ /opt/skillpanel/src/
+COPY docker/ /opt/skillpanel/docker/
+COPY fixtures/ /opt/skillpanel/fixtures/
+COPY patches/ /opt/skillpanel/patches/
+COPY vscode-extension/skill-panel.vsix /opt/skillpanel/vscode-extension/skill-panel.vsix
+
+ENV PYTHONPATH="/opt/skillpanel/src" \
+    HOME="/root" \
+    HERMES_HOME="${HOME}/.hermes" \
+    HERMES_SKILL_STATE_FILE="/data/skill-state.json" \
+    SKILLPANEL_ENABLED_DIR="${HOME}/.agents/skills" \
+    SKILLPANEL_DISABLED_DIR="${HOME}/.agents/skills-disabled" \
+    SKILLPANEL_STATE_FILE="/data/skill-state.json" \
+    SKILLPANEL_SCENES_FILE="/data/scenes.json" \
+    SKILLPANEL_OPENCODE_URL="http://127.0.0.1:4096"
+
+# Hermes 补丁针对 0.18.2;patch 失败必须中断构建
+RUN HERMES_SITE="$(python3 -c 'import pathlib, agent; print(pathlib.Path(agent.__file__).parent.parent)')" \
+    && cd "${HERMES_SITE}" \
+    && patch -p1 < /opt/skillpanel/patches/hermes-turn-revision.patch \
+    && patch -p1 < /opt/skillpanel/patches/hermes-basic-auth-login.patch \
+    && patch -p1 < /opt/skillpanel/patches/hermes-bundled-tui.patch
+
+# opencode / codex 的安装从略:opencode 用 launcher 替换原生入口,
+# codex 参照本仓库 Dockerfile 的 codex-installer 阶段(npm 全局安装 @openai/codex)
+```
 
 ## Skill 控制 API
 
@@ -252,9 +390,10 @@ curl -fsS -X PUT \
 - `changed`：目录是否真的发生移动。
 - `revision`：成功提交后的 revision。
 - `opencode_skills`：OpenCode dispose 后重新扫描到的名称。
-- `pids`：三个当前进程 PID。
+- `pids`：四个当前进程 PID（opencode、hermes、codex、controller）。
 - `latency_ms`：控制器处理耗时。
 - `hermes_refresh: "next-turn"`：仅状态实际变化时出现，表示 Hermes 会在下一轮检查 revision。
+- `codex_refresh: "next-session"`：仅状态实际变化时出现，表示 Codex 在下次会话扫描到新的共享池状态。
 
 请求目标状态与当前状态相同时是幂等操作：控制器仍会刷新并校验 OpenCode，但 `changed` 为 `false`，revision 不增加。
 
@@ -454,7 +593,7 @@ OPENCODE_VERSION=1.17.12 HERMES_VERSION=0.18.2 \
 - OpenCode Supervisor server 和控制器当前没有 HTTP 鉴权。虽然宿主端口只绑定 `127.0.0.1`，同一 Docker network 内的容器仍能访问它们；不要把端口改为公网绑定。直接 TUI runtime 只监听容器内部随机 loopback 端口，也不得改为外部地址。
 - Hermes 有 Basic Auth，但 Compose 默认密码只适合本机 PoC，必须在共享环境覆盖。
 - auth 文件是只读 bind mount，也不会进入镜像；但 Hermes key 存在于 Hermes 进程环境中，容器 root、Docker daemon 管理者以及有 `docker exec` 权限的人仍可读取。只读挂载不等于对容器管理员保密。
-- 控制器进程以 `skillpanel` 用户运行；OpenCode 和 Hermes 当前以 root 运行。该隔离只限制普通控制器文件权限，不是容器内强安全边界。
+- 控制器进程以 `skillpanel` 用户运行；OpenCode、Hermes 和 Codex 当前以 root 运行。该隔离只限制普通控制器文件权限，不是容器内强安全边界。
 - 这是全局共享开关，不支持按用户、workspace、session 或 Agent 独立启用。
 - 开关语义以“下一轮”为边界。已经开始的 LLM/tool 调用不会撤销，也没有为目录移动和 Hermes 新一轮之间实现全局 quiescence 锁；必须在两轮之间切换。
 - OpenCode 使用 `/global/dispose`，会分别释放 Supervisor server 和每个已登记直接 TUI runtime 内的所有 workspace instance，而不仅是当前 `/workspace`。它适合单容器 PoC，但高并发产品应评估更细粒度且有完成屏障的 reload 协议。
