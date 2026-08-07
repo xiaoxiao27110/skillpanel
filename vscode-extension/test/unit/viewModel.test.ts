@@ -17,7 +17,7 @@ const catalog: SkillCatalog = {
       quarantine_location: "/disabled/.skillpanel-conflicts/gamma/1"
     }
   ],
-  pids: { opencode: 1, hermes: 2, controller: 3 }
+  pids: { opencode: 1, hermes: 2, codex: 4, controller: 3 }
 };
 
 suite("buildConflicts", () => {

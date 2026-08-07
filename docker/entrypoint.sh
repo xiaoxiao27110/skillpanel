@@ -44,6 +44,8 @@ enabled="${SKILLPANEL_ENABLED_DIR}"
 disabled="${SKILLPANEL_DISABLED_DIR}"
 mkdir -p "${enabled}" "${disabled}"
 
+mkdir -p /root/.codex
+
 for fixture in /opt/skillpanel/fixtures/skills/*; do
   name="$(basename "${fixture}")"
   if [[ ! -e "${enabled}/${name}" && ! -e "${disabled}/${name}" ]]; then

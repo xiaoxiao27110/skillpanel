@@ -16,6 +16,7 @@ export interface Reconciliation {
 export interface ProcessIds {
   opencode: number | null;
   hermes: number | null;
+  codex: number | null;
   controller: number | null;
 }
 
@@ -37,6 +38,7 @@ export interface ToggleResult {
   pids: ProcessIds;
   latency_ms: number;
   hermes_refresh?: "next-turn";
+  codex_refresh?: "next-session";
   active_scene: string;
   scenes_revision: number;
 }

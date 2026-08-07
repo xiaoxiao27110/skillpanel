@@ -20,7 +20,7 @@ function catalog() {
       }
     ],
     reconciliations: [],
-    pids: { opencode: 10, hermes: 11, controller: 12 }
+    pids: { opencode: 10, hermes: 11, codex: 13, controller: 12 }
   };
 }
 
@@ -48,7 +48,7 @@ suite("ControllerClient", () => {
         reconciliations: [],
         hermes_refresh: "next-turn",
         opencode_skills: [],
-        pids: { opencode: 10, hermes: 11, controller: 12 },
+        pids: { opencode: 10, hermes: 11, codex: 13, controller: 12 },
         latency_ms: 12.5,
         active_scene: "默认",
         scenes_revision: 3
@@ -148,7 +148,7 @@ function sceneCatalog() {
       { name: "默认", disabled: [], active: true },
       { name: "写作", disabled: ["pdf", "docx"], active: false }
     ],
-    pids: { opencode: 10, hermes: 11, controller: 12 }
+    pids: { opencode: 10, hermes: 11, codex: 13, controller: 12 }
   };
 }
 

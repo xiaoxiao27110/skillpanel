@@ -8,21 +8,30 @@ RUN npm ci
 COPY vscode-extension/ ./
 RUN npm run package
 
+FROM node:24-bookworm-slim AS codex-installer
+
+# TODO: pin a verified Codex CLI release before shipping; "latest" is a
+# placeholder so the build always tracks upstream for now.
+ARG CODEX_VERSION=latest
+RUN npm install -g "@openai/codex@${CODEX_VERSION}"
+
 FROM ubuntu:22.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG OPENCODE_VERSION=1.17.12
 ARG HERMES_VERSION=0.18.2
+ARG CODEX_VERSION=latest
 ARG CODE_SERVER_VERSION=4.121.0
 ARG TARGETARCH
 
 ENV PATH="/usr/local/bin:/root/.opencode/bin:/opt/hermes/bin:${PATH}" \
     PYTHONPATH="/opt/skillpanel/src" \
+    HOME="/root" \
     HERMES_HOME="/root/.hermes" \
     HERMES_SKIP_NODE_BOOTSTRAP="1" \
     HERMES_SKILL_STATE_FILE="/data/skill-state.json" \
-    SKILLPANEL_ENABLED_DIR="/root/.config/opencode/skills" \
-    SKILLPANEL_DISABLED_DIR="/root/.config/opencode/skills-disabled" \
+    SKILLPANEL_ENABLED_DIR="${HOME}/.agents/skills" \
+    SKILLPANEL_DISABLED_DIR="${HOME}/.agents/skills-disabled" \
     SKILLPANEL_STATE_FILE="/data/skill-state.json" \
     SKILLPANEL_SCENES_FILE="/data/scenes.json" \
     SKILLPANEL_OPENCODE_URL="http://127.0.0.1:4096"
@@ -78,6 +87,12 @@ RUN python3.12 -m venv /opt/hermes \
 # image does not otherwise need npm or the builder's dependency tree.
 COPY --from=extension-builder /usr/local/bin/node /usr/local/bin/node
 RUN node --version | grep -E '^v24\.'
+
+# Codex CLI (OpenAI). entrypoint.sh links /root/.codex/skills to the shared
+# skill pool; toggles take effect on the next Codex session.
+COPY --from=codex-installer /usr/local/bin/codex /usr/local/bin/codex
+COPY --from=codex-installer /usr/local/lib/node_modules/@openai/codex /usr/local/lib/node_modules/@openai/codex
+RUN codex --version
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ripgrep \

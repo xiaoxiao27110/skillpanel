@@ -286,8 +286,8 @@ export class SkillTreeProvider implements vscode.TreeDataProvider<SkillTreeNode>
     item.iconPath = new vscode.ThemeIcon("info");
     item.tooltip = linesTooltip([
       "未发现全局 Skills",
-      "启用目录：/root/.config/opencode/skills",
-      "禁用目录：/root/.config/opencode/skills-disabled"
+      "启用目录（共享池，opencode / hermes / codex 共用）：~/.agents/skills",
+      "禁用目录（共享池）：~/.agents/skills-disabled"
     ]);
     item.command = { command: "skillPanel.refresh", title: "刷新 Skills" };
     return item;

@@ -493,12 +493,12 @@ def main():
     parser.add_argument("--skill", default=CANARY_SKILL)
     parser.add_argument(
         "--enabled-dir",
-        default=os.getenv("SKILLPANEL_ENABLED_DIR", "/root/.config/opencode/skills"),
+        default=os.getenv("SKILLPANEL_ENABLED_DIR", os.path.expanduser("~/.agents/skills")),
     )
     parser.add_argument(
         "--disabled-dir",
         default=os.getenv(
-            "SKILLPANEL_DISABLED_DIR", "/root/.config/opencode/skills-disabled"
+            "SKILLPANEL_DISABLED_DIR", os.path.expanduser("~/.agents/skills-disabled")
         ),
     )
     parser.add_argument(

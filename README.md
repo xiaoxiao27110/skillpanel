@@ -33,15 +33,15 @@ SkillPanel controller :8787
         +-- Hermes :9119 下一轮读取 revision、清缓存并重扫
         |
         v
-/root/.config/opencode/skills
+~/.agents/skills
 ```
 
 开关使用两个同文件系统目录：
 
-- 启用：`/root/.config/opencode/skills`
-- 禁用：`/root/.config/opencode/skills-disabled`
+- 启用：`~/.agents/skills`
+- 禁用：`~/.agents/skills-disabled`
 
-控制器用 `os.rename()` 移动整个 skill 包，因此 `SKILL.md`、`scripts/`、`references/`、`assets/` 会一起切换。两个目录都位于 `opencode-config` named volume 内，这是原子移动成立的必要条件。
+控制器用 `os.rename()` 移动整个 skill 包，因此 `SKILL.md`、`scripts/`、`references/`、`assets/` 会一起切换。两个目录都位于 `agents-home` named volume 内，这是原子移动成立的必要条件。
 
 状态保存在 `/data/skill-state.json`。状态文件通过临时文件、文件 `fsync`、`os.replace()` 和目录 `fsync` 提交；控制器与 TUI 启动器共用 `/data/skill-state.lock`，把扫描、写入和新 runtime 的启动登记串行化。
 
@@ -82,9 +82,11 @@ Hermes 0.18.2 在构建镜像时应用 `patches/hermes-turn-revision.patch`。�
 
 | Named volume         | 容器路径                                 | 内容                                                    |
 | -------------------- | ---------------------------------------- | ------------------------------------------------------- |
-| `opencode-config`  | `/root/.config/opencode`               | OpenCode 配置、启用和禁用 skill                         |
+| `opencode-config`  | `/root/.config/opencode`               | OpenCode 配置                                             |
 | `opencode-state`   | `/root/.local/share/opencode`          | OpenCode 持久状态；auth 路径指向 tmpfs 中的最小凭据文件 |
+| `agents-home`      | `/root/.agents`(即 `$HOME/.agents`) | 共享 skill 池：启用和禁用目录                             |
 | `hermes-home`      | `/root/.hermes`                        | Hermes 配置和 session 数据                              |
+| `codex-home`       | `/root/.codex`                         | Codex 配置和 session 数据                               |
 | `code-server-data` | `/home/coder/.local/share/code-server` | code-server 用户状态和已安装 VSIX                       |
 | `skillpanel-state` | `/data`                                | revision 状态和控制锁                                   |
 
@@ -215,12 +217,13 @@ curl -fsS http://127.0.0.1:8787/skills | jq
       "name": "canary-alpha",
       "description": "...",
       "enabled": true,
-      "location": "/root/.config/opencode/skills/canary-alpha"
+      "location": "/root/.agents/skills/canary-alpha"
     }
   ],
   "pids": {
     "opencode": 0,
     "hermes": 0,
+    "codex": 0,
     "controller": 0
   }
 }
@@ -287,7 +290,7 @@ VS Code 客户端遇到 `409` 时应重新 `GET /skills`，向用户展示最新
 
 ```bash
 docker cp "$HOME/.config/opencode/skills/." \
-  skillpanel-poc:/root/.config/opencode/skills/
+  skillpanel-poc:/root/.agents/skills/
 
 # reconcile 目录、刷新 OpenCode 并提交新 revision，供 Hermes 下一轮识别
 curl -fsS http://127.0.0.1:8787/skills | jq

@@ -40,8 +40,8 @@ Model:           MiniMax-M2.7
 ### 共享目录
 
 ```text
-Enabled:  /root/.config/opencode/skills
-Disabled: /root/.config/opencode/skills-disabled
+Enabled:  ~/.agents/skills
+Disabled: ~/.agents/skills-disabled
 ```
 
 Hermes 的 `skills.external_dirs` 指向 enabled 目录。

@@ -5,6 +5,7 @@ services:
       args:
         OPENCODE_VERSION: ${OPENCODE_VERSION:-1.17.12}
         HERMES_VERSION: ${HERMES_VERSION:-0.18.2}
+        CODEX_VERSION: ${CODEX_VERSION:-latest}
     image: skillpanel-poc:${OPENCODE_VERSION:-1.17.12}
     container_name: skillpanel-poc
     restart: unless-stopped
@@ -28,13 +29,17 @@ services:
       - .:/workspace
       - opencode-config:/root/.config/opencode
       - opencode-state:/root/.local/share/opencode
+      - agents-home:/root/.agents
       - hermes-home:/root/.hermes
+      - codex-home:/root/.codex
       - code-server-data:/home/coder/.local/share/code-server
       - skillpanel-state:/data
 
 volumes:
   opencode-config:
   opencode-state:
+  agents-home:
   hermes-home:
+  codex-home:
   code-server-data:
   skillpanel-state:

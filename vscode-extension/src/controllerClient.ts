@@ -187,6 +187,10 @@ function parseToggleResult(value: unknown): ToggleResult {
   if (refresh !== undefined && refresh !== "next-turn") {
     throw new ControllerError("Controller returned an invalid hermes_refresh value");
   }
+  const codexRefresh = data.codex_refresh;
+  if (codexRefresh !== undefined && codexRefresh !== "next-session") {
+    throw new ControllerError("Controller returned an invalid codex_refresh value");
+  }
   return {
     ok: requireBoolean(data.ok, "toggle.ok"),
     changed: requireBoolean(data.changed, "toggle.changed"),
@@ -203,6 +207,7 @@ function parseToggleResult(value: unknown): ToggleResult {
     pids: parsePids(data.pids),
     latency_ms: requireNumber(data.latency_ms, "toggle.latency_ms"),
     hermes_refresh: refresh,
+    codex_refresh: codexRefresh,
     active_scene: requireString(data.active_scene, "toggle.active_scene"),
     scenes_revision: requireInteger(data.scenes_revision, "toggle.scenes_revision")
   };
@@ -281,6 +286,7 @@ function parsePids(value: unknown): ProcessIds {
   return {
     opencode: optionalInteger(data.opencode, "pids.opencode"),
     hermes: optionalInteger(data.hermes, "pids.hermes"),
+    codex: optionalInteger(data.codex, "pids.codex"),
     controller: optionalInteger(data.controller, "pids.controller")
   };
 }

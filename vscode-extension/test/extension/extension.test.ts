@@ -22,7 +22,7 @@ function sceneCatalog() {
       { name: "默认", disabled: [], active: true },
       { name: "写作", disabled: ["global-only"], active: false }
     ],
-    pids: { opencode: 10, hermes: 11, controller: 12 }
+    pids: { opencode: 10, hermes: 11, codex: 13, controller: 12 }
   };
 }
 
@@ -52,7 +52,7 @@ function catalog() {
         quarantine_location: "/disabled/.skillpanel-conflicts/quarantined/1"
       }
     ],
-    pids: { opencode: 10, hermes: 11, controller: 12 }
+    pids: { opencode: 10, hermes: 11, codex: 13, controller: 12 }
   };
 }
 
@@ -268,8 +268,8 @@ suite("SkillPanel extension", () => {
       assert.equal(empty.id, "status:empty");
       assert.equal(empty.command?.command, "skillPanel.refresh");
       const emptyTooltip = empty.tooltip as vscode.MarkdownString;
-      assert.match(emptyTooltip.value, /\/root\/\.config\/opencode\/skills/);
-      assert.match(emptyTooltip.value, /\/root\/\.config\/opencode\/skills-disabled/);
+      assert.match(emptyTooltip.value, /~\/\.agents\/skills/);
+      assert.match(emptyTooltip.value, /~\/\.agents\/skills-disabled/);
 
       api.model.catalog = undefined;
       api.model.connectionError = "offline";

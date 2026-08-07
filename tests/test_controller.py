@@ -51,6 +51,12 @@ class ControllerTests(unittest.TestCase):
             ):
                 self.assertIsNone(self.controller._read_pid("opencode"))
 
+    def test_pids_includes_all_managed_processes(self):
+        self.assertEqual(
+            set(self.controller._pids()),
+            {"opencode", "hermes", "codex", "controller"},
+        )
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         root = Path(self.tmp.name)
@@ -125,6 +131,7 @@ class ControllerTests(unittest.TestCase):
         disabled = self.controller.toggle_skill("canary-alpha", request)
         self.assertTrue(disabled["changed"])
         self.assertEqual(disabled["revision"], 1)
+        self.assertEqual(disabled["codex_refresh"], "next-session")
         self.assertTrue((self.disabled / "canary-alpha" / "SKILL.md").is_file())
 
         enabled = self.controller.toggle_skill(

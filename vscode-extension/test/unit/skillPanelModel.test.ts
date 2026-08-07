@@ -16,7 +16,7 @@ function makeCatalog(revision: number, enabled: boolean): SkillCatalog {
       { name: "alpha", description: "Alpha", enabled, location: `/skills/${String(enabled)}/alpha` }
     ],
     reconciliations: [],
-    pids: { opencode: 1, hermes: 2, controller: 3 }
+    pids: { opencode: 1, hermes: 2, codex: 4, controller: 3 }
   };
 }
 
@@ -29,9 +29,10 @@ function toggleResult(revision: number, enabled: boolean): ToggleResult {
     revision,
     reconciliations: [],
     opencode_skills: enabled ? ["alpha"] : [],
-    pids: { opencode: 1, hermes: 2, controller: 3 },
+    pids: { opencode: 1, hermes: 2, codex: 4, controller: 3 },
     latency_ms: 1,
     hermes_refresh: "next-turn",
+    codex_refresh: "next-session",
     active_scene: "默认",
     scenes_revision: 1
   };
@@ -45,7 +46,7 @@ function makeScenes(revision: number): SceneCatalog {
       { name: "默认", disabled: [], active: true },
       { name: "写作", disabled: ["alpha"], active: false }
     ],
-    pids: { opencode: 1, hermes: 2, controller: 3 }
+    pids: { opencode: 1, hermes: 2, codex: 4, controller: 3 }
   };
 }
 

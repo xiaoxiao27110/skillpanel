@@ -521,7 +521,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--controller-url", default="http://127.0.0.1:8787")
     parser.add_argument("--registry-dir", default="/run/skillpanel-opencode-tuis")
     parser.add_argument("--directory", default="/workspace")
-    parser.add_argument("--enabled-root", default="/root/.config/opencode/skills")
+    parser.add_argument(
+        "--enabled-root", default=os.path.expanduser("~/.agents/skills")
+    )
     parser.add_argument("--opencode-command", default="opencode")
     parser.add_argument("--startup-timeout", type=float, default=30)
     parser.add_argument("--timeout", type=float, default=180)

@@ -22,8 +22,10 @@ import yaml
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-ENABLED_DIR = Path(os.getenv("SKILLPANEL_ENABLED_DIR", "/root/.config/opencode/skills"))
-DISABLED_DIR = Path(os.getenv("SKILLPANEL_DISABLED_DIR", "/root/.config/opencode/skills-disabled"))
+ENABLED_DIR = Path(os.getenv("SKILLPANEL_ENABLED_DIR", str(Path.home() / ".agents" / "skills")))
+DISABLED_DIR = Path(
+    os.getenv("SKILLPANEL_DISABLED_DIR", str(Path.home() / ".agents" / "skills-disabled"))
+)
 STATE_FILE = Path(os.getenv("SKILLPANEL_STATE_FILE", "/data/skill-state.json"))
 SCENES_FILE = Path(os.getenv("SKILLPANEL_SCENES_FILE", "/data/scenes.json"))
 LOCK_FILE = STATE_FILE.with_suffix(".lock")
@@ -774,7 +776,7 @@ def _apply_scene_locked(
 
 
 def _pids() -> dict[str, int | None]:
-    return {name: _read_pid(name) for name in ("opencode", "hermes", "controller")}
+    return {name: _read_pid(name) for name in ("opencode", "hermes", "codex", "controller")}
 
 
 def _startup_reconcile() -> None:
@@ -920,6 +922,7 @@ def toggle_skill(name: str, body: ToggleRequest) -> dict[str, Any]:
             "revision": state["revision"],
             "reconciliations": state.get("reconciliations", []),
             "hermes_refresh": "next-turn",
+            "codex_refresh": "next-session",
             "opencode_skills": opencode_names,
             "active_scene": scenes_state["active"],
             "scenes_revision": scenes_state["revision"],
