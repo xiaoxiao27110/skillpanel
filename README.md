@@ -239,7 +239,7 @@ PoC 用 python3.12 运行 controller（代码用到 3.10+ 的类型语法），p
 | `HERMES_HOME` | `$HOME/.hermes`（PoC 镜像 ENV） | Hermes 配置和 session 根 |
 | `SKILLPANEL_CONTROLLER_URL` | `http://127.0.0.1:8787` | 插件侧变量：插件连接的控制器基址 |
 
-`bootstrap_config.py` 另读 `SKILLPANEL_MODEL`、`SKILLPANEL_OPENCODE_PROVIDER`、`SKILLPANEL_HERMES_PROVIDER` 写入两个 agent 的模型配置。注意它写死的两个目标路径是 `/root/.config/opencode/opencode.json` 和 `/root/.hermes/config.yaml`（外加 touch `/root/.hermes/.no-bundled-skills`），非 root 运行时需先调整。
+`bootstrap_config.py` 另读 `SKILLPANEL_MODEL`、`SKILLPANEL_OPENCODE_PROVIDER`、`SKILLPANEL_HERMES_PROVIDER` 写入两个 agent 的模型配置。目标路径从 `$HOME` 派生：`$HOME/.config/opencode/opencode.json` 和 `$HERMES_HOME/config.yaml`（`HERMES_HOME` 未设置时回退 `$HOME/.hermes`，外加 touch 同目录下的 `.no-bundled-skills`）。
 
 ### 硬性约束
 
